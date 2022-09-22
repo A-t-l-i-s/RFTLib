@@ -1,5 +1,4 @@
 #include<RFT/require.hpp>
-#include<RFT/OStream.hpp>
 
 #include<RFT/Array/toBuf.hpp>
 #include<RFT/Array/Buffer.hpp>
@@ -16,7 +15,23 @@
 
 
 int main(int argC,char* argV[]){
-	RFT_Volume volume({0,0,0,0,0});
+	// RFT_UUID uuid(0,0,0,0,0);
+	// RFT_Buffer buf;
+
+
+	// while (true){
+	// 	buf=uuid.finish();
+
+	// 	sleep_for(1ms);
+	// }
+
+
+
+	// RFT_Volume volume({0x3b18842b,0x0000,0x0000,0x0000,0xd01200000000});
+
+	// volume.open();
+
+	// std::cout<<volume.good()<<std::endl;
 }
 
 
@@ -30,6 +45,7 @@ int main(int argC,char* argV[]){
 @VER c++20
 @DLL false
 @WIN false
+@EXR -Wall
 
 @INC src
 @INC include

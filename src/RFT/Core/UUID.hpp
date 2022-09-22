@@ -1,6 +1,8 @@
 #pragma once
 #include"../require.hpp"
 #include"Object.hpp"
+#include"../Array/toBuf.hpp"
+#include"../Array/Buffer.hpp"
 
 
 
@@ -40,8 +42,52 @@ public:
 
 
 
-// ~~~~~~~~~~~ Operators ~~~~~~~~~~
-	friend std::ostream& operator<<(std::ostream&,RFT_UUID);
+// ~~~~~~~~~~~ Functions ~~~~~~~~~~
+	RFT_Buffer finish(bool upper=false){
+		RFT_Buffer buf(38), temp;
+
+
+		buf.set(0,'{');
+
+		buf.set(9,'-');
+		buf.set(14,'-');
+		buf.set(19,'-');
+		buf.set(24,'-');
+
+
+		temp=uint32ToBuf(this->timeLow);
+		temp=temp.asHex();
+		buf.assign(1,temp);
+
+
+		temp=uint16ToBuf(this->timeMid);
+		temp=temp.asHex();
+		buf.assign(10,temp);
+
+
+		temp=uint16ToBuf(this->timeHigh);
+		temp=temp.asHex();
+		buf.assign(15,temp);
+
+
+		temp=uint16ToBuf(this->clockSeq);
+		temp=temp.asHex();
+		buf.assign(20,temp);
+
+
+		temp=uint48ToBuf(this->macAddress);
+		temp=temp.asHex();
+		buf.assign(25,temp);
+
+
+		buf.set(37,'}');
+
+
+		temp.free();
+
+
+		return buf;
+	}
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 };
 
