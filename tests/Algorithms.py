@@ -5,7 +5,12 @@ import random
 
 sys.path.append("..")
 
-from RFTLib.RFT_Graph import *
+from RFTLib.Graph import *
+from RFTLib.Graph.Window import *
+from RFTLib.Core.Math.pairing import *
+from RFTLib.Core.Geometry.Line import *
+from RFTLib.Core.Graphics.Text import *
+from RFTLib.Core.Graphics.Color import *
 
 
 

@@ -8,7 +8,7 @@ import numpy as np
 
 sys.path.append("..")
 
-from RFTLib.RFT_Graph import *
+from RFTLib.Graph import *
 
 
 

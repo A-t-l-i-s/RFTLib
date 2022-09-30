@@ -41,6 +41,16 @@ public:
 
 
 // ~~~~~~~~~~~ Functions ~~~~~~~~~~
+	RFT_UUID getUUID(){
+		return this->_uuid;
+	}
+
+	void setUUID(RFT_UUID uuid){
+		this->_uuid=uuid;
+	}
+
+
+
 	void setBlockSize(u_int blockSize){
 		this->_blockSize=blockSize;
 	}
@@ -53,18 +63,32 @@ public:
 
 
 // ~~~~~~~~~ IO Functions ~~~~~~~~~
-	void open(){
+	bool open(){
 		RFT_Vector b;
 
 		b.append((u_char*)"\\\\?\\Volume",10);
 		b.append(this->_uuid.finish());
 
 
-
 		this->_stream.open(
 			b.asString(),
 			std::ios::in | std::ios::out | std::ios::binary
 		);
+
+
+		return this->isOpen();
+	}
+
+
+
+	bool close(){
+		if (this->isOpen()){
+			this->_stream.close();
+
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 
@@ -74,32 +98,39 @@ public:
 	}
 
 
+
 	bool eof(){
 		return this->_stream.eof();
 	}
 
 	bool good(){
-		return this->_stream.good();
+		if (this->isOpen()){
+			return this->_stream.good();
+		} else {
+			return false;
+		}
 	}
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
 // ~~~~~~~~~~~~ Blocks ~~~~~~~~~~~~
-	void readBlock(){
+	RFT_Buffer readBlock(){
 		RFT_Buffer block(this->_blockSize);
 
 		this->_stream.read(
-			(char*)block->data(),
+			(char*)block.data(),
 			this->_blockSize
 		);
+
+		return block;
 	}
 
 
 
 	void writeBlock(RFT_Buffer block){
 		this->_stream.write(
-			(char*)block->data(),
+			(char*)block.data(),
 			this->_blockSize
 		);
 	}

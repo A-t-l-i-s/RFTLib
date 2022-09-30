@@ -1,4 +1,5 @@
 import time
+import random
 
 
 
@@ -8,21 +9,18 @@ p2="\\\\?\\Volume{3b18842b-0000-0000-0000-101900000000}" # data
 
 
 file=open(p1,"rb+")
+file.seek(0,0)
 
-
-
-blockSize=512
-pos=0
 
 start=time.time()
 
+
+data=None
 while (True):
 	try:
-		d=file.read(blockSize)
-
-		attr=d[0]
-		size=int.from_bytes(d[1:3],"big")
-		block_pointer=int.from_bytes(d[3:7],"big")
+		data=file.read(512)
+		attr=data[0]
+		ptr=int.from_bytes(data[1:5],"big")
 	except:
 		break
 
@@ -31,14 +29,10 @@ print(time.time()-start)
 
 
 
-
-
-
 """
 512 byte block size
 
 1 byte = attributes
-2 bytes = size
 4 bytes = next chunk, 0 means means eoc
 
 Available bytes per block 505
