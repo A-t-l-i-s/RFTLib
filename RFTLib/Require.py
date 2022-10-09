@@ -17,9 +17,11 @@ import ntpath
 import pickle
 import random
 import socket
+import struct
 import urllib
 import asyncio
 import hashlib
+import binascii
 import requests
 import keyboard
 import encodings
@@ -31,9 +33,9 @@ import numpy as np
 
 from typing import *
 
-from PySide6.QtGui import *
-from PySide6.QtCore import *
-from PySide6.QtWidgets import QApplication, QWidget
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
+from PyQt6.QtWidgets import QApplication, QWidget
 
 
 

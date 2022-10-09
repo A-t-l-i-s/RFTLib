@@ -1,14 +1,18 @@
 from RFTLib.Require import *
 from RFTLib.Core.Object import *
-from RFTLib.Database import *
 
 
 
 
-s=RFT_Database(9999)
 
-time.sleep(600)
+__all__=["RFT_Console"]
 
+
+
+
+
+class RFT_Console(RFT_Object):
+	...
 
 
 

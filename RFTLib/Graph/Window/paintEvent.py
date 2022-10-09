@@ -18,12 +18,12 @@ __all__=["paintEvent"]
 def drawGraph(self,graph:Graph,painter:QPainter):
 	canvas=graph.toQImage()
 
-	trans=Qt.FastTransformation
+	trans=Qt.TransformationMode.FastTransformation
 	if (self.smooth):
-		trans=Qt.SmoothTransformation
+		trans=Qt.TransformationMode.SmoothTransformation
 
 
-	canvas=canvas.scaled(self.width,self.height,Qt.KeepAspectRatio,trans)
+	canvas=canvas.scaled(self.width,self.height,Qt.AspectRatioMode.KeepAspectRatio,trans)
 
 	x=abs(canvas.width()-self.width)//2
 	y=abs(canvas.height()-self.height)//2
@@ -105,7 +105,7 @@ def paintEvent(self,event):
 		font.setKerning(t.isKerning)
 		font.setFixedPitch(t.isFixedPitch)
 
-		font.setLetterSpacing(QFont.AbsoluteSpacing,t.letterSpacing)
+		font.setLetterSpacing(QFont.SpacingType.AbsoluteSpacing,t.letterSpacing)
 		font.setWordSpacing(t.wordSpacing)
 
 		painter.setFont(font)
@@ -134,7 +134,11 @@ def paintEvent(self,event):
 
 		painter.setFont(font)
 
-		painter.drawText(QRect(0,0,self.width,30),str(round(self.fps,2)),Qt.AlignRight | Qt.AlignVCenter)
+		painter.drawText(
+			QRect(0,0,self.width,30),
+			Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter,
+			str(round(self.fps,2))
+		)
 
 
 

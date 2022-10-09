@@ -12,8 +12,10 @@ __all__=["mouseReleaseEvent"]
 
 def mouseReleaseEvent(self,event):
 	buttons=event.buttons()
+	pos=event.position()
+	gPos=event.globalPosition()
 	
-	if (buttons==Qt.NoButton):
-		self.mousePos=event.x(),event.y()
+	if (buttons==Qt.MouseButton.NoButton):
+		self.mousePos=pos.x(),pos.y()
 
 

@@ -1,5 +1,6 @@
 from RFTLib.Require import *
 from RFTLib.Core.Object import *
+from RFTLib.Core.Buffer import *
 
 
 
@@ -25,6 +26,7 @@ class RFT_UUID(RFT_Object):
 
 
 
+	# ~~~~~~~~~~~~~ Init ~~~~~~~~~~~~~
 	def __init__(self,timeLow,timeMid,timeHigh,clockSeqHigh,clockSeqLow,address):
 		self.timeLow=timeLow
 		self.timeMid=timeMid
@@ -32,11 +34,11 @@ class RFT_UUID(RFT_Object):
 		self.clockSeqHigh=clockSeqHigh
 		self.clockSeqLow=clockSeqLow
 		self.address=address
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
-
-
+	# ~~~~~~~~~~~ Functions ~~~~~~~~~~
 	def create(address=None):
 		temp=uuid.uuid1(address)
 
@@ -50,20 +52,27 @@ class RFT_UUID(RFT_Object):
 		)
 
 		return new
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+
+
+	# ~~~~~~~~ Representation ~~~~~~~~
+	def __repr__(self)->repr:
+		return repr(self.__str__())
 
 
 
 	def __str__(self):
-		tl=int.to_bytes(self.timeLow,4,"big").hex()
-		tm=int.to_bytes(self.timeMid,2,"big").hex()
-		th=int.to_bytes(self.timeHigh,2,"big").hex()
+		tl=RFT_Buffer.intToHex(self.timeLow,4)
+		tm=RFT_Buffer.intToHex(self.timeMid,2)
+		th=RFT_Buffer.intToHex(self.timeHigh,2)
 
-		cqh=int.to_bytes(self.clockSeqHigh,1,"big").hex()
-		cql=int.to_bytes(self.clockSeqLow,1,"big").hex()
+		cqh=RFT_Buffer.intToHex(self.clockSeqHigh,1)
+		cql=RFT_Buffer.intToHex(self.clockSeqLow,1)
 
-		ad=int.to_bytes(self.address,6,"big").hex()
+		ad=RFT_Buffer.intToHex(self.address,6)
 
 		return f"{tl}-{tm}-{th}-{cqh}{cql}-{ad}"
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

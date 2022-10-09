@@ -27,13 +27,14 @@ class RFT_Volume(RFT_Object):
 
 
 
+	# ~~~~~~~~~~~~~ Init ~~~~~~~~~~~~~
 	def __init__(self,uuid):
 		self.uuid=uuid
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
-
-
+	# ~~~~~~~~~ IO Functions ~~~~~~~~~
 	def open(self):
 		p=f"\\\\?\\Volume{{{self.uuid}}}"
 
@@ -55,17 +56,7 @@ class RFT_Volume(RFT_Object):
 	def close(self):
 		if (self.isOpen()):
 			self.stream.close()
-
-
-
-
-
-	def isOpen(self):
-		if (self.stream!=None and not self.stream.closed):
-			return True
-
-		else:
-			return False
+			self.stream=None
 
 
 
@@ -103,6 +94,17 @@ class RFT_Volume(RFT_Object):
 
 
 
+	def isOpen(self):
+		if (self.stream!=None and not self.stream.closed):
+			return True
+
+		else:
+			return False
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+	# ~~~~~~~ Block Functions ~~~~~~~~
 	def seekBlock(self,pos):
 		return self.seek(
 			pos * self.blockSize,
@@ -114,9 +116,7 @@ class RFT_Volume(RFT_Object):
 
 
 	def tellBlock(self):
-		return math.floor(
-			self.tell() / self.blockSize
-		)
+		return self.tell() // self.blockSize
 
 
 
@@ -150,7 +150,6 @@ class RFT_Volume(RFT_Object):
 
 			block=RFT_Block(data)
 
-
 		return block
 
 
@@ -159,7 +158,32 @@ class RFT_Volume(RFT_Object):
 
 	def writeBlock(self,block):
 		if (self.isOpen()):
-			self.stream.write(block.data)
+			self.stream.write(block.buffer.data)
+
+
+
+
+
+	def writeToBlock(self,pos,block):
+		if (self.isOpen()):
+			self.seekBlock(pos)
+			self.writeBlock(block)
+
+
+
+
+
+	def getBlockInfo(self):
+		block=None
+
+		if (self.isOpen()):
+			data=self.stream.read(5)
+			self.seek(-5,os.SEEK_CUR)
+
+			block=RFT_Block(data)
+
+		return block
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 

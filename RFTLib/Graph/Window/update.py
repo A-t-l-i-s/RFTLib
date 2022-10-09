@@ -39,7 +39,7 @@ def update(self,texts:Dict[Any,Text]={},graphs:Dict[Any,Graph]={},*,skipRepaint=
 
 
 
-	QtApp.processEvents(QEventLoop.AllEvents)
+	QtApp.processEvents()
 
 	if (not skipRepaint):
 		self.widget.repaint()

@@ -39,7 +39,7 @@ class Graph:
 			self.width,
 			self.height,
 			self.width*4,
-			QImage.Format_RGBA8888,
+			QImage.Format.Format_RGBA8888,
 		)
 
 		return canvas

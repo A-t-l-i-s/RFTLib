@@ -12,8 +12,10 @@ __all__=["mousePressEvent"]
 
 def mousePressEvent(self,event):
 	buttons=event.buttons()
+	pos=event.position()
+	gPos=event.globalPosition()
 	
-	if (buttons==Qt.LeftButton):
-		self.mousePos=event.x(),event.y()
+	if (buttons==Qt.MouseButton.LeftButton):
+		self.mousePos=pos.x(),pos.y()
 
 

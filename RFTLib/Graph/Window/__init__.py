@@ -71,11 +71,11 @@ class Window:
 
 
 
-		self.widget.setCursor(Qt.CrossCursor) # set cursor
+		self.widget.setCursor(Qt.CursorShape.CrossCursor) # set cursor
 		self.widget.setWindowTitle("Raphter") # set window title
 
-		self.widget.setWindowFlags(Qt.FramelessWindowHint) # make window frameless
-		self.widget.setAttribute(Qt.WA_TranslucentBackground,True) # make background translucent
+		self.widget.setWindowFlags(Qt.WindowType.FramelessWindowHint) # make window frameless
+		self.widget.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground,True) # make background translucent
 
 		self.widget.setGeometry(self.x,self.y,self.width,self.height) # set window geometry
 		# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
