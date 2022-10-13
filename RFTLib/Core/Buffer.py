@@ -12,7 +12,7 @@ __all__=["RFT_Buffer"]
 
 
 class RFT_Buffer(RFT_Object):
-	def intToBytes(value,size,littleEndian=False):
+	def intToList(value,size,littleEndian=False):
 		arr=[]
 
 		for i in range(size):
@@ -27,14 +27,23 @@ class RFT_Buffer(RFT_Object):
 
 
 
+	def intToBytes(value,size,littleEndian=False):
+		return bytes(
+			RFT_Buffer.intToList(
+				value,
+				size,
+				littleEndian
+			)
+		)
+
+
+
 	def intToHex(value,size,littleEndian=False):
 		return binascii.hexlify(
-			bytes(
-				RFT_Buffer.intToBytes(
-					value,
-					size,
-					littleEndian
-				)
+			RFT_Buffer.intToBytes(
+				value,
+				size,
+				littleEndian
 			)
 		)
 
@@ -42,7 +51,7 @@ class RFT_Buffer(RFT_Object):
 
 
 
-	def intFromBytes(data,littleEndian=False):
+	def intFromList(data,littleEndian=False):
 		value=0
 
 		size=len(data)
@@ -60,9 +69,16 @@ class RFT_Buffer(RFT_Object):
 
 
 
+	def intFromBytes(data,littleEndian=False):
+		return RFT_Buffer.intFromList(
+			data,
+			littleEndian
+		)
+
+
 
 	def intFromHex(data,littleEndian=False):
-		return RFT_Buffer.intFromHex(
+		return RFT_Buffer.intFromList(
 			binascii.unhexlify(
 				data
 			),

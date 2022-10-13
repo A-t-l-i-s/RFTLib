@@ -9,6 +9,7 @@ import math
 import time
 import uuid
 import yaml
+import zlib
 import bleak
 import mouse
 import codecs
