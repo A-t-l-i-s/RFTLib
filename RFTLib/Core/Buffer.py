@@ -84,3 +84,25 @@ class RFT_Buffer(RFT_Object):
 			),
 			littleEndian
 		)
+
+
+
+
+	def listToStr(data,strict=False):
+		out=[]
+		v=string.printable.encode("utf-8")
+
+		for c in data:
+			if (c in v):
+				out.append(c)
+
+			elif (strict):
+				return None
+
+
+		out=bytes(out).decode("utf-8")
+		return out
+
+
+
+

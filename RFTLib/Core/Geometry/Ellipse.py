@@ -1,6 +1,6 @@
 from RFTLib.Require import *
+from RFTLib.Core.BaseGeometry import *
 from RFTLib.Core.Graphics.Color import *
-from RFTLib.Core.Base.BaseGeometry import *
 
 
 
@@ -12,7 +12,7 @@ __all__=["Ellipse"]
 
 
 
-class Ellipse(BaseGeometry):
+class Ellipse(RFT_BaseGeometry):
 	def __init__(self,
 			x:Number=0,
 			y:Number=0,

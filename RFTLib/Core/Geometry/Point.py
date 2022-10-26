@@ -1,6 +1,6 @@
 from RFTLib.Require import *
+from RFTLib.Core.BaseGeometry import *
 from RFTLib.Core.Graphics.Color import *
-from RFTLib.Core.Base.BaseGeometry import *
 from RFTLib.Core.Geometry.Velocity import *
 
 
@@ -13,7 +13,7 @@ __all__=["Point"]
 
 
 
-class Point(BaseGeometry):
+class Point(RFT_BaseGeometry):
 	def __init__(self,
 			x:Number=0,
 			y:Number=0,

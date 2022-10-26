@@ -1,6 +1,6 @@
 from RFTLib.Require import *
+from RFTLib.Core.BaseGeometry import *
 from RFTLib.Core.Graphics.Color import *
-from RFTLib.Core.Base.BaseGeometry import *
 
 
 
@@ -12,7 +12,7 @@ __all__=["Rectangle"]
 
 
 
-class Rectangle(BaseGeometry):
+class Rectangle(RFT_BaseGeometry):
 	def __init__(self,
 			x1:Number=0,
 			y1:Number=0,

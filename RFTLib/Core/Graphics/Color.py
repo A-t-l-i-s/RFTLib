@@ -58,6 +58,34 @@ class Color:
 
 
 
+			case "HLS":
+				v=colorsys.hls_to_rgb(*values[:3])
+				self.r=v[0]
+				self.g=v[1]
+				self.b=v[2]
+				self.a=0xff
+
+
+
+			case "HSV":
+				v=colorsys.hsv_to_rgb(*values[:3])
+				self.r=round(v[0] * 0xff)
+				self.g=round(v[1] * 0xff)
+				self.b=round(v[2] * 0xff)
+				self.a=0xff
+
+
+
+			case "YIQ":
+				v=colorsys.yiq_to_rgb(*values[:3])
+				self.r=round(v[0] * 0xff)
+				self.g=round(v[1] * 0xff)
+				self.b=round(v[2] * 0xff)
+				self.a=0xff
+				
+
+
+
 
 
 
@@ -75,6 +103,8 @@ class Color:
 
 	def random(alpha:int=255,thickness:int=1):
 		return Color(random.randint(0x00,0xff),random.randint(0x00,0xff),random.randint(0x00,0xff),alpha,thickness=thickness)
+
+
 
 
 

@@ -6,13 +6,13 @@ from RFTLib.Core.Graphics.Color import *
 
 
 
-__all__=["BaseGeometry"]
+__all__=["RFT_BaseGeometry"]
 
 
 
 
 
-class BaseGeometry(RFT_Object):
+class RFT_BaseGeometry(RFT_Object):
 	def __init__(self,*args,**kwargs):
 		raise NotImplementedError
 

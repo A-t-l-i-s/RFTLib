@@ -62,7 +62,7 @@ while window.running:
 		graph[Line(graph.first.x2,graph.first.y2,x,y)]=Color(i%256+200,100,i%256)
 
 
-		# window.texts[i]=Text(x,graph.height-y,f"{i}:{h}",Color(100,255,100),"Consolas",8)
+		window.texts[i]=Text(x,graph.height-y,f"{i}:{h}",Color(100,255,100),"Consolas",8)
 
 
 		if (not i%5):

@@ -1,8 +1,8 @@
 from RFTLib.Require import *
+from RFTLib.Core.BaseGeometry import *
 from RFTLib.Core.Geometry.Null import *
 from RFTLib.Core.Graphics.Text import *
 from RFTLib.Core.Graphics.Color import *
-from RFTLib.Core.Base.BaseGeometry import *
 
 
 
@@ -144,7 +144,7 @@ class Graph:
 
 
 		for v in pos:
-			if (isinstance(v,BaseGeometry)):
+			if (isinstance(v,RFT_BaseGeometry)):
 				v.draw(self.canvas,color)
 				self.prevActions.append(v)
 

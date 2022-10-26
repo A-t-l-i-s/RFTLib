@@ -23,7 +23,7 @@ class Text:
 			y:int=0,
 			text:str="",
 			color:Color=Color(),
-			font:str="Helvetica",
+			font:str="Consolas",
 			size:int=12,
 			*,
 			isBold:bool=False,

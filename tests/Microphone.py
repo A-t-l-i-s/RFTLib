@@ -1,15 +1,12 @@
-import sys
-import math
-import time
-import random
-import pyaudio
-
-import numpy as np
-
-sys.path.append("..")
-
+from RFTLib.Require import *
 from RFTLib.Graph import *
+from RFTLib.Graph.Window import *
 
+from RFTLib.Core.Graphics.Color import *
+
+from RFTLib.Core.Geometry.Rectangle import *
+
+import pyaudio
 
 
 

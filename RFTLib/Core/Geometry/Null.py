@@ -1,6 +1,6 @@
 from RFTLib.Require import *
+from RFTLib.Core.BaseGeometry import *
 from RFTLib.Core.Graphics.Color import *
-from RFTLib.Core.Base.BaseGeometry import *
 
 
 
@@ -11,7 +11,7 @@ __all__=["Null"]
 
 
 
-class Null(BaseGeometry):
+class Null(RFT_BaseGeometry):
 	def __init__(cls,*args:Tuple[Any],**kwargs:Dict[str,Any]):
 		...
 
