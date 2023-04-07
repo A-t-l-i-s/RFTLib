@@ -1,0 +1,12 @@
+Extension: RyPile
+Extension: RyPile.Python
+
+
+DontWriteBytecode
+Popout: False
+
+File: main.py
+
+
+Done
+
