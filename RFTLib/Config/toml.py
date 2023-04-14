@@ -1,9 +1,9 @@
-import toml
-import traceback
+from ..Require import *
 
-from pathlib import Path
+import toml
 
 from .loader import *
+from ..Core.Types import *
 from ..Core.Structure import *
 
 
@@ -21,7 +21,7 @@ class RFT_Config_TOML(RFT_Config_Loader):
 
 
 
-	def load(cls,path):
+	def load(cls, path:RFT_Typing.Path):
 		# Convert to pathlib
 		path = Path(path)
 		path = path.resolve()

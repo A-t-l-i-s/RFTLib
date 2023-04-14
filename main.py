@@ -1,3 +1,5 @@
+from RFTLib.Require import *
+
 from RFTLib.Config import *
 from RFTLib.Config.qt import *
 from RFTLib.Config.cv2 import *

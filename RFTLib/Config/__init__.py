@@ -1,6 +1,4 @@
-import string
-
-from pathlib import Path
+from ..Require import *
 
 from .loader import *
 
@@ -103,13 +101,16 @@ class RFT_Config(RFT_Structure):
 
 
 					# Remove all incorrect characters and replace them with underscores
-					for i in range(len(p)):
-						if (p[i] not in (string.ascii_letters + string.digits + "_.")):
-							p[i] = "_"
-					
+					p_ = ""
+					for c in p:
+						if (c not in (string.ascii_letters + string.digits + "_.")):
+							p_ += "_"
+						else:
+							p_ += c
+
 
 					# Load file into structure
-					self.load(f, loaders, p)
+					self.load(f, loaders, p_)
 
 
 

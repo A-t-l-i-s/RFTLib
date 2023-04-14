@@ -1,10 +1,9 @@
-import io
-import yaml
-import traceback
+from ..Require import *
 
-from pathlib import Path
+import yaml
 
 from .loader import *
+from ..Core.Types import *
 from ..Core.Structure import *
 
 
@@ -22,7 +21,7 @@ class RFT_Config_YAML(RFT_Config_Loader):
 
 
 
-	def load(cls,path):
+	def load(cls, path:RFT_Typing.Path):
 		# Convert to pathlib
 		path = Path(path)
 		path = path.resolve()

@@ -1,9 +1,9 @@
-import json
-import traceback
+from ..Require import *
 
-from pathlib import Path
+import json
 
 from .loader import *
+from ..Core.Types import *
 from ..Core.Structure import *
 
 
@@ -21,7 +21,7 @@ class RFT_Config_JSON(RFT_Config_Loader):
 
 
 
-	def load(cls,path):
+	def load(cls, path:RFT_Typing.Path):
 		# Convert to pathlib
 		path = Path(path)
 		path = path.resolve()

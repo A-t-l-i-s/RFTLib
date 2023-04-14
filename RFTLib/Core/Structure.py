@@ -1,3 +1,5 @@
+from ..Require import *
+
 from .Object import *
 from .Types import *
 
@@ -119,7 +121,7 @@ class RFT_Structure(RFT_Object):
 		out = {}
 
 		for k,v in self.data().items():
-			if (isinstance(v,RFT_Structure)):
+			if (isinstance(v, RFT_Structure)):
 				out[k] = v.toDict()
 			else:
 				out[k] = v
@@ -134,7 +136,14 @@ class RFT_Structure(RFT_Object):
 	def keys(self):
 		d = self.data()
 
-		return tuple(d.keys())
+		return d.keys()
+
+
+
+	def items(self):
+		d = self.data()
+
+		return d.items()
 
 
 
