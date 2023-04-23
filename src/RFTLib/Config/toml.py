@@ -1,8 +1,9 @@
 from ..Require import *
 
-import toml
+import tomllib
 
 from .loader import *
+
 from ..Core.Types import *
 from ..Core.Structure import *
 
@@ -29,7 +30,7 @@ class RFT_Config_TOML(RFT_Config_Loader):
 
 		# Read file
 		with path.open("r") as file:
-			dataT = toml.load(file)
+			dataT = tomllib.load(file)
 			
 			data = RFT_Structure(dataT)
 

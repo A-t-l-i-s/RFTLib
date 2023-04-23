@@ -19,6 +19,9 @@ requires-python = ">=3"
 classifiers = [
 ]
 
+dependencies = [
+]
+
 
 
 [project.urls]

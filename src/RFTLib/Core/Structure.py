@@ -15,11 +15,11 @@ __all__ = ("RFT_Structure",)
 
 class RFT_Structure(RFT_Object):
 	def __init__(self, struct:RFT_Typing.Dictionary):
-		if (isinstance(struct,RFT_Structure)):
+		if (isinstance(struct, RFT_Structure)):
 			struct = struct.data()
 
 
-		if (isinstance(struct,dict)):
+		if (isinstance(struct, dict)):
 			data = dict(struct)
 			
 
@@ -31,7 +31,7 @@ class RFT_Structure(RFT_Object):
 					struct[k] = v
 
 
-			object.__setattr__(self,"__data__",struct)
+			object.__setattr__(self, "__data__", struct)
 
 		else:
 			raise TypeError
@@ -42,14 +42,18 @@ class RFT_Structure(RFT_Object):
 
 	# ~~~~~~~~ Attr Assignment ~~~~~~~
 	def __getattr__(self, attr:str):
-		v = self.data()
+		self.getEvent(attr) # Call get event
+
+		v = self.data() # Get dict data
 
 		return v[attr]
 
 
 
 	def __setattr__(self, attr:str, val:RFT_Typing.Any):
-		v = self.data()
+		self.setEvent(attr) # Call set event
+
+		v = self.data() # Get dict data
 		
 		v[attr] = val
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -72,7 +76,7 @@ class RFT_Structure(RFT_Object):
 
 			# If parent found
 			if (parent != None):
-				return RFT_Structure.__getattr__(parent,attr)
+				return RFT_Structure.__getattr__(parent, attr)
 
 
 		else:
@@ -96,7 +100,7 @@ class RFT_Structure(RFT_Object):
 
 			# If parent found
 			if (parent != None):
-				return RFT_Structure.__setattr__(parent,attr,value)
+				return RFT_Structure.__setattr__(parent, attr, value)
 
 
 		else:
@@ -105,6 +109,22 @@ class RFT_Structure(RFT_Object):
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+
+	# ~~~~~~~~~~~~ Events ~~~~~~~~~~~~
+	def getEvent(self, attr:str):
+		...
+
+	def assignGetEvent(self, func):
+		object.__setattr__(self, "getEvent", func)
+
+
+
+	def setEvent(self, attr:str):
+		...
+
+	def assignSetEvent(self, func):
+		object.__setattr__(self, "setEvent", func)
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 

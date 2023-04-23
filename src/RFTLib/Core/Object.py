@@ -100,7 +100,7 @@ class RFT_Object(object):
 
 
 					# Return type is void
-					if (ret in (inspect._empty, types.NoneType, typing.NoReturn)):
+					if (ret in (inspect._empty, types.NoneType, typing.NoReturn, None)):
 						retName = "void"
 
 					else:
