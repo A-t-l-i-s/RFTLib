@@ -1,7 +1,5 @@
 from ..Require import *
 
-import json
-
 from .loader import *
 
 from ..Core.Types import *
@@ -31,10 +29,7 @@ class RFT_Config_JSON(RFT_Config_Loader):
 		# Read file
 		with path.open("r") as file:
 			# Read file data as a dictionary
-			dataJson = json.load(file)
-			
-			# Convert dictionary data to RFT_Structure
-			data = RFT_Structure(dataJson)
+			data = json.load(file)
 
 
 		# Return data

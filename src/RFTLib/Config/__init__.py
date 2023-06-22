@@ -31,7 +31,7 @@ class RFT_Config(RFT_Structure):
 		loaders: All loaders to sift through while loading file
 		attr: Attribute location inside the structure
 	"""
-	def load(self, path:RFT_Typing.Path, loaders:RFT_Typing.Group, attr:str):
+	def load(self, path:RFT_Typing.Path, loaders:RFT_Typing.Group, attr:str, hideErrors:bool = True):
 		# Convert to pathlike
 		path = Path(path)
 
@@ -58,8 +58,11 @@ class RFT_Config(RFT_Structure):
 			if (ext in l.exts):
 				try:
 					d = l.load(l, path)
+				
 				except:
-					...
+					if (not hideErrors):
+						print(traceback.format_exc())
+
 				else:
 					# If any parent attributes then allocate some
 					if (len(p) > 0):
@@ -79,7 +82,7 @@ class RFT_Config(RFT_Structure):
 		path: Directory of configurations to iterate through
 		loaders: All loaders to sift through while loading file
 	"""
-	def scan(self, path:RFT_Typing.Path, loaders:RFT_Typing.Group = ()):
+	def scan(self, path:RFT_Typing.Path, loaders:RFT_Typing.Group = (), hideErrors:bool = True):
 		# Convert to pathlike
 		path = Path(path)
 
@@ -110,7 +113,7 @@ class RFT_Config(RFT_Structure):
 
 
 					# Load file into structure
-					self.load(f, loaders, p_)
+					self.load(f, loaders, p_, hideErrors = hideErrors)
 
 
 

@@ -13,17 +13,17 @@ __all__ = ("RFT_Types", "RFT_Typing")
 
 
 class RFT_Types(RFT_Object):
-	Union = 		types.UnionType
+	Union = 					types.UnionType
 
 
-	Path = 			str | os.PathLike
-	Array =			tuple | list
-	Iterable = 		Array | range
-	Group = 		Iterable | Union
-	Number = 		int | float | complex
-	Buffer = 		bytes | bytearray | memoryview
-	Dictionary = 	dict | map
-	Module = 		types.ModuleType
+	Path = 						str | os.PathLike
+	Array =						tuple | list
+	Iterable = 					Array | range
+	Group = 					Iterable | Union
+	Number = 					int | float | complex
+	Buffer = 					bytes | bytearray | memoryview
+	Dictionary = 				dict | map
+	Module = 					types.ModuleType
 
 
 

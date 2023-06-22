@@ -30,3 +30,8 @@ class RFT_Graph_NAN(RFT_Graph_Geometry):
 
 
 
+	def __getattr__(self, attr:str):
+		return 0
+
+
+

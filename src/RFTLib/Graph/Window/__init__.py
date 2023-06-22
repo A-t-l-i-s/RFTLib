@@ -48,6 +48,7 @@ class RFT_Graph_Window(RFT_Object):
 	mousePressEvent = MouseEvent.press
 	mouseReleaseEvent = MouseEvent.release
 	mouseMoveEvent = MouseEvent.move
+	wheelEvent = MouseEvent.wheel
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -55,7 +56,10 @@ class RFT_Graph_Window(RFT_Object):
 	def __init__(self, width:int, height:int) -> RFT_Typing.Self:
 		self.running = True
 		self.paused = False
+
 		self.smoothing = False
+
+		self.displayText = True
 		self.displayFPS = False
 
 		self.x = 0
@@ -63,13 +67,14 @@ class RFT_Graph_Window(RFT_Object):
 		self.width = width
 		self.height = height
 
+		self.shiftDown = False
 		self.mousePos = (0, 0)
 
 		self.fps = 0
-		self.fpsFrames = collections.deque(maxlen = 60)
+		self.fpsFrames = collections.deque(maxlen = 50)
 		self.fpsFrames.append(time.time())
 
-		self.backgroundColor = RFT_Color.RGB(0, 0, 0)
+		self.backgroundColor = RFT_Color.RGBA(0, 0, 0, 255)
 
 		self.graphs = []
 		self.texts = []
@@ -92,6 +97,7 @@ class RFT_Graph_Window(RFT_Object):
 		self.widget.mousePressEvent = self.mousePressEvent
 		self.widget.mouseReleaseEvent = self.mouseReleaseEvent
 		self.widget.mouseMoveEvent = self.mouseMoveEvent
+		self.widget.wheelEvent = self.wheelEvent
 
 
 		# Configuration

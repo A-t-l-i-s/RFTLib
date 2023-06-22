@@ -32,7 +32,7 @@ class RFT_Config_YAML(RFT_Config_Loader):
 		with path.open("r") as file:
 			dataY = yaml.load(
 				file,
-				Loader=yaml.FullLoader
+				Loader = yaml.FullLoader
 			)
 			
 			data = RFT_Structure(dataY)

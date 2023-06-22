@@ -1,7 +1,5 @@
 from ..Require import *
 
-import json
-
 from .loader import *
 
 from ..Core.Types import *

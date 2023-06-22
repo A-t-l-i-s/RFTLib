@@ -1,6 +1,7 @@
 from ..Require import *
 
 import importlib
+import importlib.util
 
 from .loader import *
 

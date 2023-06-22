@@ -42,12 +42,19 @@ class MouseEvent(RFT_Object):
 
 		match buttons:
 			case Qt.MouseButton.LeftButton:
-				gPos = event.globalPosition()
+				if (not self.shiftDown):
+					gPos = event.globalPosition()
 
-				self.widget.move(
-					round(gPos.x() - self.mousePos[0]),
-					round(gPos.y() - self.mousePos[1])
-				)
+					self.widget.move(
+						round(gPos.x() - self.mousePos[0]),
+						round(gPos.y() - self.mousePos[1])
+					)
+
+
+
+
+	def wheel(self, event):
+		...
 
 
 

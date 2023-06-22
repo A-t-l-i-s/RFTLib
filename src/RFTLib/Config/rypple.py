@@ -1,7 +1,6 @@
 from ..Require import *
 
 import Rypple
-from Rypple.namespace import *
 
 from .loader import *
 
@@ -29,14 +28,7 @@ class RFT_Config_RYPPLE(RFT_Config_Loader):
 		path = path.resolve()
 
 		# Read file as Rypple_Namespace
-		dataRyp = Rypple.load(path)
-
-		# Convert to dictionary
-		dataRyp_ = dataRyp.toJSON()
-
-		# COnvert dictionary to RFT_Structure
-		data = RFT_Structure(dataRyp_)
-
+		data = Rypple.load(path)
 
 		# Return data
 		return data

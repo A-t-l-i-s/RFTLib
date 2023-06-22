@@ -28,7 +28,7 @@ class RFT_Color(RFT_Object):
 		self.b:int = RFT_Parser.verifyColorInteger(b)
 		self.a:int = RFT_Parser.verifyColorInteger(a)
 
-		self.thickness:int = -1
+		self.thickness:int = 1
 
 
 

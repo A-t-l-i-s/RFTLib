@@ -1,5 +1,6 @@
 from ..Require import *
 
+from .Json import *
 from .Types import *
 from .Object import *
 from .Structure import *
@@ -15,7 +16,7 @@ __all__ = ("RFT_Buffer",)
 
 
 class RFT_Buffer(RFT_Object):
-	def __init__(self, data:int | str | RFT_Typing.Buffer | tuple | list = None) -> None:
+	def __init__(self, data:int | str | RFT_Typing.Buffer | tuple | list = None) -> RFT_Typing.Self:
 		self.data = self.toBytes(data)
 
 
@@ -97,15 +98,15 @@ class RFT_Buffer(RFT_Object):
 
 
 
-		elif (isinstance(val, (dict, map, RFT_Structure))):
+		elif (isinstance(val, (dict, map, set, RFT_Structure))):
 			if (isinstance(val, RFT_Structure)):
 				val = val.toDict()
 
-			elif (isinstance(val, map)):
+			elif (isinstance(val, (map, set))):
 				val = dict(val)
 
-			s = json.dumps(val)
-			out = s.encode("utf-8")
+
+			out = RFT_Json.dumps(val)
 
 
 
@@ -129,19 +130,24 @@ class RFT_Buffer(RFT_Object):
 		return reversed(self.data)	
 
 
-	def pop(self,i:int) -> int:
+	def pop(self, i:int) -> int:
 		return self.data.pop(i)
+
+
+	def clear(self):
+		self.data = bytearray()
+
 
 
 
 
 
 	# Output methods
-	def hex(self) -> str:
+	def toHex(self) -> str:
 		return self.data.hex()
 
 
-	def int(self) -> int:
+	def toInt(self) -> int:
 		out = 0
 
 		for i,c in enumerate(self.riter()):
@@ -150,21 +156,27 @@ class RFT_Buffer(RFT_Object):
 		return out
 
 
-	def str(self) -> str:
+	def toStr(self) -> str:
 		return self.data.decode("utf-8")
+
+
+	def toStruct(self):
+		struct = RFT_Json.loads(self.data)
+
+		return struct
 
 
 
 
 
 	# Compression methods
-	def compress(self):
+	def compress(self) -> RFT_Typing.Self:
 		data = zlib.compress(self.data)
 
 		return RFT_Buffer(data)
 
 
-	def decompress(self):
+	def decompress(self) -> RFT_Typing.Self:
 		data = zlib.decompress(self.data)
 
 		return RFT_Buffer(data)

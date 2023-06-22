@@ -1,7 +1,7 @@
 from ..Require import *
 
-from .Object import *
 from .Types import *
+from .Object import *
 
 
 
@@ -14,24 +14,38 @@ __all__ = ("RFT_Structure",)
 
 
 class RFT_Structure(RFT_Object):
-	def __init__(self, struct:RFT_Typing.Dictionary):
+	def __init__(self, struct:RFT_Typing.Dictionary, *, defaults:RFT_Typing.Dictionary = {}):
+		# If struct is an RFT_Structure
 		if (isinstance(struct, RFT_Structure)):
-			struct = struct.data()
+			newStruct = struct.data()
+		else:
+			newStruct = struct
 
 
-		if (isinstance(struct, dict)):
-			data = dict(struct)
-			
+		# If defaults is an RFT_Structure
+		if (isinstance(defaults, RFT_Structure)):
+			newDefaults = defaults.data()
+		else:
+			newDefaults = defaults
 
-			for k in struct.keys():
-				v = struct[k]
 
-				if (isinstance(v,dict)):
+
+		# If newStruct is a dictionary
+		if (isinstance(newStruct, dict)):
+			# Copy dictionary
+			data = copy.deepcopy(newDefaults)
+			data.update(newStruct)
+
+
+			for k in data.keys():
+				v = data[k]
+
+				if (isinstance(v, dict)):
 					v = RFT_Structure(v)
-					struct[k] = v
+					data[k] = v
 
 
-			object.__setattr__(self, "__data__", struct)
+			object.__setattr__(self, "__data__", data)
 
 		else:
 			raise TypeError
@@ -128,27 +142,12 @@ class RFT_Structure(RFT_Object):
 
 
 
+	# ~~~~~~~~~~~~ Methods ~~~~~~~~~~~
 	def data(self):
 		d = self.__dict__
 		v = d["__data__"]
 
 		return v
-
-
-
-
-	def toDict(self):
-		out = {}
-
-		for k,v in self.data().items():
-			if (isinstance(v, RFT_Structure)):
-				out[k] = v.toDict()
-			else:
-				out[k] = v
-
-		return out
-
-
 
 
 
@@ -169,7 +168,7 @@ class RFT_Structure(RFT_Object):
 
 
 
-	def contains(self, attr:str):
+	def contains(self, attr:RFT_Typing.Array | str):
 		d = self.data()
 
 		return attr in d.keys()
@@ -248,6 +247,23 @@ class RFT_Structure(RFT_Object):
 
 
 		return parent
+
+
+
+
+
+
+	def toDict(self):
+		out = {}
+
+		for k,v in self.data().items():
+			if (isinstance(v, RFT_Structure)):
+				out[k] = v.toDict()
+			else:
+				out[k] = v
+
+		return out
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 

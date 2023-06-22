@@ -78,77 +78,77 @@ def paintEvent(self, event):
 
 
 
+	if (self.displayText):
+		for v in self.texts:
+			# Pen object
+			pen = QPen()
 
-	for v in self.texts:
-		# Pen object
-		pen = QPen()
-
-		# Pen foreground color
-		pen.setColor(
-			QColor(
-				*v.color.toRGBA()
+			# Pen foreground color
+			pen.setColor(
+				QColor(
+					*v.color.toRGBA()
+				)
 			)
-		)
 
-		# Add pen to painter
-		painter.setPen(pen)
-
-
-
-		# Create font object
-		font = QFont()
-
-		# Set font and font size
-		font.setFamily(v.font)
-		font.setPointSize(v.fontSize)
-
-		# Set font style
-		font.setBold(v.isBold)
-		font.setItalic(v.isItalic)
-		font.setStrikeOut(v.isStrikeOut)
-		font.setOverline(v.isOverline)
-		font.setUnderline(v.isUnderline)
-
-		# Set painter font
-		painter.setFont(font)
+			# Add pen to painter
+			painter.setPen(pen)
 
 
 
-		# Draw text to painter object
-		painter.drawText(
-			v.x, v.y,
-			self.width - v.x, self.height - v.y,
+			# Create font object
+			font = QFont()
 
-			Qt.AlignmentFlag.AlignLeft,
-			v.text
-		)
+			# Set font and font size
+			font.setFamily(v.font)
+			font.setPointSize(v.fontSize)
+
+			# Set font style
+			font.setBold(v.isBold)
+			font.setItalic(v.isItalic)
+			font.setStrikeOut(v.isStrikeOut)
+			font.setOverline(v.isOverline)
+			font.setUnderline(v.isUnderline)
+
+			# Set painter font
+			painter.setFont(font)
 
 
 
+			# Draw text to painter object
+			painter.drawText(
+				v.x, v.y,
+				self.width - v.x, self.height - v.y,
 
-
-	if (self.displayFPS):
-		# Pen object
-		pen = QPen()
-		pen.setColor(QColor(255,255,255))
-		painter.setPen(pen)
-
-		# Font object
-		font = QFont()
-		font.setFamily("Arial")
-		font.setPointSize(20)
-		font.setBold(True)
-		painter.setFont(font)
-
-		# Draw text to painter
-		painter.drawText(
-			0, 0,
-			self.width, 30,
-			Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter,
-			str(
-				round(self.fps, 2)
+				Qt.AlignmentFlag.AlignLeft,
+				v.text
 			)
-		)
+
+
+
+
+
+		if (self.displayFPS):
+			# Pen object
+			pen = QPen()
+			pen.setColor(QColor(255,255,255))
+			painter.setPen(pen)
+
+			# Font object
+			font = QFont()
+			font.setFamily("Arial")
+			font.setPointSize(14)
+			font.setBold(True)
+			painter.setFont(font)
+
+			# Draw text to painter
+			painter.drawText(
+				0, 0,
+				self.width, 30,
+				Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter,
+				str(
+					round(self.fps, 2)
+				)
+			)
 
 
 

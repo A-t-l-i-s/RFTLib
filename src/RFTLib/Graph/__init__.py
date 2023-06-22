@@ -112,12 +112,21 @@ class RFT_Graph(RFT_Object):
 
 
 		return self
+
+
+
+
+	def randomX(self):
+		return random.randint(0, self.width)
+
+	def randomY(self):
+		return random.randint(0, self.height)
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
 	# ~~~~~~~~~ Magic Methods ~~~~~~~~
-	def __setitem__(self, pos:RFT_Typing.Any) -> RFT_Typing.Array:
+	def __getitem__(self, pos:RFT_Typing.Any) -> RFT_Typing.Array:
 		return self.canvas[pos]
 
 

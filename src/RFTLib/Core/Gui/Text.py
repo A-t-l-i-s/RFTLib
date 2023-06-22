@@ -17,7 +17,7 @@ __all__ = ("RFT_Text",)
 
 
 class RFT_Text(RFT_Object):
-	def __init__(self, text:str) -> RFT_Typing.Self:
+	def __init__(self, text:str = "") -> RFT_Typing.Self:
 		self.text = text
 
 		self.x = -1
