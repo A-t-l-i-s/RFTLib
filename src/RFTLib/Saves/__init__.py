@@ -1,6 +1,5 @@
 from ..Require import *
 
-from ..Core.Json import *
 from ..Core.Types import *
 from ..Core.Buffer import *
 from ..Core.Object import *
@@ -55,7 +54,8 @@ class RFT_Saves(RFT_Object):
 				buf = RFT_Buffer(data)
 				buf = buf.decompress()
 
-				out = RFT_Json.loads(buf.data)
+				out_ = json.loads(buf.data)
+				out = RFT_Structure(out_)
 
 			except:
 				out = RFT_Structure({})

@@ -58,7 +58,7 @@ class RFT_Config(RFT_Structure):
 			if (ext in l.exts):
 				try:
 					d = l.load(l, path)
-				
+
 				except:
 					if (not hideErrors):
 						print(traceback.format_exc())

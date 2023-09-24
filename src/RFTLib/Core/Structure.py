@@ -77,7 +77,7 @@ class RFT_Structure(RFT_Object):
 	# ~~~~~~~~ Item Assignment ~~~~~~~
 	def __getitem__(self, path:RFT_Typing.Array | str):
 		# If path is string then split into array
-		if (isinstance(path,str)):
+		if (isinstance(path, str)):
 			path = path.split(".")
 
 
@@ -101,7 +101,7 @@ class RFT_Structure(RFT_Object):
 
 	def __setitem__(self, path:RFT_Typing.Array | str, value:RFT_Typing.Any):
 		# If path is string then split into array
-		if (isinstance(path,str)):
+		if (isinstance(path, str)):
 			path = path.split(".")
 
 
@@ -119,7 +119,7 @@ class RFT_Structure(RFT_Object):
 
 		else:
 			attr = ".".join(path)
-			self.__setattr__(attr,value)
+			self.__setattr__(attr, value)
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -171,7 +171,13 @@ class RFT_Structure(RFT_Object):
 	def contains(self, attr:RFT_Typing.Array | str):
 		d = self.data()
 
-		return attr in d.keys()
+		if (isinstance(attr, (list, tuple))):
+			return all(
+				[a in d.keys() for a in attr]
+			)
+
+		else:
+			return attr in d.keys()
 
 
 
@@ -181,6 +187,15 @@ class RFT_Structure(RFT_Object):
 		d = self.data()
 
 		return d.pop(attr)
+
+
+
+
+
+	def clear(self):
+		d = self.data()
+
+		d.clear()
 
 
 

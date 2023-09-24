@@ -1,5 +1,4 @@
 from ..Require import *
-from ..Console.Color import *
 
 
 
@@ -119,9 +118,9 @@ class RFT_Object(object):
 						anno = v_.annotation
 
 						# Convert annoatation to tuple
-						if (isinstance(anno,types.UnionType)):
+						if (isinstance(anno, types.UnionType)):
 							annoL = anno.__args__
-						elif (isinstance(anno,tuple | list)):
+						elif (isinstance(anno, tuple | list)):
 							annoL = tuple(anno)
 						else:
 							annoL = (anno,)
@@ -130,12 +129,15 @@ class RFT_Object(object):
 						for t in annoL:
 							# If argument type is void
 							if (t in (inspect._empty, types.NoneType, typing.NoReturn)):
-								types_.append("void")
+								t_ = "void"
 
 							else:
 								# Get argument type name
-								types_.append(t.__name__)
-						
+								t_ = t.__name__
+
+							types_.append(t_)
+					
+
 
 						# Join types to form name
 						name = " | ".join(types_)
@@ -158,10 +160,12 @@ class RFT_Object(object):
 
 
 			# If value type is none
-			if (isinstance(v,(inspect._empty,types.NoneType))):
+			if (isinstance(v, (inspect._empty, types.NoneType))):
 				n = "void"
 			else:
 				n = type(v).__name__
+
+
 
 
 			# Format type string
@@ -178,6 +182,7 @@ class RFT_Object(object):
 
 			# Append new line
 			lines.append(l)
+
 
 
 		# Close structure

@@ -34,8 +34,9 @@ class RFT_Config_YAML(RFT_Config_Loader):
 				file,
 				Loader = yaml.FullLoader
 			)
+		
 			
-			data = RFT_Structure(dataY)
+		data = RFT_Structure(dataY)
 
 
 		# Return data

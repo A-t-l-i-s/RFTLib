@@ -14,6 +14,7 @@ __all__ = ("RFT_Types", "RFT_Typing")
 
 class RFT_Types(RFT_Object):
 	Union = 					types.UnionType
+	Generator = 				types.GeneratorType
 
 
 	Path = 						str | os.PathLike

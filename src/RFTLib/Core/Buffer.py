@@ -1,6 +1,5 @@
 from ..Require import *
 
-from .Json import *
 from .Types import *
 from .Object import *
 from .Structure import *
@@ -73,12 +72,17 @@ class RFT_Buffer(RFT_Object):
 
 
 		elif (isinstance(val, int)):
-			size = (val.bit_length() + 7) // 8
-			
-			out = bytearray(size)
-			
-			for i in range(size):
-				out[size - i - 1] = (val >> (8 * i)) & 0xff
+			if (val == 0):
+				out = bytearray([0])
+
+			else:
+				size = (val.bit_length() + 7) // 8
+				
+				out = bytearray(size)
+				
+				for i in range(size):
+					out[size - i - 1] = (val >> (8 * i)) & 0xff
+
 
 
 
@@ -92,7 +96,7 @@ class RFT_Buffer(RFT_Object):
 
 
 
-		elif (isinstance(val, (tuple, list))):
+		elif (isinstance(val, (tuple, list, range, RFT_Types.Generator))):
 			for v in val:
 				out += self.toBytes(v)
 
@@ -106,7 +110,7 @@ class RFT_Buffer(RFT_Object):
 				val = dict(val)
 
 
-			out = RFT_Json.dumps(val)
+			out = json.dumps(val)
 
 
 
@@ -138,6 +142,10 @@ class RFT_Buffer(RFT_Object):
 		self.data = bytearray()
 
 
+	def find(self, char: bytes):
+		return self.data.find(char)
+
+
 
 
 
@@ -161,9 +169,11 @@ class RFT_Buffer(RFT_Object):
 
 
 	def toStruct(self):
-		struct = RFT_Json.loads(self.data)
+		out_ = json.loads(self.data)
 
-		return struct
+		out = RFT_Structure(out)
+
+		return out
 
 
 

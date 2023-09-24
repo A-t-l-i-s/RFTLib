@@ -1,12 +1,11 @@
-Extension: RyPile
-Extension: RyPile.Python
+@Extension: RyPile
+@Extension: RyPile-Python
 
 
-DontWriteBytecode
-Popout: False
+@DontWriteBytecode
 
-File: main.py
+@File: "main.py"
 
 
-Done
+@Done
 

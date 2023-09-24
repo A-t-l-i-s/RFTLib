@@ -87,7 +87,7 @@ class RFT_Parser(RFT_Object):
 		Sames function as above but reversed. It outputs a float.
 	"""
 	@classmethod
-	def verifyColorDecimal(cls, value:RFT_Typing.Number, *, maxValue:int = 0xff):
+	def verifyColorDecimal(cls, value:RFT_Typing.Number, *, maxValue:float = 1.0):
 		if (isinstance(value, float)):
 			return max(
 				min(
