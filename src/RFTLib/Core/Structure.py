@@ -80,6 +80,9 @@ class RFT_Structure(RFT_Object):
 		if (isinstance(path, str)):
 			path = path.split(".")
 
+		elif (not isinstance(path, (list, tuple))):
+			path = [path]
+
 
 		if (len(path) > 1):
 			# Get final attribute
@@ -94,7 +97,14 @@ class RFT_Structure(RFT_Object):
 
 
 		else:
-			attr = ".".join(path)
+			# Create attribute string
+			attr = ""
+			for i, p in enumerate(path):
+				attr += str(p)
+
+				if (i < len(path) - 1):
+					attr += "."
+
 			return self.__getattr__(attr)
 
 
@@ -103,6 +113,9 @@ class RFT_Structure(RFT_Object):
 		# If path is string then split into array
 		if (isinstance(path, str)):
 			path = path.split(".")
+
+		elif (not isinstance(path, (list, tuple))):
+			path = [path]
 
 
 		if (len(path) > 1):
@@ -118,7 +131,14 @@ class RFT_Structure(RFT_Object):
 
 
 		else:
-			attr = ".".join(path)
+			# Create attribute string
+			attr = ""
+			for i, p in enumerate(path):
+				attr += str(p)
+
+				if (i < len(path) - 1):
+					attr += "."
+
 			self.__setattr__(attr, value)
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -138,6 +158,15 @@ class RFT_Structure(RFT_Object):
 
 	def assignSetEvent(self, func):
 		object.__setattr__(self, "setEvent", func)
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+	# ~~~~~~~~~ Magic Methods ~~~~~~~~
+	def __len__(self):
+		return len(
+			self.keys()
+		)
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -200,12 +229,25 @@ class RFT_Structure(RFT_Object):
 
 
 
+	def copy(self):
+		newStruct = RFT_Structure(
+			self.data()
+		)
+
+		return newStruct
+
+
+
+
 
 	# Gets parent structure of given path
 	def parent(self, path:RFT_Typing.Array | str):
 		# If path is string then split into array
-		if (isinstance(path,str)):
+		if (isinstance(path, str)):
 			path = path.split(".")
+
+		elif (not isinstance(path, (list, tuple))):
+			path = [path]
 
 
 		# Default parent
@@ -240,6 +282,9 @@ class RFT_Structure(RFT_Object):
 		# If path is string then split into array
 		if (isinstance(path,str)):
 			path = path.split(".")
+
+		elif (not isinstance(path, (list, tuple))):
+			path = [path]
 
 
 		parent = self

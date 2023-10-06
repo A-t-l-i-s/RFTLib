@@ -18,10 +18,15 @@ src/RFTLib/Config/text.py
 src/RFTLib/Config/toml.py
 src/RFTLib/Config/yaml.py
 src/RFTLib/Core/Buffer.py
+src/RFTLib/Core/Exception.py
+src/RFTLib/Core/Math.py
 src/RFTLib/Core/Object.py
 src/RFTLib/Core/Parser.py
 src/RFTLib/Core/Structure.py
 src/RFTLib/Core/Types.py
+src/RFTLib/Core/Decorators/Label.py
+src/RFTLib/Core/Decorators/Structure.py
+src/RFTLib/Core/Decorators/Threading.py
 src/RFTLib/Core/Gui/Color.py
 src/RFTLib/Core/Gui/Text.py
 src/RFTLib/Graph/__init__.py
