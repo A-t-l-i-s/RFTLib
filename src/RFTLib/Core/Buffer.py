@@ -114,6 +114,13 @@ class RFT_Buffer(RFT_Object):
 
 
 
+		elif (isinstance(val, uuid.UUID)):
+			out = bytearray(
+				val.bytes
+			)
+
+
+
 		elif (val is None):
 			...
 
@@ -171,7 +178,7 @@ class RFT_Buffer(RFT_Object):
 	def toStruct(self):
 		out_ = json.loads(self.data)
 
-		out = RFT_Structure(out)
+		out = RFT_Structure(out_)
 
 		return out
 

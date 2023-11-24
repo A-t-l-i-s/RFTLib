@@ -181,6 +181,16 @@ class RFT_Structure(RFT_Object):
 
 
 
+	def get(self, key, default = None):
+		if (self.contains(key)):
+			return self[key]
+
+		else:
+			return default
+
+
+
+
 	def keys(self):
 		d = self.data()
 

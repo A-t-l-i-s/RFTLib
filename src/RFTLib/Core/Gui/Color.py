@@ -104,9 +104,9 @@ class RFT_Color(RFT_Object):
 	@classmethod
 	def Random(cls):
 		return cls.RGB(
-			random.randint(0,0xff),
-			random.randint(0,0xff),
-			random.randint(0,0xff)
+			random.randint(0, 0xff),
+			random.randint(0, 0xff),
+			random.randint(0, 0xff)
 		)
 
 	@classmethod

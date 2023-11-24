@@ -64,13 +64,15 @@ class RFT_Text(RFT_Object):
 
 
 
-	# Font family and font size
+	# Font family
 	def setFont(self, font:str) -> RFT_Typing.Self:
 		self.font = font
 
 		return self
 
 
+
+	# Font size
 	def setFontSize(self, fontSize:int) -> RFT_Typing.Self:
 		self.fontSize = fontSize
 
@@ -78,7 +80,6 @@ class RFT_Text(RFT_Object):
 
 
 
-	# Font style
 	def setIsBold(self, isBold:str) -> RFT_Typing.Self:
 		self.isBold = isBold
 
