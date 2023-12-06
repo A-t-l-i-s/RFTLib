@@ -205,6 +205,13 @@ class RFT_Structure(RFT_Object):
 
 
 
+	def values(self):
+		d = self.data()
+
+		return d.values()
+
+
+
 
 
 	def contains(self, attr:RFT_Typing.Array | str):

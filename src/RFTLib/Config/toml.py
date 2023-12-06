@@ -30,14 +30,14 @@ class RFT_Config_TOML(RFT_Config_Loader):
 
 		# Read file
 		with path.open("r") as file:
-			dataT = tomllib.load(file)
-		
-			
-		data = RFT_Structure(dataT)
-
+			try:
+				data = tomllib.load(file)
+			except:
+				data = {}
+	
 
 		# Return data
-		return data
+		return RFT_Structure(data)
 
 
 

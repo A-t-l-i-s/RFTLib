@@ -28,15 +28,14 @@ class RFT_Config_JSON(RFT_Config_Loader):
 
 		# Read file
 		with path.open("r") as file:
-			# Read file data as a dictionary
-			dataJ = json.load(file)
-
-
-		data = RFT_Structure(dataJ)
+			try:
+				data = json.load(file)
+			except:
+				data = {}
 
 
 		# Return data
-		return data
+		return RFT_Structure(data)
 
 		
 

@@ -30,17 +30,20 @@ class RFT_Config_YAML(RFT_Config_Loader):
 
 		# Read file
 		with path.open("r") as file:
-			dataY = yaml.load(
-				file,
-				Loader = yaml.FullLoader
-			)
-		
-			
-		data = RFT_Structure(dataY)
+			try:
+				data = yaml.load(
+					file,
+					Loader = yaml.FullLoader
+				)
+
+				if (data == None):
+					data = {}
+			except:
+				data = {}
 
 
 		# Return data
-		return data
+		return RFT_Structure(data)
 
 
 
