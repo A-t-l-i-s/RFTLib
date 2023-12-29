@@ -1,6 +1,5 @@
 from ..Require import *
 
-from ..Core.Types import *
 from ..Core.Buffer import *
 from ..Core.Object import *
 from ..Core.Parser import *
@@ -17,13 +16,9 @@ __all__ = ("RFT_Saves",)
 
 
 class RFT_Saves(RFT_Object):
-
-
-	extension:str = "sav"
-
-
-	def __init__(self, path:RFT_Typing.Path) -> None:
+	def __init__(self, path:str, ext:str = "sav"):
 		self.path = Path(path)
+		self.ext = ext
 
 		self.data = RFT_Structure({})
 		self.data.assignSetEvent(self.setEvent)
@@ -35,8 +30,8 @@ class RFT_Saves(RFT_Object):
 
 
 
-	def read(self, name:str) -> RFT_Structure:
-		path = self.path / (RFT_Parser.verifyPath(name) + f".{self.extension}")
+	def read(self, name:str):
+		path = self.path / (RFT_Parser.verifyPath(name) + f".{self.ext}")
 
 
 
@@ -70,7 +65,7 @@ class RFT_Saves(RFT_Object):
 
 
 	def write(self, name:str):
-		path = self.path / (RFT_Parser.verifyPath(name) + f".{self.extension}")
+		path = self.path / (RFT_Parser.verifyPath(name) + f".{self.ext}")
 
 
 		if (not path.exists()):
@@ -97,7 +92,7 @@ class RFT_Saves(RFT_Object):
 
 
 
-	def autoUpdater(self, secs:RFT_Typing.Number):
+	def autoUpdater(self, secs:int | float):
 		def update():
 			while self.autoUpdate:
 				# Wait for timer

@@ -1,6 +1,5 @@
 from ...Require import *
 
-from ..Types import *
 from ..Object import *
 from ..Parser import *
 
@@ -16,10 +15,10 @@ __all__ = ("RFT_Color",)
 
 class RFT_Color(RFT_Object):
 	def __init__(self,
-			r:RFT_Typing.Number,
-			g:RFT_Typing.Number,
-			b:RFT_Typing.Number,
-			a:RFT_Typing.Number
+			r:int | float,
+			g:int | float,
+			b:int | float,
+			a:int | float
 		):
 		
 		# Convert all decimals to integers
@@ -56,18 +55,18 @@ class RFT_Color(RFT_Object):
 	# ~~~~~~~~~ Class Methods ~~~~~~~~
 	# RGB Methods
 	@classmethod
-	def RGBA(cls, r:RFT_Typing.Number, g:RFT_Typing.Number, b:RFT_Typing.Number, a:RFT_Typing.Number):
+	def RGBA(cls, r:int | float, g:int | float, b:int | float, a:int | float):
 		return cls(r, g, b, a)
 
 	@classmethod
-	def RGB(cls, r:RFT_Typing.Number, g:RFT_Typing.Number, b:RFT_Typing.Number):
+	def RGB(cls, r:int | float, g:int | float, b:int | float):
 		return cls.RGBA(r, g, b, 0xff)
 
 
 
 	# HSV Methods
 	@classmethod
-	def HSVA(cls, h:RFT_Typing.Number, s:RFT_Typing.Number, v:RFT_Typing.Number, a:RFT_Typing.Number):
+	def HSVA(cls, h:int | float, s:int | float, v:int | float, a:int | float):
 		h = RFT_Parser.verifyColorDecimal(h, maxValue = 360)
 		s = RFT_Parser.verifyColorDecimal(s, maxValue = 100)
 		v = RFT_Parser.verifyColorDecimal(v, maxValue = 100)
@@ -77,14 +76,14 @@ class RFT_Color(RFT_Object):
 		return cls.RGBA(r, g, b, a)
 
 	@classmethod
-	def HSV(cls, h:RFT_Typing.Number, s:RFT_Typing.Number, v:RFT_Typing.Number):
+	def HSV(cls, h:int | float, s:int | float, v:int | float):
 		return cls.HSVA(h, s, v, 0xff)
 
 
 
 	# HLS Methods
 	@classmethod
-	def HLSA(cls, h:RFT_Typing.Number, l:RFT_Typing.Number, s:RFT_Typing.Number, a:RFT_Typing.Number):
+	def HLSA(cls, h:int | float, l:int | float, s:int | float, a:int | float):
 		h = RFT_Parser.verifyColorDecimal(h, maxValue = 360)
 		l = RFT_Parser.verifyColorDecimal(l, maxValue = 100)
 		s = RFT_Parser.verifyColorDecimal(s, maxValue = 100)
@@ -94,7 +93,7 @@ class RFT_Color(RFT_Object):
 		return cls.RGBA(r, g, b, a)
 
 	@classmethod
-	def HLS(cls, h:RFT_Typing.Number, l:RFT_Typing.Number, s:RFT_Typing.Number):
+	def HLS(cls, h:int | float, l:int | float, s:int | float):
 		return cls.HLSA(h, s, v, 0xff)
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

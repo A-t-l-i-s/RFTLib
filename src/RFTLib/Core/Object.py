@@ -18,7 +18,18 @@ blacklistedTypes = (types.BuiltinFunctionType, types.BuiltinMethodType, types.Me
 
 
 class RFT_Object(object):
-	def __str__(self, showMagic:bool = False, indent:int = 0) -> str:
+	def elevate(self, name:str):
+		setattr(
+			builtins,
+			name,
+			self
+		)
+
+
+
+
+
+	def __str__(self, showMagic:bool = False, indent:int = 0):
 		# Variables
 		lines = []
 
@@ -195,7 +206,4 @@ class RFT_Object(object):
 
 		# Return string
 		return out
-
-
-
 

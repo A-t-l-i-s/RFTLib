@@ -1,6 +1,5 @@
 from ..Require import *
 
-from .Types import *
 from .Object import *
 from .Structure import *
 
@@ -15,45 +14,45 @@ __all__ = ("RFT_Buffer",)
 
 
 class RFT_Buffer(RFT_Object):
-	def __init__(self, data:int | str | RFT_Typing.Buffer | tuple | list = None) -> RFT_Typing.Self:
+	def __init__(self, data:int | str | bytes | bytearray | tuple | list | dict = None):
 		self.data = self.toBytes(data)
 
 
 
 
 	# ~~~~~~~~~ Magic Methods ~~~~~~~~
-	def __add__(self, val:int | str | RFT_Typing.Buffer | tuple | list) -> None:
+	def __add__(self, val:int | str | bytes | bytearray | tuple | list | dict):
 		self.data += self.toBytes(val)
 
 		return self
 
-	def __sub__(self, num:int) -> None:
+	def __sub__(self, num:int):
 		for i in range(num):
 			self.pop(-1)
 
 		return self
 
-	def __mul__(self, num:int) -> None:
+	def __mul__(self, num:int):
 		self.data = self.data * num
 
 		return self
 
 
 
-	def __len__(self) -> int:
+	def __len__(self):
 		return len(self.data)
 
 
 
-	def __iter__(self) -> iter:
+	def __iter__(self):
 		return self.iter()
 
 
 
-	def __getitem__(self, i:int) -> int:
+	def __getitem__(self, i:int):
 		return self.data[i]
 
-	def __setitem__(self, i:int, v:int | str) -> None:
+	def __setitem__(self, i:int, v:int | str):
 		self.data[i] = v
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -61,7 +60,7 @@ class RFT_Buffer(RFT_Object):
 
 	# ~~~~~~~~~~~~ Methods ~~~~~~~~~~~
 	@classmethod
-	def toBytes(self, val:int | str | RFT_Typing.Buffer | RFT_Typing.Array | RFT_Typing.Dictionary) -> bytearray:
+	def toBytes(self, val:int | str | bytes | bytearray | tuple | list | dict):
 		out = bytearray()
 
 
@@ -86,7 +85,7 @@ class RFT_Buffer(RFT_Object):
 
 
 
-		elif (isinstance(val, RFT_Types.Buffer)):
+		elif (isinstance(val, bytes | bytearray)):
 			out = bytearray(val)
 
 
@@ -96,7 +95,7 @@ class RFT_Buffer(RFT_Object):
 
 
 
-		elif (isinstance(val, (tuple, list, range, RFT_Types.Generator))):
+		elif (isinstance(val, (tuple, list, range, types.GeneratorType))):
 			for v in val:
 				out += self.toBytes(v)
 
@@ -133,15 +132,15 @@ class RFT_Buffer(RFT_Object):
 
 
 	# Manipulation methods
-	def iter(self) -> iter:
+	def iter(self):
 		return iter(self.data)
 
 
-	def riter(self) -> iter:
+	def riter(self):
 		return reversed(self.data)	
 
 
-	def pop(self, i:int) -> int:
+	def pop(self, i:int):
 		return self.data.pop(i)
 
 
@@ -158,11 +157,11 @@ class RFT_Buffer(RFT_Object):
 
 
 	# Output methods
-	def toHex(self) -> str:
+	def toHex(self):
 		return self.data.hex()
 
 
-	def toInt(self) -> int:
+	def toInt(self):
 		out = 0
 
 		for i,c in enumerate(self.riter()):
@@ -171,7 +170,7 @@ class RFT_Buffer(RFT_Object):
 		return out
 
 
-	def toStr(self) -> str:
+	def toStr(self):
 		return self.data.decode("utf-8")
 
 
@@ -187,13 +186,13 @@ class RFT_Buffer(RFT_Object):
 
 
 	# Compression methods
-	def compress(self) -> RFT_Typing.Self:
+	def compress(self):
 		data = zlib.compress(self.data)
 
 		return RFT_Buffer(data)
 
 
-	def decompress(self) -> RFT_Typing.Self:
+	def decompress(self):
 		data = zlib.decompress(self.data)
 
 		return RFT_Buffer(data)

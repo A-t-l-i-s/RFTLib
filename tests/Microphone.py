@@ -1,6 +1,5 @@
 from RFTLib.Require import *
 
-from RFTLib.Core.Types import *
 from RFTLib.Core.Buffer import *
 from RFTLib.Core.Object import *
 from RFTLib.Core.Structure import *

@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from ..Core.Object import *
-from ..Core.Types import *
+from ..Core.Structure import *
 
 
 
@@ -18,8 +18,8 @@ class RFT_Config_Loader(RFT_Object):
 
 
 
-	def load(cls, path:RFT_Typing.Path):
-		raise NotImplementedError
+	def import_(cls, path:str):
+		...
 
 		
 

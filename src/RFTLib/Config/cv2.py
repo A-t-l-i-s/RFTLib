@@ -4,8 +4,6 @@ import cv2
 
 from .loader import *
 
-from ..Core.Types import *
-
 
 
 
@@ -32,7 +30,7 @@ class RFT_Config_CV2_IMAGE(RFT_Config_Loader):
 
 
 
-	def load(cls, path:RFT_Typing.Path):
+	def import_(cls, path:str):
 		# Convert to pathlib
 		path = Path(path)
 		path = path.resolve()
@@ -57,7 +55,7 @@ class RFT_Config_CV2_VIDEO(RFT_Config_Loader):
 
 
 
-	def load(cls, path:RFT_Typing.Path):
+	def import_(cls, path:str):
 		# Convert to pathlib
 		path = Path(path)
 

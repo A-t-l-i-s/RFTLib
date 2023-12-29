@@ -2,7 +2,6 @@ from ..Require import *
 
 from .loader import *
 
-from ..Core.Types import *
 from ..Core.Structure import *
 
 
@@ -20,7 +19,7 @@ class RFT_Config_JSON(RFT_Config_Loader):
 
 
 
-	def load(cls, path:RFT_Typing.Path):
+	def import_(cls, path:str):
 		# Convert to pathlib
 		path = Path(path)
 		path = path.resolve()
@@ -35,7 +34,12 @@ class RFT_Config_JSON(RFT_Config_Loader):
 
 
 		# Return data
-		return RFT_Structure(data)
+		if (isinstance(data, dict)):
+			return RFT_Structure(data)
+
+		else:
+			return data
+
 
 		
 

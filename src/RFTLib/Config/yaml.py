@@ -4,7 +4,6 @@ import yaml
 
 from .loader import *
 
-from ..Core.Types import *
 from ..Core.Structure import *
 
 
@@ -18,11 +17,11 @@ __all__ = ("RFT_Config_YAML",)
 
 
 class RFT_Config_YAML(RFT_Config_Loader):
-	exts = ("yaml","yml")
+	exts = ("yaml", "yml")
 
 
 
-	def load(cls, path:RFT_Typing.Path):
+	def import_(cls, path:str):
 		# Convert to pathlib
 		path = Path(path)
 		path = path.resolve()
@@ -43,7 +42,11 @@ class RFT_Config_YAML(RFT_Config_Loader):
 
 
 		# Return data
-		return RFT_Structure(data)
+		if (isinstance(data, dict)):
+			return RFT_Structure(data)
+
+		else:
+			return data
 
 
 

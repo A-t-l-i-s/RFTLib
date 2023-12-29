@@ -5,7 +5,6 @@ import numpy as np
 
 from .geometry import *
 
-from ..Core.Types import *
 from ..Core.Object import *
 from ..Core.Parser import *
 
@@ -23,8 +22,8 @@ __all__ = ("RFT_Graph_Velocity",)
 
 class RFT_Graph_Velocity(RFT_Graph_Geometry):
 	def __init__(self,
-			xVelocity:RFT_Typing.Number = 0,
-			yVelocity:RFT_Typing.Number = 0
+			xVelocity:int | float = 0,
+			yVelocity:int | float = 0
 		):
 
 		self.xVelocity = xVelocity

@@ -12,7 +12,6 @@ from .MouseEvent import *
 from .closeEvent import *
 from .paintEvent import *
 
-from ...Core.Types import *
 from ...Core.Buffer import *
 from ...Core.Object import *
 from ...Core.Structure import *
@@ -53,7 +52,7 @@ class RFT_Graph_Window(RFT_Object):
 
 
 
-	def __init__(self, width:int, height:int) -> RFT_Typing.Self:
+	def __init__(self, width:int, height:int):
 		self.running = True
 		self.paused = False
 
@@ -114,7 +113,7 @@ class RFT_Graph_Window(RFT_Object):
 
 
 	# ~~~~~~~~~ Magic Methods ~~~~~~~~
-	def __add__(self, obj) -> RFT_Typing.Self:
+	def __add__(self, obj):
 		if (isinstance(obj, RFT_Graph)):
 			self.graphs.append(
 				obj
@@ -130,7 +129,7 @@ class RFT_Graph_Window(RFT_Object):
 
 
 
-	def __sub__(self, obj) -> RFT_Typing.Self:
+	def __sub__(self, obj):
 		if (isinstance(obj, RFT_Graph)):
 			self.graphs.remove(
 				obj
@@ -148,15 +147,15 @@ class RFT_Graph_Window(RFT_Object):
 
 
 	# ~~~~~~~~~~~~ Methods ~~~~~~~~~~~
-	def show(self) -> None:
+	def show(self):
 		self.widget.show()
 
-	def hide(self) -> None:
+	def hide(self):
 		self.widget.hide()
 
 
 
-	def resize(self, width:int, height:int) -> None:
+	def resize(self, width:int, height:int):
 		self.width = width
 		self.height = height
 
@@ -164,7 +163,7 @@ class RFT_Graph_Window(RFT_Object):
 
 
 
-	def exit(self) -> None:
+	def exit(self):
 		self.running = False
 		self.paused = False
 
@@ -172,15 +171,20 @@ class RFT_Graph_Window(RFT_Object):
 
 
 
-	def pause(self) -> None:
+	def pause(self):
 		self.paused = True
 
-	def resume(self) -> None:
+	def resume(self):
 		self.paused = False
 
 
 
-	def update(self, *, skipEvents:bool = False, skipRepaint:bool = False, skipPause:bool = False) -> None:
+	def clearText(self):
+		self.texts.clear()
+
+
+
+	def update(self, *, skipEvents:bool = False, skipRepaint:bool = False, skipPause:bool = False):
 		# Get current FPS
 		current = time.time() # Get current time
 

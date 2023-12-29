@@ -5,7 +5,6 @@ import numpy as np
 
 from .geometry import *
 
-from ..Core.Types import *
 from ..Core.Object import *
 from ..Core.Parser import *
 
@@ -23,10 +22,10 @@ __all__ = ("RFT_Graph_Circle",)
 
 class RFT_Graph_Circle(RFT_Graph_Geometry):
 	def __init__(self,
-			x:RFT_Typing.Number = 0,
-			y:RFT_Typing.Number = 0,
+			x:int | float = 0,
+			y:int | float = 0,
 
-			radius:RFT_Typing.Number = 0
+			radius:int | float = 0
 		):
 		
 		self.x = x

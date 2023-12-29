@@ -1,6 +1,5 @@
 from ..Require import *
 
-from .Types import *
 from .Object import *
 
 
@@ -14,7 +13,7 @@ __all__ = ("RFT_Structure",)
 
 
 class RFT_Structure(RFT_Object):
-	def __init__(self, struct:RFT_Typing.Dictionary, *, defaults:RFT_Typing.Dictionary = {}):
+	def __init__(self, struct:dict, *, defaults:dict = {}):
 		# If struct is an RFT_Structure
 		if (isinstance(struct, RFT_Structure)):
 			newStruct = struct.data()
@@ -64,18 +63,18 @@ class RFT_Structure(RFT_Object):
 
 
 
-	def __setattr__(self, attr:str, val:RFT_Typing.Any):
+	def __setattr__(self, attr:str, value):
 		self.setEvent(attr) # Call set event
 
 		v = self.data() # Get dict data
 		
-		v[attr] = val
+		v[attr] = value
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
 	# ~~~~~~~~ Item Assignment ~~~~~~~
-	def __getitem__(self, path:RFT_Typing.Array | str):
+	def __getitem__(self, path:tuple | list | str):
 		# If path is string then split into array
 		if (isinstance(path, str)):
 			path = path.split(".")
@@ -109,7 +108,7 @@ class RFT_Structure(RFT_Object):
 
 
 
-	def __setitem__(self, path:RFT_Typing.Array | str, value:RFT_Typing.Any):
+	def __setitem__(self, path:tuple | list | str, value):
 		# If path is string then split into array
 		if (isinstance(path, str)):
 			path = path.split(".")
@@ -214,7 +213,7 @@ class RFT_Structure(RFT_Object):
 
 
 
-	def contains(self, attr:RFT_Typing.Array | str):
+	def contains(self, attr:tuple | list | str):
 		d = self.data()
 
 		if (isinstance(attr, (list, tuple))):
@@ -258,7 +257,7 @@ class RFT_Structure(RFT_Object):
 
 
 	# Gets parent structure of given path
-	def parent(self, path:RFT_Typing.Array | str):
+	def parent(self, path:tuple | list | str):
 		# If path is string then split into array
 		if (isinstance(path, str)):
 			path = path.split(".")
@@ -295,7 +294,7 @@ class RFT_Structure(RFT_Object):
 
 
 
-	def allocate(self, path:RFT_Typing.Array | str):
+	def allocate(self, path:tuple | list | str):
 		# If path is string then split into array
 		if (isinstance(path,str)):
 			path = path.split(".")

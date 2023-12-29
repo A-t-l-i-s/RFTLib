@@ -1,7 +1,6 @@
 from RFTLib.Require import *
 
 from RFTLib.Core.Math import *
-from RFTLib.Core.Types import *
 from RFTLib.Core.Buffer import *
 from RFTLib.Core.Object import *
 from RFTLib.Core.Structure import *
@@ -46,8 +45,8 @@ if (__name__ == "__main__"):
 
 
 		seed = RFT_Math.pairing(
-			random.randint(-180,180),
-			random.randint(-180,180)
+			random.randint(-180, 180),
+			random.randint(-180, 180)
 		)
 
 

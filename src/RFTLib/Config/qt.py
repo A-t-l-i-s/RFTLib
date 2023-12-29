@@ -4,7 +4,6 @@ from PyQt6.QtGui import QPixmap, QIcon, QImage
 
 from .loader import *
 
-from ..Core.Types import *
 from ..Core.Structure import *
 
 
@@ -28,7 +27,7 @@ class RFT_Config_QT_PIXMAP(RFT_Config_Loader):
 
 
 
-	def load(cls, path:RFT_Typing.Path):
+	def import_(cls, path:str):
 		# Convert to pathlib
 		path = Path(path)
 		path = path.resolve()
@@ -50,7 +49,7 @@ class RFT_Config_QT_IMAGE(RFT_Config_Loader):
 
 
 
-	def load(cls, path:RFT_Typing.Path):
+	def import_(cls, path:str):
 		# Convert to pathlib
 		path = Path(path)
 		path = path.resolve()
@@ -72,7 +71,7 @@ class RFT_Config_QT_ICON(RFT_Config_Loader):
 
 
 
-	def load(cls, path:RFT_Typing.Path):
+	def import_(cls, path:str):
 		# Convert to pathlib
 		path = Path(path)
 		path = path.resolve()

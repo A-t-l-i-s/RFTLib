@@ -5,7 +5,6 @@ import numpy as np
 
 from .geometry import *
 
-from ..Core.Types import *
 from ..Core.Object import *
 from ..Core.Parser import *
 

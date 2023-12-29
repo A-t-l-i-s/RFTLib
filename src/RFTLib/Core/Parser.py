@@ -1,6 +1,5 @@
 from ..Require import *
 
-from .Types import *
 from .Object import *
 
 
@@ -18,15 +17,15 @@ class RFT_Parser(RFT_Object):
 		Converts an iterable/union/tuple/list into a correct tuple
 	"""
 	@classmethod
-	def parseGroup(cls, val:RFT_Typing.Group):
-		if (isinstance(val, RFT_Types.Union)):
-			args = val.__args__
+	def parseGroup(cls, value:tuple):
+		if (isinstance(value, types.UnionType)):
+			args = value.__args__
 
-		elif (isinstance(val, RFT_Types.Iterable)):
-			args = tuple(val)
+		elif (isinstance(value, (tuple | list | range | types.GeneratorType))):
+			args = tuple(value)
 
 		else:
-			args = (val,)
+			args = (value,)
 
 
 		return args
@@ -38,11 +37,11 @@ class RFT_Parser(RFT_Object):
 		Verifies that the path is valid in a filesystem
 	"""
 	@classmethod
-	def verifyPath(cls, path:RFT_Typing.Path):
+	def verifyPath(cls, path:str, chars:str = "\\/:*?<>|"):
 		out = ""
 
 		for c in str(path):
-			if (c not in "\\/:*?<>|"):
+			if (c not in chars):
 				out += c
 			else:
 				out += "_"
@@ -59,7 +58,7 @@ class RFT_Parser(RFT_Object):
 		If it takes in an int the function willl just send it through while keeping it below the maxValue
 	"""
 	@classmethod
-	def verifyColorInteger(cls, value:RFT_Typing.Number, *, maxValue:int = 0xff):
+	def verifyColorInteger(cls, value:int | float, *, maxValue:int = 0xff):
 		if (isinstance(value, float)):
 			return max(
 				min(
@@ -87,7 +86,7 @@ class RFT_Parser(RFT_Object):
 		Sames function as above but reversed. It outputs a float.
 	"""
 	@classmethod
-	def verifyColorDecimal(cls, value:RFT_Typing.Number, *, maxValue:float = 1.0):
+	def verifyColorDecimal(cls, value:int | float, *, maxValue:float = 1.0):
 		if (isinstance(value, float)):
 			return max(
 				min(

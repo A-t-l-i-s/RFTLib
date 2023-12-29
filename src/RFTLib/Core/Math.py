@@ -1,6 +1,5 @@
 from ..Require import *
 
-from .Types import *
 from .Object import *
 from .Exception import *
 
@@ -16,9 +15,9 @@ __all__ = ("RFT_Math",)
 
 class RFT_Math(RFT_Object):
 	@classmethod
-	def pairing(cls, a:RFT_Typing.Number, b:RFT_Typing.Number):
-		if (isinstance(a, RFT_Types.Number)):
-			if (isinstance(b, RFT_Types.Number)):
+	def pairing(cls, a:int | float, b:int | float):
+		if (isinstance(a, (int | float))):
+			if (isinstance(b, (int | float))):
 				if (a >= 0):
 					a *= 2
 				else:

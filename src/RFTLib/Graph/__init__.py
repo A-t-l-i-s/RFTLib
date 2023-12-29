@@ -6,7 +6,6 @@ import numpy as np
 from .nan import *
 from .geometry import *
 
-from ..Core.Types import *
 from ..Core.Buffer import *
 from ..Core.Object import *
 from ..Core.Structure import *
@@ -24,7 +23,7 @@ __all__ = ("RFT_Graph",)
 
 
 class RFT_Graph(RFT_Object):
-	def __init__(self, width:int, height:int) -> RFT_Typing.Self:
+	def __init__(self, width:int, height:int):
 		self.width, self.height = width, height
 
 		self.canvas = np.zeros((self.height, self.width, 4), np.uint8)
@@ -43,26 +42,26 @@ class RFT_Graph(RFT_Object):
 
 	# ~~~~~~~ Previous Actions ~~~~~~~
 	@property
-	def first(self) -> RFT_Graph_Geometry:
+	def first(self):
 		return self.prevActions[-1]
 
 	@first.setter
-	def first(self,value) -> None:
+	def first(self,value):
 		self.prevActions[-1] = value
 
 
 
 	@property
-	def last(self) -> RFT_Graph_Geometry:
+	def last(self):
 		return self.prevActions[0]
 
 	@last.setter
-	def last(self,value) -> None:
+	def last(self,value):
 		self.prevActions[0] = value
 
 
 
-	def prevClear(self) -> RFT_Typing.Self:
+	def prevClear(self):
 		for i in range(self.prevMax):
 			self.prevActions.append(
 				RFT_Graph_NAN()
@@ -75,21 +74,21 @@ class RFT_Graph(RFT_Object):
 
 
 	# ~~~~~~~~~~~~ Methods ~~~~~~~~~~~
-	def fill(self, color:RFT_Color) -> RFT_Typing.Self:
+	def fill(self, color:RFT_Color):
 		self.canvas[:] = color.toRGBA()
 
 		return self
 
 
 
-	def clear(self) -> RFT_Typing.Self:
+	def clear(self):
 		self.canvas[:] = 0
 
 		return self
 
 
 
-	def reset(self) -> RFT_Typing.Self:
+	def reset(self):
 		self.clear()
 		self.prevClear()
 
@@ -97,17 +96,11 @@ class RFT_Graph(RFT_Object):
 
 
 
-	def shift(self, amount:int, yAxis:bool = False) -> RFT_Typing.Self:
-		if (yAxis):
-			axis = 0 # Y Axis
-		else:
-			axis = 1 # X Axis
-
-
+	def shift(self, amount:int, xAxis:bool = True):
 		self.canvas[:] = np.roll(
 			self.canvas,
 			amount,
-			axis
+			xAxis
 		)
 
 
@@ -126,12 +119,12 @@ class RFT_Graph(RFT_Object):
 
 
 	# ~~~~~~~~~ Magic Methods ~~~~~~~~
-	def __getitem__(self, pos:RFT_Typing.Any) -> RFT_Typing.Array:
+	def __getitem__(self, pos):
 		return self.canvas[pos]
 
 
 
-	def __setitem__(self, pos:RFT_Typing.Any, color:RFT_Color) -> None:
+	def __setitem__(self, pos, color:RFT_Color):
 		# If value isnt a tuple then make it one
 		if (not isinstance(pos, tuple)):
 			pos = (pos,)

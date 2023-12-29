@@ -1,6 +1,5 @@
 from ...Require import *
 
-from ..Types import *
 from ..Object import *
 from ..Parser import *
 
@@ -17,7 +16,7 @@ __all__ = ("RFT_Text",)
 
 
 class RFT_Text(RFT_Object):
-	def __init__(self, text:str = "") -> RFT_Typing.Self:
+	def __init__(self, text:str = ""):
 		self.text = text
 
 		self.x = -1
@@ -40,7 +39,7 @@ class RFT_Text(RFT_Object):
 
 	# ~~~~~~~~~~~~ Methods ~~~~~~~~~~~
 	# Set text
-	def setText(self, text:str) -> RFT_Typing.Self:
+	def setText(self, text:str):
 		self.text = text
 
 		return self
@@ -48,7 +47,7 @@ class RFT_Text(RFT_Object):
 
 
 	# Text position
-	def setPos(self, x:int, y:int) -> RFT_Typing.Self:
+	def setPos(self, x:int, y:int):
 		self.x = x
 		self.y = y
 
@@ -57,7 +56,7 @@ class RFT_Text(RFT_Object):
 
 
 	# Text color
-	def setColor(self, color:RFT_Color) -> RFT_Typing.Self:
+	def setColor(self, color:RFT_Color):
 		self.color = color
 
 		return self
@@ -65,7 +64,7 @@ class RFT_Text(RFT_Object):
 
 
 	# Font family
-	def setFont(self, font:str) -> RFT_Typing.Self:
+	def setFont(self, font:str):
 		self.font = font
 
 		return self
@@ -73,38 +72,38 @@ class RFT_Text(RFT_Object):
 
 
 	# Font size
-	def setFontSize(self, fontSize:int) -> RFT_Typing.Self:
+	def setFontSize(self, fontSize:int):
 		self.fontSize = fontSize
 
 		return self
 
 
 
-	def setIsBold(self, isBold:str) -> RFT_Typing.Self:
+	def setIsBold(self, isBold:str):
 		self.isBold = isBold
 
 		return self
 
 
-	def setIsItalic(self, isItalic:str) -> RFT_Typing.Self:
+	def setIsItalic(self, isItalic:str):
 		self.isItalic = isItalic
 
 		return self
 
 
-	def setIsStrikeOut(self, isStrikeOut:str) -> RFT_Typing.Self:
+	def setIsStrikeOut(self, isStrikeOut:str):
 		self.isStrikeOut = isStrikeOut
 
 		return self
 
 
-	def setIsOverline(self, isOverline:str) -> RFT_Typing.Self:
+	def setIsOverline(self, isOverline:str):
 		self.isOverline = isOverline
 
 		return self
 
 
-	def setIsUnderline(self, isUnderline:str) -> RFT_Typing.Self:
+	def setIsUnderline(self, isUnderline:str):
 		self.isUnderline = isUnderline
 
 		return self

@@ -5,7 +5,6 @@ import numpy as np
 
 from .geometry import *
 
-from ..Core.Types import *
 from ..Core.Object import *
 from ..Core.Parser import *
 
@@ -23,15 +22,15 @@ __all__ = ("RFT_Graph_Ellipse",)
 
 class RFT_Graph_Ellipse(RFT_Graph_Geometry):
 	def __init__(self,
-			x:RFT_Typing.Number = 0,
-			y:RFT_Typing.Number = 0,
+			x:int | float = 0,
+			y:int | float = 0,
 
-			xAxis:RFT_Typing.Number = 0,
-			yAxis:RFT_Typing.Number = 0,
+			xAxis:int | float = 0,
+			yAxis:int | float = 0,
 
-			angle:RFT_Typing.Number = 0,
-			startAngle:RFT_Typing.Number = 0,
-			endAngle:RFT_Typing.Number = 0
+			angle:int | float = 0,
+			startAngle:int | float = 0,
+			endAngle:int | float = 0
 		):
 		
 		self.x = x

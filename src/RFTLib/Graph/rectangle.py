@@ -5,7 +5,6 @@ import numpy as np
 
 from .geometry import *
 
-from ..Core.Types import *
 from ..Core.Object import *
 from ..Core.Parser import *
 
@@ -23,11 +22,11 @@ __all__ = ("RFT_Graph_Rectangle",)
 
 class RFT_Graph_Rectangle(RFT_Graph_Geometry):
 	def __init__(self,
-			x1:RFT_Typing.Number = 0,
-			y1:RFT_Typing.Number = 0,
+			x1:int | float = 0,
+			y1:int | float = 0,
 			
-			x2:RFT_Typing.Number = 0,
-			y2:RFT_Typing.Number = 0
+			x2:int | float = 0,
+			y2:int | float = 0
 		):
 		
 		self.x1 = x1
