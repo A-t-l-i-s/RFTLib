@@ -109,7 +109,8 @@ class RFT_Buffer(RFT_Object):
 				val = dict(val)
 
 
-			out = json.dumps(val)
+			out_ = json.dumps(val)
+			out = bytes(out_, "utf-8")
 
 
 

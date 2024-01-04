@@ -25,7 +25,7 @@ from RFTLib.Config.pillow import *
 from RFTLib.Config.python import *
 from RFTLib.Config.rypple import *
 
-from RFTLib.Saves import *
+from RFTLib.Tables import *
 
 from RFTLib.Graph import *
 from RFTLib.Graph.nan import *
@@ -44,7 +44,6 @@ from RFTLib.Graph.Window import *
 
 if (__name__ == "__main__"):
 	...
-
 
 
 

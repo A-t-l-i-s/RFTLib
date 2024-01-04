@@ -55,20 +55,18 @@ class RFT_Structure(RFT_Object):
 
 	# ~~~~~~~~ Attr Assignment ~~~~~~~
 	def __getattr__(self, attr:str):
-		self.getEvent(attr) # Call get event
+		if (self.getEvent(attr)):
+			v = self.data() # Get dict data
 
-		v = self.data() # Get dict data
-
-		return v[attr]
+			return v[attr] # Return value
 
 
 
 	def __setattr__(self, attr:str, value):
-		self.setEvent(attr) # Call set event
-
-		v = self.data() # Get dict data
-		
-		v[attr] = value
+		if (self.setEvent(attr)):
+			v = self.data() # Get dict data
+			
+			v[attr] = value # Set value
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -145,7 +143,7 @@ class RFT_Structure(RFT_Object):
 
 	# ~~~~~~~~~~~~ Events ~~~~~~~~~~~~
 	def getEvent(self, attr:str):
-		...
+		return True
 
 	def assignGetEvent(self, func):
 		object.__setattr__(self, "getEvent", func)
@@ -153,7 +151,7 @@ class RFT_Structure(RFT_Object):
 
 
 	def setEvent(self, attr:str):
-		...
+		return True
 
 	def assignSetEvent(self, func):
 		object.__setattr__(self, "setEvent", func)
