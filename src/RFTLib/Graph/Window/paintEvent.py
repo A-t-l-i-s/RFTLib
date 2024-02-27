@@ -1,4 +1,4 @@
-from ...Require import *
+from RFTLib.Require import *
 
 from PyQt6.QtCore import Qt, QRect
 from PyQt6.QtGui import QPainter, QColor, QPen, QFont, QImage
@@ -28,10 +28,10 @@ def paintEvent(self, event):
 	for g in self.graphs:
 		# Convert to QImage
 		img = QImage(
-			g.canvas,
+			g.data,
 			g.width,
 			g.height,
-			g.width * g.canvas.shape[2],
+			g.width * g.data.shape[2],
 			QImage.Format.Format_RGBA8888
 		)
 
@@ -116,8 +116,8 @@ def paintEvent(self, event):
 
 			# Draw text to painter object
 			painter.drawText(
-				v.x, v.y,
-				self.width - v.x, self.height - v.y,
+				round(v.pos.x), round(v.pos.y),
+				round(self.width - v.pos.x), round(self.height - v.pos.y),
 
 				Qt.AlignmentFlag.AlignLeft,
 				v.text
@@ -130,7 +130,7 @@ def paintEvent(self, event):
 		if (self.displayFPS):
 			# Pen object
 			pen = QPen()
-			pen.setColor(QColor(255,255,255))
+			pen.setColor(QColor(255, 255, 255))
 			painter.setPen(pen)
 
 			# Font object
@@ -146,7 +146,7 @@ def paintEvent(self, event):
 				self.width, 30,
 				Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter,
 				str(
-					round(self.fps, 2)
+					round(self.fpsCurrent, 2)
 				)
 			)
 

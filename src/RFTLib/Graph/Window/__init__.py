@@ -1,23 +1,21 @@
-from ...Require import *
+from RFTLib.Require import *
+from RFTLib.Core.Buffer import *
+from RFTLib.Core.Object import *
+from RFTLib.Core.Structure import *
+
+from RFTLib.Graph import *
+
+from RFTLib.Core.Graphic.Text import *
+from RFTLib.Core.Graphic.Color import *
+
+from .KeyEvent import *
+from .MouseEvent import *
+from .paintEvent import *
 
 import numpy as np
 
 from PyQt6.QtCore import *
 from PyQt6.QtWidgets import QApplication, QWidget
-
-from .. import *
-
-from .KeyEvent import *
-from .MouseEvent import *
-from .closeEvent import *
-from .paintEvent import *
-
-from ...Core.Buffer import *
-from ...Core.Object import *
-from ...Core.Structure import *
-
-from ...Core.Gui.Text import *
-from ...Core.Gui.Color import *
 
 
 # Initialize qt app 
@@ -34,25 +32,8 @@ __all__ = ("RFT_Graph_Window",)
 
 
 class RFT_Graph_Window(RFT_Object):
-
-
-
-	# ~~~~~~~~~~~~ Events ~~~~~~~~~~~~
-	closeEvent = closeEvent
-	paintEvent = paintEvent
-
-	keyPressEvent = KeyEvent.press
-	keyReleaseEvent = KeyEvent.release
-	
-	mousePressEvent = MouseEvent.press
-	mouseReleaseEvent = MouseEvent.release
-	mouseMoveEvent = MouseEvent.move
-	wheelEvent = MouseEvent.wheel
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-
 	def __init__(self, width:int, height:int):
+		# ~~~~~~~~~~~ Variables ~~~~~~~~~~
 		self.running = True
 		self.paused = False
 
@@ -70,18 +51,18 @@ class RFT_Graph_Window(RFT_Object):
 		self.mousePos = (0, 0)
 
 		self.fps = 0
+		self.fpsCurrent = 0
 		self.fpsFrames = collections.deque(maxlen = 50)
 		self.fpsFrames.append(time.time())
 
-		self.backgroundColor = RFT_Color.RGBA(0, 0, 0, 255)
+		self.backgroundColor = RFT_Color.Black()
 
 		self.graphs = []
 		self.texts = []
+		# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-
-
-
+		# ~~~~~~~~~~~~ Window ~~~~~~~~~~~~
 		# Create window
 		self.widget = QWidget()
 
@@ -107,8 +88,7 @@ class RFT_Graph_Window(RFT_Object):
 		self.widget.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True) # Set transparent background
 
 		self.widget.resize(self.width, self.height) # Set window size
-
-
+		# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
@@ -159,7 +139,7 @@ class RFT_Graph_Window(RFT_Object):
 		self.width = width
 		self.height = height
 
-		self.widget.resize(self.width,self.height)
+		self.widget.resize(self.width, self.height)
 
 
 
@@ -179,40 +159,68 @@ class RFT_Graph_Window(RFT_Object):
 
 
 
-	def clearText(self):
-		self.texts.clear()
-
-
-
 	def update(self, *, skipEvents:bool = False, skipRepaint:bool = False, skipPause:bool = False):
-		# Get current FPS
-		current = time.time() # Get current time
+		if (self.running):
+			# Get current FPS
+			current = time.time() # Get current time
 
-		self.fpsFrames.append(current) # Append current time
+			self.fpsFrames.append(current) # Append current time
 
-		last = self.fpsFrames[-1] # Get last frame
-		first = self.fpsFrames[0] # Get first frame
-		dif = last - first # Get difference between frames
-		
-		if (dif):
-			self.fps = len(self.fpsFrames) / dif # Get difference between first and final frame
-
-
-
-
-		if (not skipEvents):
-			# Process user events
-			QtApp.processEvents()
+			last = self.fpsFrames[-1] # Get last frame
+			first = self.fpsFrames[0] # Get first frame
+			dif = last - first # Get difference between frames
+			
+			if (dif):
+				self.fpsCurrent = len(self.fpsFrames) / dif # Get difference between first and final frame
 
 
-		if (not skipRepaint):
-			# Send repaint event
-			self.widget.repaint()
 
 
-		if (not skipPause):
-			while self.paused:
-				self.update(skipPause = True)
+			if (not skipEvents):
+				# Process user events
+				QtApp.processEvents()
+
+
+			if (not skipRepaint):
+				# Send repaint event
+				self.widget.repaint()
+
+
+			if (not skipPause):
+				while self.paused:
+					self.update(skipPause = True)
+			
+			
+			# Wait for next frame
+			self.wait()
+
+
+
+
+	def wait(self):
+		if (self.fps > 0):
+			n = self.fpsFrames[-1] + (.96 / self.fps)
+
+			while (time.time() < n):
+				...
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+	# ~~~~~~~~~~~~ Events ~~~~~~~~~~~~
+	paintEvent = paintEvent
+
+	keyPressEvent = KeyEvent.press
+	keyReleaseEvent = KeyEvent.release
+	
+	mousePressEvent = MouseEvent.press
+	mouseReleaseEvent = MouseEvent.release
+	mouseMoveEvent = MouseEvent.move
+	wheelEvent = MouseEvent.wheel
+
+
+
+	def closeEvent(self, event):
+		self.exit()
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 

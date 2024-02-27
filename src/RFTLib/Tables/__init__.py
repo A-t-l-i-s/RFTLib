@@ -2,7 +2,6 @@ from ..Require import *
 
 from ..Core.Buffer import *
 from ..Core.Object import *
-from ..Core.Parser import *
 from ..Core.Structure import *
 
 
@@ -21,6 +20,7 @@ class RFT_Tables(RFT_Object):
 
 		self.updating = False
 		self.running = False
+		self.indent = False
 
 		self.data = RFT_Structure({})
 		self.data.assignGetEvent(self.getEvent)
@@ -100,7 +100,7 @@ class RFT_Tables(RFT_Object):
 		self.updating = True
 
 		# Read file data
-		with path.open("rb") as file:
+		with path.open("r") as file:
 			try:
 				data = json.load(file)
 			except:
@@ -126,20 +126,25 @@ class RFT_Tables(RFT_Object):
 		# Touch file
 		path = self.touchFile(attr)
 
-		# Gut data
+		# Get data
 		data = self.data[attr]
 
 
 		# Start Updating
 		self.updating = True
 
-		with path.open("wb") as file:
+		with path.open("w") as file:
 			try:
-				buf = RFT_Buffer(data)
+				# Convert to python dict
+				data_ = data.toDict()
 
-				file.write(buf.data)
+				# Dump json data to file
+				if (self.indent):
+					json.dump(data_, file, indent = "\t")
+				else:
+					json.dump(data_, file)
 			except:
-				file.write(b"{}")
+				file.write("{}")
 
 		# End Updating
 		self.updating = False

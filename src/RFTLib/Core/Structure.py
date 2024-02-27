@@ -177,14 +177,12 @@ class RFT_Structure(RFT_Object):
 
 
 
-
 	def get(self, key, default = None):
 		if (self.contains(key)):
 			return self[key]
 
 		else:
 			return default
-
 
 
 
@@ -209,8 +207,6 @@ class RFT_Structure(RFT_Object):
 
 
 
-
-
 	def contains(self, attr:tuple | list | str):
 		d = self.data()
 
@@ -224,8 +220,6 @@ class RFT_Structure(RFT_Object):
 
 
 
-
-
 	def pop(self, attr:str):
 		d = self.data()
 
@@ -233,13 +227,10 @@ class RFT_Structure(RFT_Object):
 
 
 
-
-
 	def clear(self):
 		d = self.data()
 
 		d.clear()
-
 
 
 
@@ -251,6 +242,31 @@ class RFT_Structure(RFT_Object):
 		return newStruct
 
 
+
+	def default(self, struct):
+		for k, v in struct.items():
+			if (not self.contains(k)):
+				self[k] = v
+
+
+
+	def all(self):
+		vals = []
+
+		for k, v in self.items():
+			vals.append(bool(v))
+
+		return vals.all()
+
+
+
+	def any(self):
+		vals = []
+
+		for k, v in self.items():
+			vals.append(bool(v))
+
+		return vals.any()
 
 
 

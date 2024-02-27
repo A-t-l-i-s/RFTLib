@@ -3,7 +3,6 @@ from ..Require import *
 from .loader import *
 
 from ..Core.Object import *
-from ..Core.Parser import *
 from ..Core.Structure import *
 
 
@@ -33,10 +32,6 @@ class RFT_Config(RFT_Object):
 		path = Path(self.path)
 
 
-		# Parse group into tuple
-		loaders = RFT_Parser.parseGroup(loaders)
-
-
 		if (path.exists() and path.is_dir()):
 			for f in path.glob("**/*.*"):
 				if (f.is_file()):
@@ -47,13 +42,15 @@ class RFT_Config(RFT_Object):
 
 
 					# Parse path parent dir to file name
-					structName = RFT_Parser.verifyPath(f.stem, "\\/:*?<>|.")
+					structName = ""
+					for c in f.stem:
+						if (c not in "\\/:*?<>|."):
+							structName += c
+						else:
+							structName += "_"
+
 					p += "." + structName
 					p = p.strip(".")
-
-
-					# Remove all incorrect characters and replace them with underscores
-					p = RFT_Parser.verifyPath(p)
 
 
 					# Split path into tuple
