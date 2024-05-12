@@ -1,4 +1,4 @@
-from ..Require import *
+from RFTLib.Require import *
 
 from .Object import *
 
@@ -73,11 +73,7 @@ class RFT_Structure(RFT_Object):
 
 	# ~~~~~~~~ Item Assignment ~~~~~~~
 	def __getitem__(self, path:tuple | list | str):
-		# If path is string then split into array
-		if (isinstance(path, str)):
-			path = path.split(".")
-
-		elif (not isinstance(path, (list, tuple))):
+		if (not isinstance(path, (list, tuple))):
 			path = [path]
 
 
@@ -94,24 +90,14 @@ class RFT_Structure(RFT_Object):
 
 
 		else:
-			# Create attribute string
-			attr = ""
-			for i, p in enumerate(path):
-				attr += str(p)
-
-				if (i < len(path) - 1):
-					attr += "."
+			attr = str(path[0])
 
 			return self.__getattr__(attr)
 
 
 
 	def __setitem__(self, path:tuple | list | str, value):
-		# If path is string then split into array
-		if (isinstance(path, str)):
-			path = path.split(".")
-
-		elif (not isinstance(path, (list, tuple))):
+		if (not isinstance(path, (list, tuple))):
 			path = [path]
 
 
@@ -128,13 +114,7 @@ class RFT_Structure(RFT_Object):
 
 
 		else:
-			# Create attribute string
-			attr = ""
-			for i, p in enumerate(path):
-				attr += str(p)
-
-				if (i < len(path) - 1):
-					attr += "."
+			attr = str(path[0])
 
 			self.__setattr__(attr, value)
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -209,14 +189,24 @@ class RFT_Structure(RFT_Object):
 
 	def contains(self, attr:tuple | list | str):
 		d = self.data()
+		k = d.keys()
 
 		if (isinstance(attr, (list, tuple))):
 			return all(
-				[a in d.keys() for a in attr]
+				[a in k for a in attr]
 			)
 
 		else:
-			return attr in d.keys()
+			return attr in k
+
+
+
+	def containsInst(self, attr:str, type_:type):
+		if (self.contains(attr)):
+			if (isinstance(self[attr], type_)):
+				return True
+
+		return False
 
 
 
@@ -250,6 +240,12 @@ class RFT_Structure(RFT_Object):
 
 
 
+	def defaultInst(self, attr:str, value, type_:type):
+		if (not self.containsInst(attr, type_)):
+			self[attr] = value
+
+
+
 	def all(self):
 		vals = []
 
@@ -272,11 +268,7 @@ class RFT_Structure(RFT_Object):
 
 	# Gets parent structure of given path
 	def parent(self, path:tuple | list | str):
-		# If path is string then split into array
-		if (isinstance(path, str)):
-			path = path.split(".")
-
-		elif (not isinstance(path, (list, tuple))):
+		if (not isinstance(path, (list, tuple))):
 			path = [path]
 
 
@@ -309,11 +301,7 @@ class RFT_Structure(RFT_Object):
 
 
 	def allocate(self, path:tuple | list | str):
-		# If path is string then split into array
-		if (isinstance(path,str)):
-			path = path.split(".")
-
-		elif (not isinstance(path, (list, tuple))):
+		if (not isinstance(path, (list, tuple))):
 			path = [path]
 
 
@@ -347,8 +335,10 @@ class RFT_Structure(RFT_Object):
 		out = {}
 
 		for k,v in self.data().items():
-			if (isinstance(v, RFT_Structure)):
-				out[k] = v.toDict()
+			if (isinstance(v, RFT_Object)):
+				if (hasattr(v, "toDict")):
+					out[k] = v.toDict()
+
 			else:
 				out[k] = v
 

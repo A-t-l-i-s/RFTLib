@@ -26,7 +26,6 @@ class RFT_Config(RFT_Object):
 
 
 
-
 	def load(self, loaders:tuple, showErrors:bool = False):
 		# Convert to pathlike
 		path = Path(self.path)

@@ -1,4 +1,4 @@
-from ..Require import *
+from RFTLib.Require import *
 
 from .Object import *
 from .Exception import *

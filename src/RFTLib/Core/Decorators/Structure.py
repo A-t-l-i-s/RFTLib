@@ -1,5 +1,5 @@
-from ...Require import *
-from ..Structure import *
+from RFTLib.Require import *
+from RFTLib.Core.Structure import *
 
 
 
@@ -28,7 +28,7 @@ def RFT_ToStructure(obj):
 
 
 
-class RFT_JoinStructure:
+class RFT_JoinStructure(object):
 	def __init__(self, struct):
 		self.struct = struct
 

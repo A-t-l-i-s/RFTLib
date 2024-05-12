@@ -29,7 +29,7 @@ class RFT_Tables(RFT_Object):
 
 
 
-
+	# ~~~~~~~~~~~~ Events ~~~~~~~~~~~~
 	def getEvent(self, attr:str):
 		self.wait()
 
@@ -43,8 +43,6 @@ class RFT_Tables(RFT_Object):
 
 
 
-
-
 	def tableGetEvent(self, attr:str):
 		self.wait()
 		return True
@@ -52,19 +50,11 @@ class RFT_Tables(RFT_Object):
 	def tableSetEvent(self, attr:str):
 		self.wait()
 		return True
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
-
-
-	def wait(self):
-		while self.updating:
-			time.sleep(0.001)
-
-
-
-
-
+	# ~~~~~~~ File Input/Output ~~~~~~
 	def touchFile(self, attr:str):
 		path = self.path / (attr + ".table")
 
@@ -87,8 +77,6 @@ class RFT_Tables(RFT_Object):
 
 
 		return path
-
-
 
 
 
@@ -120,8 +108,6 @@ class RFT_Tables(RFT_Object):
 
 
 
-
-
 	def writeFile(self, attr:str):
 		# Touch file
 		path = self.touchFile(attr)
@@ -148,16 +134,14 @@ class RFT_Tables(RFT_Object):
 
 		# End Updating
 		self.updating = False
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
-
-
+	# ~~~~~~~~~~ File Saving ~~~~~~~~~
 	def saveAll(self):
 		for k in self.data.keys():
 			self.writeFile(k)
-
-
 
 
 
@@ -173,6 +157,23 @@ class RFT_Tables(RFT_Object):
 
 		self.running = True
 		threading._start_new_thread(call, (), {})
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+	# ~~~~~~~~~~~~ Safety ~~~~~~~~~~~~
+	def wait(self):
+		while self.updating:
+			time.sleep(0.01)
+
+
+
+	def verify(self):
+		self.path.mkdir(
+			parents = True,
+			exist_ok = True
+		)
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 

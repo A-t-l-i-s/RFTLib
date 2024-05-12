@@ -24,7 +24,6 @@ def paintEvent(self, event):
 
 
 
-
 	for g in self.graphs:
 		# Convert to QImage
 		img = QImage(

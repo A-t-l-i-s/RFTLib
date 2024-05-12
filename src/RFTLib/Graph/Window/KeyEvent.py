@@ -1,8 +1,8 @@
-from ...Require import *
+from RFTLib.Require import *
+
+from RFTLib.Core.Object import *
 
 from PyQt6.QtCore import Qt
-
-from ...Core.Object import *
 
 
 

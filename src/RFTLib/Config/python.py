@@ -34,13 +34,8 @@ class RFT_Config_PYTHON(RFT_Config_Loader):
 		# Get module
 		module = importlib.util.module_from_spec(spec)
 
-
-		try:
-			# Compile module
-			spec.loader.exec_module(module)
-
-		except:
-			module = None
+		# Compile module
+		spec.loader.exec_module(module)
 
 
 		# Return data

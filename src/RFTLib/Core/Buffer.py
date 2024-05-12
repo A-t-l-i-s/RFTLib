@@ -1,4 +1,4 @@
-from ..Require import *
+from RFTLib.Require import *
 
 from .Object import *
 from .Structure import *
@@ -188,13 +188,17 @@ class RFT_Buffer(RFT_Object):
 
 	# Compression methods
 	def compress(self):
-		data = zlib.compress(self.data)
+		data = zlib.compress(
+			self.data
+		)
 
 		return RFT_Buffer(data)
 
 
 	def decompress(self):
-		data = zlib.decompress(self.data)
+		data = zlib.decompress(
+			self.data
+		)
 
 		return RFT_Buffer(data)
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
