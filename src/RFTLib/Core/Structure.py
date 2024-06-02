@@ -13,15 +13,20 @@ __all__ = ("RFT_Structure",)
 
 
 class RFT_Structure(RFT_Object):
-	def __init__(self, struct:dict, *, defaults:dict = {}):
-		# If struct is an RFT_Structure
+	def __init__(self, struct:dict = None, *, defaults:dict = {}):
+		# Create new dict
+		if (struct == None):
+			struct = dict()
+
+
+		# Convert struct to dict
 		if (isinstance(struct, RFT_Structure)):
 			newStruct = struct.data()
 		else:
 			newStruct = struct
 
 
-		# If defaults is an RFT_Structure
+		# Convert defaults to dict
 		if (isinstance(defaults, RFT_Structure)):
 			newDefaults = defaults.data()
 		else:
@@ -36,10 +41,12 @@ class RFT_Structure(RFT_Object):
 			data.update(newStruct)
 
 
+			# Iterate keys
 			for k in data.keys():
 				v = data[k]
 
 				if (isinstance(v, dict)):
+					# Convert to structure
 					v = RFT_Structure(v)
 					data[k] = v
 
@@ -56,17 +63,27 @@ class RFT_Structure(RFT_Object):
 	# ~~~~~~~~ Attr Assignment ~~~~~~~
 	def __getattr__(self, attr:str):
 		if (self.getEvent(attr)):
-			v = self.data() # Get dict data
+			# Get dict data
+			v = self.data()
 
-			return v[attr] # Return value
+			# Return value
+			return v[attr]
 
 
 
 	def __setattr__(self, attr:str, value):
 		if (self.setEvent(attr)):
-			v = self.data() # Get dict data
-			
-			v[attr] = value # Set value
+			# Get dict data
+			v = self.data()
+
+			# Convert value to structure
+			if (isinstance(value, dict)):
+				value_ = RFT_Structure(value)
+			else:
+				value_ = value
+
+			# Set value
+			v[attr] = value_
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -148,7 +165,8 @@ class RFT_Structure(RFT_Object):
 
 
 
-	# ~~~~~~~~~~~~ Methods ~~~~~~~~~~~
+	# ~~~~~~~~~ Retrieve Data ~~~~~~~~
+	# ~~~~~ Get Raw Data ~~~~~
 	def data(self):
 		d = self.__dict__
 		v = d["__data__"]
@@ -156,7 +174,7 @@ class RFT_Structure(RFT_Object):
 		return v
 
 
-
+	# ~~~~~~~~ Get Key ~~~~~~~
 	def get(self, key, default = None):
 		if (self.contains(key)):
 			return self[key]
@@ -165,28 +183,31 @@ class RFT_Structure(RFT_Object):
 			return default
 
 
-
+	# ~~~~~ Get All Keys ~~~~~
 	def keys(self):
 		d = self.data()
 
 		return d.keys()
 
 
-
+	# ~~~~~ Get All Items ~~~~
 	def items(self):
 		d = self.data()
 
 		return d.items()
 
 
-
+	# ~~~~ Get All Values ~~~~
 	def values(self):
 		d = self.data()
 
 		return d.values()
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
+	# ~~~~~~~~~ Contains Data ~~~~~~~~
+	# ~~~~~~~ Contains ~~~~~~~
 	def contains(self, attr:tuple | list | str):
 		d = self.data()
 		k = d.keys()
@@ -201,6 +222,7 @@ class RFT_Structure(RFT_Object):
 
 
 
+	# ~~~~~ Contains Inst ~~~~
 	def containsInst(self, attr:str, type_:type):
 		if (self.contains(attr)):
 			if (isinstance(self[attr], type_)):
@@ -210,42 +232,7 @@ class RFT_Structure(RFT_Object):
 
 
 
-	def pop(self, attr:str):
-		d = self.data()
-
-		return d.pop(attr)
-
-
-
-	def clear(self):
-		d = self.data()
-
-		d.clear()
-
-
-
-	def copy(self):
-		newStruct = RFT_Structure(
-			self.data()
-		)
-
-		return newStruct
-
-
-
-	def default(self, struct):
-		for k, v in struct.items():
-			if (not self.contains(k)):
-				self[k] = v
-
-
-
-	def defaultInst(self, attr:str, value, type_:type):
-		if (not self.containsInst(attr, type_)):
-			self[attr] = value
-
-
-
+	# ~~~~~~~~~~ All ~~~~~~~~~
 	def all(self):
 		vals = []
 
@@ -256,6 +243,7 @@ class RFT_Structure(RFT_Object):
 
 
 
+	# ~~~~~~~~~~ Any ~~~~~~~~~
 	def any(self):
 		vals = []
 
@@ -263,9 +251,45 @@ class RFT_Structure(RFT_Object):
 			vals.append(bool(v))
 
 		return vals.any()
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
+	# ~~~~~~~~~~ Remove Data ~~~~~~~~~
+	# ~~~~~~~~~~ Pop ~~~~~~~~~
+	def pop(self, attr:str):
+		d = self.data()
+
+		return d.pop(attr)
+
+
+
+	# ~~~~~~~~~ Clear ~~~~~~~~
+	def clear(self):
+		d = self.data()
+
+		d.clear()
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+	# ~~~~~~~~~ Allocate Data ~~~~~~~~
+	# ~~~~~~~~ Default ~~~~~~~
+	def default(self, struct):
+		for k, v in struct.items():
+			if (not self.contains(k)):
+				self[k] = v
+
+
+
+	# ~~~~~ Default Inst ~~~~~
+	def defaultInst(self, attr:str, value, type_:type):
+		if (not self.containsInst(attr, type_)):
+			self[attr] = value
+
+
+
+	# ~~~~~~~~ Parent ~~~~~~~~
 	# Gets parent structure of given path
 	def parent(self, path:tuple | list | str):
 		if (not isinstance(path, (list, tuple))):
@@ -298,8 +322,7 @@ class RFT_Structure(RFT_Object):
 
 
 
-
-
+	# ~~~~~~~ Allocate ~~~~~~~
 	def allocate(self, path:tuple | list | str):
 		if (not isinstance(path, (list, tuple))):
 			path = [path]
@@ -325,12 +348,22 @@ class RFT_Structure(RFT_Object):
 
 
 		return parent
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
+	# ~~~~~~~~~ Convert Data ~~~~~~~~~
+	# ~~~~~~~~~ Copy ~~~~~~~~~
+	def copy(self):
+		newStruct = RFT_Structure(
+			self.data()
+		)
+
+		return newStruct
 
 
 
+	# ~~~~~ To Dictionary ~~~~
 	def toDict(self):
 		out = {}
 
@@ -339,6 +372,8 @@ class RFT_Structure(RFT_Object):
 				if (hasattr(v, "toDict")):
 					out[k] = v.toDict()
 
+				else:
+					out[k] = v
 			else:
 				out[k] = v
 

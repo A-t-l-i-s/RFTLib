@@ -19,7 +19,6 @@ class RFT_Buffer(RFT_Object):
 
 
 
-
 	# ~~~~~~~~~ Magic Methods ~~~~~~~~
 	def __add__(self, val:int | str | bytes | bytearray | tuple | list | dict):
 		self.data += self.toBytes(val)
@@ -58,18 +57,20 @@ class RFT_Buffer(RFT_Object):
 
 
 
-	# ~~~~~~~~~~~~ Methods ~~~~~~~~~~~
+	# ~~~~~~~ Convert To Bytes ~~~~~~~
 	@classmethod
 	def toBytes(self, val:int | str | bytes | bytearray | tuple | list | dict):
 		out = bytearray()
 
 
 
+		# ~~~~~~~~ Buffer ~~~~~~~~
 		if (isinstance(val, RFT_Buffer)):
 			out = val.data
 
 
 
+		# ~~~~~~~~ Integer ~~~~~~~
 		elif (isinstance(val, int)):
 			if (val == 0):
 				out = bytearray([0])
@@ -84,23 +85,26 @@ class RFT_Buffer(RFT_Object):
 
 
 
-
+		# ~~~~~~~~~ Bytes ~~~~~~~~
 		elif (isinstance(val, bytes | bytearray)):
 			out = bytearray(val)
 
 
 
+		# ~~~~~~~~ String ~~~~~~~~
 		elif (isinstance(val, str)):
-			out = bytearray(val.encode("utf-8"))
+			out = bytearray(val, "utf-8")
 
 
 
+		# ~~~~~~~~~ Array ~~~~~~~~
 		elif (isinstance(val, (tuple, list, range, types.GeneratorType))):
 			for v in val:
 				out += self.toBytes(v)
 
 
 
+		# ~~~~~~ Structure ~~~~~~~
 		elif (isinstance(val, (dict, map, set, RFT_Structure))):
 			if (isinstance(val, RFT_Structure)):
 				val = val.toDict()
@@ -114,6 +118,7 @@ class RFT_Buffer(RFT_Object):
 
 
 
+		# ~~~~~~~~~ UUID ~~~~~~~~~
 		elif (isinstance(val, uuid.UUID)):
 			out = bytearray(
 				val.bytes
@@ -121,60 +126,67 @@ class RFT_Buffer(RFT_Object):
 
 
 
+		# ~~~~~~~~~ None ~~~~~~~~~
 		elif (val is None):
 			...
 
 
 
 		return out
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
-
-
-	# Manipulation methods
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	# ~~~~~~~~ Iterate ~~~~~~~
 	def iter(self):
 		return iter(self.data)
 
 
+	# ~~~~ Reverse Iterate ~~~
 	def riter(self):
 		return reversed(self.data)	
 
 
+	# ~~~~~~~~~~ Pop ~~~~~~~~~
 	def pop(self, i:int):
 		return self.data.pop(i)
 
 
+	# ~~~~~~~~~ Clear ~~~~~~~~
 	def clear(self):
 		self.data = bytearray()
 
 
+	# ~~~~~~~~~ Find ~~~~~~~~~
 	def find(self, char: bytes):
 		return self.data.find(char)
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
-
-
-
-	# Output methods
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	# ~~~~ To Hexidecimal ~~~~
 	def toHex(self):
 		return self.data.hex()
 
 
+	# ~~~~~~ To Integer ~~~~~~
 	def toInt(self):
 		out = 0
 
-		for i,c in enumerate(self.riter()):
+		for i, c in enumerate(self.riter()):
 			out += c << (i * 8)
 
 		return out
 
 
+	# ~~~~~~~ To String ~~~~~~
 	def toStr(self):
 		return self.data.decode("utf-8")
 
 
+	# ~~~~~ To Structure ~~~~~
 	def toStruct(self):
 		out_ = json.loads(self.data)
 
@@ -183,10 +195,15 @@ class RFT_Buffer(RFT_Object):
 		return out
 
 
+	# ~~~~~ To Dictionary ~~~~
+	def toDict(self):
+		return self.data
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
-	# Compression methods
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	# ~~~~~~~ Compress ~~~~~~~
 	def compress(self):
 		data = zlib.compress(
 			self.data
@@ -195,6 +212,7 @@ class RFT_Buffer(RFT_Object):
 		return RFT_Buffer(data)
 
 
+	# ~~~~~~ Decompress ~~~~~~
 	def decompress(self):
 		data = zlib.decompress(
 			self.data

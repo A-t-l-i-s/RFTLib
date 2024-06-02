@@ -1,4 +1,5 @@
 import sys
+import re
 import os
 import io
 import copy
@@ -13,6 +14,7 @@ import string
 import typing
 import random
 import inspect
+import zipfile
 import builtins
 import colorsys
 import datetime

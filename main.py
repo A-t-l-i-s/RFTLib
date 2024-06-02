@@ -1,8 +1,11 @@
 from RFTLib.Require import *
+from RFTLib.Literals import *
 
 from RFTLib.Core.Math import *
+from RFTLib.Core.Table import *
 from RFTLib.Core.Buffer import *
 from RFTLib.Core.Object import *
+from RFTLib.Core.Resource import *
 from RFTLib.Core.Exception import *
 from RFTLib.Core.Structure import *
 
@@ -17,24 +20,9 @@ from RFTLib.Core.Geometric.Ellipse import *
 from RFTLib.Core.Geometric.Polygon import *
 from RFTLib.Core.Geometric.Rectangle import *
 
-from RFTLib.Core.Decorators.Label import *
-from RFTLib.Core.Decorators.Limiter import *
-from RFTLib.Core.Decorators.Structure import *
-from RFTLib.Core.Decorators.Threading import *
-
-from RFTLib.Config import *
-from RFTLib.Config.qt import *
-from RFTLib.Config.cv2 import *
-from RFTLib.Config.nil import *
-from RFTLib.Config.json import *
-from RFTLib.Config.html import *
-from RFTLib.Config.text import *
-from RFTLib.Config.toml import *
-from RFTLib.Config.yaml import *
-from RFTLib.Config.pillow import *
-from RFTLib.Config.python import *
-
-from RFTLib.Tables import *
+from RFTLib.Core.Decorator.Label import *
+from RFTLib.Core.Decorator.Function import *
+from RFTLib.Core.Decorator.Structure import *
 
 from RFTLib.Graph import *
 from RFTLib.Graph.Window import *
@@ -47,12 +35,5 @@ from RFTLib.BLE import *
 
 if (__name__ == "__main__"):
 	...
-
-
-
-
-
-
-
 
 

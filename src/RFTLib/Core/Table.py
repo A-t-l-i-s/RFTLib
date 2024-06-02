@@ -1,20 +1,20 @@
-from ..Require import *
+from RFTLib.Require import *
 
-from ..Core.Buffer import *
-from ..Core.Object import *
-from ..Core.Structure import *
-
-
-
-
-
-__all__ = ("RFT_Tables",)
+from .Buffer import *
+from .Object import *
+from .Structure import *
 
 
 
 
 
-class RFT_Tables(RFT_Object):
+__all__ = ("RFT_Table",)
+
+
+
+
+
+class RFT_Table(RFT_Object):
 	def __init__(self, path:str):
 		self.path = Path(path)
 
@@ -55,6 +55,7 @@ class RFT_Tables(RFT_Object):
 
 
 	# ~~~~~~~ File Input/Output ~~~~~~
+	# ~~~~~~ Touch File ~~~~~~
 	def touchFile(self, attr:str):
 		path = self.path / (attr + ".table")
 
@@ -80,6 +81,7 @@ class RFT_Tables(RFT_Object):
 
 
 
+	# ~~~~~~~ Read File ~~~~~~
 	def readFile(self, attr:str):
 		# Touch file
 		path = self.touchFile(attr)
@@ -108,6 +110,7 @@ class RFT_Tables(RFT_Object):
 
 
 
+	# ~~~~~~ Write File ~~~~~~
 	def writeFile(self, attr:str):
 		# Touch file
 		path = self.touchFile(attr)
@@ -125,10 +128,15 @@ class RFT_Tables(RFT_Object):
 				data_ = data.toDict()
 
 				# Dump json data to file
-				if (self.indent):
-					json.dump(data_, file, indent = "\t")
-				else:
-					json.dump(data_, file)
+				json.dump(
+					data_,
+					file,
+					skipkeys = True,
+					indent = (
+						"\t" if (self.indent) else None
+					)
+				)
+			
 			except:
 				file.write("{}")
 
@@ -139,12 +147,14 @@ class RFT_Tables(RFT_Object):
 
 
 	# ~~~~~~~~~~ File Saving ~~~~~~~~~
+	# ~~~~~~~ Save All ~~~~~~~
 	def saveAll(self):
 		for k in self.data.keys():
 			self.writeFile(k)
 
 
 
+	# ~~~~~~ Save Every ~~~~~~
 	def saveEvery(self, secs):
 		def call():
 			while self.running:
@@ -162,12 +172,14 @@ class RFT_Tables(RFT_Object):
 
 
 	# ~~~~~~~~~~~~ Safety ~~~~~~~~~~~~
+	# ~~~~~~~~~ Wait ~~~~~~~~~
 	def wait(self):
 		while self.updating:
 			time.sleep(0.01)
 
 
 
+	# ~~~~~~~~ Verify ~~~~~~~~
 	def verify(self):
 		self.path.mkdir(
 			parents = True,

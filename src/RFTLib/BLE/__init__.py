@@ -57,18 +57,27 @@ class RFT_BLE(RFT_Object):
 
 	# ~~~~~~~~~~~~ Events ~~~~~~~~~~~~
 	def _onStart(self):
-		self.onStart()
+		try:
+			self.onStart()
+		except:
+			...
 
 	def _onStop(self):
-		self.onStop()
+		try:
+			self.onStop()
+		except:
+			...
 
 	def _onFound(self, peripheral):
 		# Add device to list
 		self.peripherals.append(
 			peripheral
 		)
-
-		self.onFound(peripheral)
+		
+		try:
+			self.onFound(peripheral)
+		except:
+			...
 
 
 

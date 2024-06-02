@@ -8,8 +8,8 @@ from RFTLib.Graph import *
 from RFTLib.Core.Graphic.Text import *
 from RFTLib.Core.Graphic.Color import *
 
-from .KeyEvent import *
-from .MouseEvent import *
+from .keyEvent import *
+from .mouseEvent import *
 from .paintEvent import *
 
 import numpy as np

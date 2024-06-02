@@ -10,15 +10,10 @@ __all__ = ("RFT_Object",)
 
 
 
-blacklistedVars = ("__class__", "__module__", "__dict__")
-blacklistedTypes = (types.BuiltinFunctionType, types.BuiltinMethodType, types.MethodWrapperType)
-
-
-
-
-
 class RFT_Object(object):
-	def elevate(self, name:str):
+	# ~~~~~~~~~~~~ Globals ~~~~~~~~~~~
+	# ~~~~~~~~~ Lift ~~~~~~~~~
+	def lift(self, name:str):
 		setattr(
 			builtins,
 			name,
@@ -26,9 +21,24 @@ class RFT_Object(object):
 		)
 
 
+	# ~~~~~~~~~ Drop ~~~~~~~~~
+	def drop(self, name:str):
+		# If had attribute
+		if (hasattr(builtins, name)):
+			# Get value
+			v = getattr(builtins, name)
+
+			if (v == self):
+				# Delete attribute
+				delattr(
+					builtins,
+					name
+				)
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
+	# ~~~~~~~~~ Magic Methods ~~~~~~~~
 	def __str__(self, showMagic:bool = False, indent:int = 0):
 		# Variables
 		lines = []
@@ -48,11 +58,11 @@ class RFT_Object(object):
 			v = getattr(self, k)
 
 			# If key is blacklisted
-			if (k in blacklistedVars):
+			if (k in ("__class__", "__module__", "__dict__")):
 				removed.append(k)
 
 			# If value is blacklisted
-			elif (isinstance(v, blacklistedTypes)):
+			elif (isinstance(v, (types.BuiltinFunctionType, types.BuiltinMethodType, types.MethodWrapperType))):
 				removed.append(k)
 
 
@@ -206,4 +216,5 @@ class RFT_Object(object):
 
 		# Return string
 		return out
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
