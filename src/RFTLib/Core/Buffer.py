@@ -113,7 +113,11 @@ class RFT_Buffer(RFT_Object):
 				val = dict(val)
 
 
-			out_ = json.dumps(val)
+			out_ = json.dumps(
+				val,
+				skipkeys = False,
+				default = lambda o: None
+			)
 			out = bytes(out_, "utf-8")
 
 

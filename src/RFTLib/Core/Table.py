@@ -131,7 +131,8 @@ class RFT_Table(RFT_Object):
 				json.dump(
 					data_,
 					file,
-					skipkeys = True,
+					skipkeys = False,
+					default = lambda o: None,
 					indent = (
 						"\t" if (self.indent) else None
 					)
@@ -149,8 +150,12 @@ class RFT_Table(RFT_Object):
 	# ~~~~~~~~~~ File Saving ~~~~~~~~~
 	# ~~~~~~~ Save All ~~~~~~~
 	def saveAll(self):
-		for k in self.data.keys():
-			self.writeFile(k)
+		try:
+			for k in self.data.keys():
+				self.writeFile(k)
+		
+		except:
+			...
 
 
 

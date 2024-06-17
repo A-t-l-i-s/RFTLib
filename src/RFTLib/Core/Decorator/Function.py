@@ -31,7 +31,7 @@ def RFT_RunIn(*, milliseconds = 0, seconds = 0, minutes = 0, hours = 0, args = (
 			try:
 				func(*args, **kwargs)
 			except:
-				...
+				print(traceback.format_exc())
 
 
 		# Start new thread
@@ -79,7 +79,7 @@ def RFT_RunEvery(*, milliseconds = 0, seconds = 0, minutes = 0, hours = 0, loop 
 				try:
 					func(*args, **kwargs)
 				except:
-					...
+					print(traceback.format_exc())
 
 
 				# Increment loop count
@@ -139,7 +139,7 @@ def RFT_RunEveryAfter(*, milliseconds = 0, seconds = 0, minutes = 0, hours = 0, 
 					try:
 						func(*args, **kwargs)
 					except:
-						...
+						print(traceback.format_exc())
 
 
 				# Increment loop count

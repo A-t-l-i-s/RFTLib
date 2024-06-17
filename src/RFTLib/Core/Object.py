@@ -44,7 +44,7 @@ class RFT_Object(object):
 		lines = []
 
 		varis = sorted(dir(self))
-		items = []
+		items = {}
 
 		longest = 0
 		longestType = 0
@@ -83,8 +83,16 @@ class RFT_Object(object):
 				if (l > longestType):
 					longestType = l
 
+
+				# Get value type
+				t = type(v)
+
+				# Add list to items
+				if (t not in items):
+					items[t] = []
+
 				# Append key and value to items
-				items.append((k,v))
+				items[t].append((k, v))
 
 
 
@@ -93,121 +101,134 @@ class RFT_Object(object):
 			varis.remove(k)
 
 
-
 		# Opening structure
-		lines.append("(")
+		lines.append("{")
+
+		last = None
+
+		for t, i in items.items():
+			for k, v in i:
+				if (isinstance(v, RFT_Object)):
+					# Add newline
+					lines.append("")
+					
+					# Covert RFT object to string
+					o = v.__str__(showMagic = showMagic, indent = indent + 1)
 
 
-		for k,v in items:
-			if (isinstance(v, RFT_Object)):
-				# Covert RFT object to string
-				o = v.__str__(showMagic = showMagic, indent = indent + 1)
-
-
-			elif (isinstance(v, typing.Callable)):
-				try:
-					# Get function signature
-					sig = inspect.signature(v)
-				except:
-					o = "void"
-
-				else:
-					# Get function parameters
-					params = dict(sig.parameters)
-
-					# Get function return type
-					ret = sig.return_annotation
-
-
-
-					# Return type is void
-					if (ret in (inspect._empty, types.NoneType, typing.NoReturn, None)):
-						retName = "void"
+				elif (isinstance(v, typing.Callable)):
+					try:
+						# Get function signature
+						sig = inspect.signature(v)
+					except:
+						o = "void"
 
 					else:
-						# Get return type name
-						retName = ret.__name__
+						# Get function parameters
+						params = dict(sig.parameters)
+
+						# Get function return type
+						ret = sig.return_annotation
 
 
 
+						# Return type is void
+						if (ret in (inspect._empty, types.NoneType, typing.NoReturn, None)):
+							retName = "void"
 
-					typeNames = []
-					for k_,v_ in params.items():
-						types_ = []
-						
-						# Get parameter annotations
-						anno = v_.annotation
-
-						# Convert annoatation to tuple
-						if (isinstance(anno, types.UnionType)):
-							annoL = anno.__args__
-						elif (isinstance(anno, tuple | list)):
-							annoL = tuple(anno)
 						else:
-							annoL = (anno,)
+							# Get return type name
+							retName = ret.__name__
 
 
-						for t in annoL:
-							# If argument type is void
-							if (t in (inspect._empty, types.NoneType, typing.NoReturn)):
-								t_ = "void"
 
+
+						typeNames = []
+						for k_,v_ in params.items():
+							types_ = []
+							
+							# Get parameter annotations
+							anno = v_.annotation
+
+							# Convert annoatation to tuple
+							if (isinstance(anno, types.UnionType)):
+								annoL = anno.__args__
+							elif (isinstance(anno, tuple | list)):
+								annoL = tuple(anno)
 							else:
-								# Get argument type name
-								t_ = t.__name__
-
-							types_.append(t_)
-					
+								annoL = (anno,)
 
 
-						# Join types to form name
-						name = " | ".join(types_)
+							for t in annoL:
+								# If argument type is void
+								if (t in (inspect._empty, types.NoneType, typing.NoReturn)):
+									t_ = "void"
 
-						# Append to type names list
-						typeNames.append(f"{k_}: {name}")
+								else:
+									# Get argument type name
+									t_ = t.__name__
 
-
-					# Join type names into string
-					typeNamesStr = ", ".join(typeNames)
-					
-					# Create line output
-					o = f"({typeNamesStr}) -> {retName}"
-
-
-			else:
-				# Get value repr
-				o = str(v)
+								types_.append(t_)
+						
 
 
+							# Join types to form name
+							name = " | ".join(types_)
 
-			# If value type is none
-			if (isinstance(v, (inspect._empty, types.NoneType))):
-				n = "void"
-			else:
-				n = type(v).__name__
-
+							# Append to type names list
+							typeNames.append(f"{k_}: {name}")
 
 
-
-			# Format type string
-			typeStr = f"<{n}>"
-			typeStr = typeStr.ljust(longestType + len(typeStr) - len(n) + 3)
-
-
-			nameStr = k.ljust(longest + 3)
+						# Join type names into string
+						typeNamesStr = ", ".join(typeNames)
+						
+						# Create line output
+						o = f"({typeNamesStr}) -> {retName}"
 
 
-			# Combine all into single line
-			l = "   " + typeStr + nameStr + o
+				else:
+					# Get value repr
+					o = str(v)
 
 
-			# Append new line
-			lines.append(l)
+
+				# If value type is none
+				if (isinstance(v, (inspect._empty, types.NoneType))):
+					n = "void"
+				else:
+					n = type(v).__name__
+
+
+
+
+				# Format type string
+				typeStr = f"<{n}>"
+				typeStr = typeStr.ljust(longestType + len(typeStr) - len(n) + 3)
+
+
+				nameStr = k.ljust(longest + 3)
+
+
+				# Combine all into single line
+				l = "   " + typeStr + nameStr + o
+
+
+				# Add a newline if previous value is an object and current isn't
+				if (isinstance(last, RFT_Object)):
+					if (not isinstance(v, RFT_Object)):
+						lines.append("")
+
+
+				# Append new line
+				lines.append(l)
+
+				# Add last
+				last = v
 
 
 
 		# Close structure
-		lines.append(")")
+		lines.append("}")
 
 
 		# Join lines into string
