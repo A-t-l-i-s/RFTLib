@@ -63,9 +63,13 @@ class RFT_Exception(BaseException):
 
 
 
+	def print(self):
+		print(self.message())
+
 
 	def __str__(self):
 		return self.message()
+
 		
 
 
@@ -92,6 +96,14 @@ class RFT_Exception(BaseException):
 	def HasValue(cls, level:int = ERROR):
 		return RFT_Exception(
 			"Values are not needed",
+			level
+		)
+
+
+	@classmethod
+	def Traceback(cls, level:int = WARNING):
+		return RFT_Exception(
+			"\n" + traceback.format_exc().strip(),
 			level
 		)
 

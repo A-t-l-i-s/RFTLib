@@ -5,6 +5,7 @@ from RFTLib.Core.Math import *
 from RFTLib.Core.Table import *
 from RFTLib.Core.Buffer import *
 from RFTLib.Core.Object import *
+from RFTLib.Core.Script import *
 from RFTLib.Core.Resource import *
 from RFTLib.Core.Exception import *
 from RFTLib.Core.Structure import *
@@ -27,13 +28,12 @@ from RFTLib.Core.Decorator.Structure import *
 from RFTLib.Graph import *
 from RFTLib.Graph.Window import *
 
-from RFTLib.BLE import *
-
 
 
 
 
 if (__name__ == "__main__"):
 	...
+
 
 

@@ -13,23 +13,26 @@ __all__ = ("Entry",)
 class Entry:
 	def init(self):
 		# Import module
-		from PyQt6.QtGui import QPixmap
+		from PyQt6.QtGui import QImage, QPixmap
 
+		self.QImage = QImage
 		self.QPixmap = QPixmap
 
 
 
-	def load(self, path):
-		# Load image
-		try:
-			data = self.QPixmap(
-				path.resolve().as_posix()
-			)
-		except:
-			data = None
+	def load(self, file):
+		# Read entire file
+		data = file.read()
 
+		try:
+			# Load as qimage
+			img = self.QImage.fromData(data)
+			pix = self.QPixmap.fromImage(img)
+
+		except:
+			pix = self.QPixmap()
 
 		# Return data
-		return data
+		return pix
 
 

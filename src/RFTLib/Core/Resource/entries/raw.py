@@ -12,21 +12,12 @@ __all__ = ("Entry",)
 
 
 class Entry:
-	def load(self, path):
-		# Read json file
-		with path.open("rb") as file:
-			data = RFT_Buffer()
+	def load(self, file):
+		# Allocate buffer
+		data = RFT_Buffer()
 
-			# Read file in chunks
-			while True:
-				c = file.read(1024)
-
-				# If not eof
-				if (c):
-					data += c
-				else:
-					break
-
+		# Read entire file
+		data += file.read()
 
 		# Return data
 		return data

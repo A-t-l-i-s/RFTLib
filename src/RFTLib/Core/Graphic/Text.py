@@ -1,8 +1,9 @@
 from RFTLib.Require import *
-from RFTLib.Core.Object import *
+
+from ..Object import *
+from ..Geometric.Point import *
 
 from .Color import *
-from ..Geometric.Point import *
 
 
 

@@ -19,17 +19,18 @@ class Entry:
 
 
 
-	def load(self, path):
-		# Load image
-		try:
-			data = self.QImage(
-				path.resolve().as_posix()
-			)
-		except:
-			data = None
+	def load(self, file):
+		# Read entire file
+		data = file.read()
 
+		try:
+			# Load as qimage
+			img = self.QImage.fromData(data)
+
+		except:
+			img = self.QImage()
 
 		# Return data
-		return data
+		return img
 
 

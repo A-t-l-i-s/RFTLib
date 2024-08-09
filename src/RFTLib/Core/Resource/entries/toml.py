@@ -20,21 +20,19 @@ class Entry:
 
 
 
-	def load(self, path):
-		# Read json file
-		with path.open("rb") as file:
-			try:
-				# Read file
-				data_ = self.tomllib.load(file)
-			
-			except:
-				print(traceback.format_exc())
-				# Default
-				data_ = {}
+	def load(self, file):
+		try:
+			# Read file
+			data_ = self.tomllib.load(file)
+		
+		except:
+			print(traceback.format_exc())
+			# Default
+			data_ = {}
 
-			finally:
-				# Convert to struct
-				data = RFT_Structure(data_)
+		finally:
+			# Convert to struct
+			data = RFT_Structure(data_)
 
 
 		# Return data

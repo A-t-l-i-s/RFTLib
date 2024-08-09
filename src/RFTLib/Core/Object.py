@@ -37,9 +37,30 @@ class RFT_Object(object):
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+	# ~~~~~~~~~~ Attributes ~~~~~~~~~~
+	def tryattr(self, attr, ret = None):
+		if (hasattr(self, attr)):
+			return getattr(self, attr)
+
+		else:
+			return ret
+
+
+	def hasattr(self, attr):
+		return hasattr(self, attr)
+
+
+	def getattr(self, attr):
+		return getattr(self, attr)
+
+
+	def setattr(self, attr, value):
+		setattr(self, attr, value)
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 	# ~~~~~~~~~ Magic Methods ~~~~~~~~
-	def __str__(self, showMagic:bool = False, indent:int = 0):
+	def __str__(self, showMagic:bool = False, indent:int = 0, found = []):
 		# Variables
 		lines = []
 
@@ -51,48 +72,57 @@ class RFT_Object(object):
 
 		removed = []
 
+		# Clear found
+		if (indent == 0):
+			found.clear()
+
+		found.append(self)
 
 
 		for k in varis:
-			# Get value
-			v = getattr(self, k)
-
-			# If key is blacklisted
-			if (k in ("__class__", "__module__", "__dict__")):
-				removed.append(k)
-
-			# If value is blacklisted
-			elif (isinstance(v, (types.BuiltinFunctionType, types.BuiltinMethodType, types.MethodWrapperType))):
-				removed.append(k)
-
-
-			# Ignore magic functions
-			elif (not showMagic and k.startswith("__") and k.endswith("__")):
-				removed.append(k)
-
+			try:
+				# Get value
+				v = getattr(self, k)
+			except:
+				...
 
 			else:
-				# Determine longest var name
-				l = len(k)
-				if (l > longest):
-					longest = l
+				# If key is blacklisted
+				if (k in ("__class__", "__module__", "__dict__")):
+					removed.append(k)
+
+				# If value is blacklisted
+				elif (isinstance(v, (types.BuiltinFunctionType, types.BuiltinMethodType, types.MethodWrapperType))):
+					removed.append(k)
 
 
-				# Determine longest type name
-				l = len(type(v).__name__)
-				if (l > longestType):
-					longestType = l
+				# Ignore magic functions
+				elif (not showMagic and k.startswith("__") and k.endswith("__")):
+					removed.append(k)
 
 
-				# Get value type
-				t = type(v)
+				else:
+					# Determine longest var name
+					l = len(k)
+					if (l > longest):
+						longest = l
 
-				# Add list to items
-				if (t not in items):
-					items[t] = []
 
-				# Append key and value to items
-				items[t].append((k, v))
+					# Determine longest type name
+					l = len(type(v).__name__)
+					if (l > longestType):
+						longestType = l
+
+
+					# Get value type
+					t = type(v)
+
+					# Add list to items
+					if (t not in items):
+						items[t] = []
+
+					# Append key and value to items
+					items[t].append((k, v))
 
 
 
@@ -109,11 +139,21 @@ class RFT_Object(object):
 		for t, i in items.items():
 			for k, v in i:
 				if (isinstance(v, RFT_Object)):
-					# Add newline
-					lines.append("")
-					
-					# Covert RFT object to string
-					o = v.__str__(showMagic = showMagic, indent = indent + 1)
+					if (v not in found):
+						# Add newline
+						lines.append("")
+
+						found.append(v)
+						
+						try:
+							# Covert RFT object to string
+							o = v.__str__(showMagic = showMagic, indent = indent + 1, found = found)
+						
+						except:
+							o = "<error>"
+
+					else:
+						o = "<...>"
 
 
 				elif (isinstance(v, typing.Callable)):
@@ -213,10 +253,11 @@ class RFT_Object(object):
 				l = "   " + typeStr + nameStr + o
 
 
-				# Add a newline if previous value is an object and current isn't
+				# Add a newline of previous value is an object and current isn't
 				if (isinstance(last, RFT_Object)):
 					if (not isinstance(v, RFT_Object)):
-						lines.append("")
+						if (last not in found):
+							lines.append("")
 
 
 				# Append new line

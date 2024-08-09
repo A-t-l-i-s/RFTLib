@@ -26,6 +26,12 @@ class RFT_Table(RFT_Object):
 		self.data.assignGetEvent(self.getEvent)
 		self.data.assignSetEvent(self.setEvent)
 
+		# Verify path
+		self.path.mkdir(
+			parents = True,
+			exist_ok = True
+		)
+
 
 
 
@@ -181,15 +187,6 @@ class RFT_Table(RFT_Object):
 	def wait(self):
 		while self.updating:
 			time.sleep(0.01)
-
-
-
-	# ~~~~~~~~ Verify ~~~~~~~~
-	def verify(self):
-		self.path.mkdir(
-			parents = True,
-			exist_ok = True
-		)
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 

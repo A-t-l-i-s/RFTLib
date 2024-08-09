@@ -1,5 +1,7 @@
 from RFTLib.Require import *
 
+from RFTLib.Core.Exception import *
+
 
 
 
@@ -30,8 +32,9 @@ def RFT_RunIn(*, milliseconds = 0, seconds = 0, minutes = 0, hours = 0, args = (
 			# Call function
 			try:
 				func(*args, **kwargs)
+			
 			except:
-				print(traceback.format_exc())
+				RFT_Exception.Traceback().print()
 
 
 		# Start new thread
@@ -78,8 +81,9 @@ def RFT_RunEvery(*, milliseconds = 0, seconds = 0, minutes = 0, hours = 0, loop 
 				# Call function
 				try:
 					func(*args, **kwargs)
+				
 				except:
-					print(traceback.format_exc())
+					RFT_Exception.Traceback().print()
 
 
 				# Increment loop count
@@ -138,8 +142,9 @@ def RFT_RunEveryAfter(*, milliseconds = 0, seconds = 0, minutes = 0, hours = 0, 
 					# Call function
 					try:
 						func(*args, **kwargs)
+					
 					except:
-						print(traceback.format_exc())
+						RFT_Exception.Traceback().print()
 
 
 				# Increment loop count

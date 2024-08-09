@@ -1,5 +1,6 @@
 from RFTLib.Require import *
-from RFTLib.Core.Object import *
+
+from ..Object import *
 
 
 

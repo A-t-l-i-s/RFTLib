@@ -11,23 +11,13 @@ __all__ = ("Entry",)
 
 
 class Entry:
-	def load(self, path):
-		# Read json file
-		with path.open("r") as file:
-			data = ""
+	def load(self, file):
+		# Read entire file
+		data = file.read()
 
-			# Read file in chunks
-			while True:
-				c = file.read(1024)
+		# Convert to utf-8
+		dataStr = str(data, "utf-8")
 
-				# If not eof
-				if (c):
-					data += c
-				else:
-					break
-
-
-		# Return data
-		return data
+		return dataStr
 
 
