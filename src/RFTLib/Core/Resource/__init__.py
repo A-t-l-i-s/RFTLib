@@ -44,11 +44,12 @@ class RFT_Resource(RFT_Object):
 
 		self.entries = entries
 
-		# Verify path
-		self.path.mkdir(
-			parents = True,
-			exist_ok = True
-		)
+		if (not self.path.is_file()):
+			# Verify path
+			self.path.mkdir(
+				parents = True,
+				exist_ok = True
+			)
 
 
 	# ~~~~~~~~~~~~~ Load ~~~~~~~~~~~~~

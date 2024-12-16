@@ -1,0 +1,133 @@
+
+# ~~~~~~~~~~~ Commands ~~~~~~~~~~~
+cmd::value
+# This works too
+cmd : : value
+
+# Variable
+:variable: value
+variable: value
+
+# Dispatch command and assign value to variable
+cmd :variable: value
+
+
+import:: RyPile
+include:: file.ryp
+
+python:: "
+python code here
+"
+
+run :cmdExe: ["cmd.exe", "/k"]
+run:: cmdExe
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+# ~~~~~~~~~~ Conditions ~~~~~~~~~~
+if:: {
+	# If statement scope
+	return:: 1
+} :: {
+	# If condition true
+} :: {
+	# If condition false
+}
+
+# ~~~ Or ~~~
+
+if :: {
+	# If statement scope
+	return:: 1
+} :ifStruct: {
+	# If condition true
+	# Create new structure
+} :elseStruct: {
+	# If condition false
+	# Create new structure
+}
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+# ~~~~~~~~~~~~~ Scope ~~~~~~~~~~~~
+# Define scope
+::{
+	var1: 1
+	var2: 6.9
+}
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+# ~~~~~~~~~~~ Structure ~~~~~~~~~~
+# Define structure
+:struct: {
+	var1: 420
+}
+
+# Structure inside structure
+:struct1: {
+	:struct2: {
+		var1: 9
+	}
+}
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+# ~~~~~~ List of Structures ~~~~~~
+# Define list of structures
+:struct:{
+	var1: 420
+}::{
+	var1: 40
+}::{
+	var1: 7.6
+}
+# ~~~ Or ~~~
+:struct:[
+	::{
+		var1: 420
+	}
+	::{
+		var1: 40
+	}
+	::{
+		var1: 7.6
+	}
+	# ~~~ Or ~~~
+	::{
+		83
+	}
+	# ~~~ Or ~~~
+	::{
+		return:: 83
+	}
+]
+
+# As python code
+struct = [
+	{
+		"var1": 420
+	},
+	{
+		"var1": 40
+	},
+	{
+		"var1": 7.6
+	}
+]
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+# ~~~~~~~~~~~~ Regex ~~~~~~~~~~~~~
+# Statement check
+^\s*(?P<command>[\w_]+[\w\d_]*)?\s*:\s*(?P<variable>[\w_]+[\w\d_]*)?\s*:\s*(?P<value>.+)?$
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+"penis", "in". "ur", "ass"
+
+"
+fuck
+my
+life
+reeeeee!"

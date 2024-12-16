@@ -11,17 +11,20 @@ __all__ = ("RFT_Exception",)
 
 
 class RFT_Exception(BaseException):
-	NONE:int = 			-1
+	# ~~~~~~~~~~~ Variables ~~~~~~~~~~
 	INFO:int = 			0
 	WARNING:int = 		1
 	ERROR:int = 		2
 	CRITICAL:int = 		3
 
+	stdout = sys.stdout
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 
 	def __init__(self,
 			text = "",
-			level = NONE
+			level = INFO
 		):
 
 		self.text = text
@@ -29,8 +32,7 @@ class RFT_Exception(BaseException):
 
 
 
-
-
+	# ~~~~~~~~~~~~ Message ~~~~~~~~~~~
 	def message(self):
 		# Get current datetime
 		timestamp = datetime.datetime.now()
@@ -60,22 +62,37 @@ class RFT_Exception(BaseException):
 		msg = f"[{timestamp.hour:>2}:{timestamp.minute:>2}:{str(timestamp.second) + '.' + str(timestamp.microsecond)[:4]:<7}]({type_}): {self.text}"
 
 		return msg
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
-	def print(self):
-		print(self.message())
+	# ~~~~~~~~~~~~~ Print ~~~~~~~~~~~~
+	def print(self, end = "\n"):
+		self.stdout.write(self.message() + end)
+		self.stdout.flush()
+		
+		return self
 
 
 	def __str__(self):
 		return self.message()
-
-		
-
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+	# ~~~~~~~~~~~~~ Wait ~~~~~~~~~~~~~
+	def wait(self, secs = None):
+		if (secs != None):
+			time.sleep(secs)
+
+		else:
+			input()
+
+		return self
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+
+	# ~~~~~~~~~ Class Methods ~~~~~~~~
 	@classmethod
 	def TypeError(cls, t:type, level:int = ERROR):
 		return RFT_Exception(
@@ -106,6 +123,7 @@ class RFT_Exception(BaseException):
 			"\n" + traceback.format_exc().strip(),
 			level
 		)
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 

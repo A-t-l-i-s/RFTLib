@@ -65,7 +65,6 @@ class RFT_Table(RFT_Object):
 	def touchFile(self, attr:str):
 		path = self.path / (attr + ".table")
 
-
 		# Get attr data
 		data = self.data.get(attr)
 
@@ -188,7 +187,6 @@ class RFT_Table(RFT_Object):
 		while self.updating:
 			time.sleep(0.01)
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 
 
 

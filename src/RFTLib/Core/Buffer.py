@@ -118,7 +118,7 @@ class RFT_Buffer(RFT_Object):
 				skipkeys = False,
 				default = lambda o: None
 			)
-			out = bytes(out_, "utf-8")
+			out = bytearray(out_, "utf-8")
 
 
 
@@ -223,6 +223,25 @@ class RFT_Buffer(RFT_Object):
 		)
 
 		return RFT_Buffer(data)
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	# ~~~~~~~ File Read ~~~~~~
+	def read(self, file, size:int):
+		self.data = bytearray(
+			file.read(
+				size
+			)
+		)
+
+
+	# ~~~~~~ File Write ~~~~~~
+	def write(self, file):
+		file.write(
+			self.data
+		)
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 

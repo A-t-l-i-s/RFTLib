@@ -1,11 +1,11 @@
 from RFTLib.Require import *
-from RFTLib.Literals import *
 
 from RFTLib.Core.Math import *
 from RFTLib.Core.Table import *
 from RFTLib.Core.Buffer import *
 from RFTLib.Core.Object import *
 from RFTLib.Core.Script import *
+from RFTLib.Core.Random import *
 from RFTLib.Core.Resource import *
 from RFTLib.Core.Exception import *
 from RFTLib.Core.Structure import *
@@ -28,12 +28,13 @@ from RFTLib.Core.Decorator.Structure import *
 from RFTLib.Graph import *
 from RFTLib.Graph.Window import *
 
+from RFTLib.Rypple import *
+
 
 
 
 
 if (__name__ == "__main__"):
-	...
-
-
+	with open("tests/test.ryp") as file:
+		RFT_Rypple.read(file)
 

@@ -34,6 +34,11 @@ class RFT_Object(object):
 					builtins,
 					name
 				)
+
+
+	# ~~~~~~~~~ Copy ~~~~~~~~~
+	def copy(self):
+		return copy.deepcopy(self)
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -274,7 +279,6 @@ class RFT_Object(object):
 
 		# Join lines into string
 		out = ("\n" + ("   " * indent)).join(lines)
-
 
 		# Return string
 		return out

@@ -19,11 +19,12 @@ class RFT_Script(RFT_Object):
 	def __init__(self, path:str):
 		self.path = Path(path)
 		
-		# Verify path
-		self.path.mkdir(
-			parents = True,
-			exist_ok = True
-		)
+		if (not self.path.is_file()):
+			# Verify path
+			self.path.mkdir(
+				parents = True,
+				exist_ok = True
+			)
 
 
 
@@ -55,12 +56,18 @@ class RFT_Script(RFT_Object):
 									# Read file
 									fileData = file.read()
 
-									# Allocate scope
-									scope = RFT_Structure()
-
 									try:
+										# Create empty module spec
+										spec = importlib.util.spec_from_loader("__RFTScript__", loader = None)
+
+										# Get module
+										mod = importlib.util.module_from_spec(spec)
+
 										# Execute code
-										exec(fileData, scope.data())
+										exec(fileData, mod.__dict__)
+										
+										# Allocate scope
+										scope = RFT_Structure(mod.__dict__)
 									
 									except:
 										RFT_Exception.Traceback().print()
@@ -92,7 +99,7 @@ class RFT_Script(RFT_Object):
 						if (ext in ("py", "pyc")):
 							try:
 								# Import module spec
-								spec = importlib.util.spec_from_file_location("script", f)
+								spec = importlib.util.spec_from_file_location("__RFTScript__", f)
 
 								# Get module
 								mod = importlib.util.module_from_spec(spec)

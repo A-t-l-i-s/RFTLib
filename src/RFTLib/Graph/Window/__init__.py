@@ -84,8 +84,15 @@ class RFT_Graph_Window(RFT_Object):
 		self.widget.setWindowTitle("RFT Graph") # Set title
 		self.widget.setCursor(Qt.CursorShape.CrossCursor) # Set cursor
 
-		self.widget.setWindowFlags(Qt.WindowType.FramelessWindowHint) # Set frameless window
-		self.widget.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True) # Set transparent background
+		# Set window flags
+		self.widget.setWindowFlags(
+			Qt.WindowType.Tool |
+			Qt.WindowType.FramelessWindowHint |
+			Qt.WindowType.WindowStaysOnTopHint
+		)
+
+		# Set transparent background
+		self.widget.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
 
 		self.widget.resize(self.width, self.height) # Set window size
 		# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

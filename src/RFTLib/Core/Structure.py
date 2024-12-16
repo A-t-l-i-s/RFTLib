@@ -1,6 +1,7 @@
 from RFTLib.Require import *
 
 from .Object import *
+from .Exception import *
 
 
 
@@ -13,7 +14,7 @@ __all__ = ("RFT_Structure",)
 
 
 class RFT_Structure(RFT_Object):
-	def __init__(self, struct:dict = None, *, defaults:dict = {}):
+	def __init__(self, struct:dict = None, *, defaults:dict = {}, readonly:bool = False):
 		# Create new dict
 		if (struct == None):
 			struct = dict()
@@ -52,6 +53,7 @@ class RFT_Structure(RFT_Object):
 
 
 			object.__setattr__(self, "__data__", data)
+			object.__setattr__(self, "__readonly__", readonly)
 
 		else:
 			raise TypeError
@@ -72,18 +74,22 @@ class RFT_Structure(RFT_Object):
 
 
 	def __setattr__(self, attr:str, value):
-		if (self.setEvent(attr)):
-			# Get dict data
-			v = self.data()
+		if (not self.__readonly__):
+			if (self.setEvent(attr)):
+				# Get dict data
+				v = self.data()
 
-			# Convert value to structure
-			if (isinstance(value, dict)):
-				value_ = RFT_Structure(value)
-			else:
-				value_ = value
+				# Convert value to structure
+				if (isinstance(value, dict)):
+					value_ = RFT_Structure(value)
+				else:
+					value_ = value
 
-			# Set value
-			v[attr] = value_
+				# Set value
+				v[attr] = value_
+
+		else:
+			raise RFT_Exception("Structure is readonly", RFT_Exception.ERROR)
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -161,6 +167,14 @@ class RFT_Structure(RFT_Object):
 		return len(
 			self.keys()
 		)
+
+
+
+	def __add__(self, value):
+		if (isinstance(value, (dict, RFT_Structure))):
+			self.default(value)
+
+		return self
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -168,10 +182,7 @@ class RFT_Structure(RFT_Object):
 	# ~~~~~~~~~ Retrieve Data ~~~~~~~~
 	# ~~~~~ Get Raw Data ~~~~~
 	def data(self):
-		d = self.__dict__
-		v = d["__data__"]
-
-		return v
+		return self.__dict__["__data__"]
 
 
 	# ~~~~~~~~ Get Key ~~~~~~~
@@ -202,6 +213,11 @@ class RFT_Structure(RFT_Object):
 		d = self.data()
 
 		return d.values()
+
+
+	# ~~~~~~ If readonly ~~~~~
+	def readonly(self):
+		return self.__dict__["__readonly__"]
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -353,16 +369,6 @@ class RFT_Structure(RFT_Object):
 
 
 	# ~~~~~~~~~ Convert Data ~~~~~~~~~
-	# ~~~~~~~~~ Copy ~~~~~~~~~
-	def copy(self):
-		newStruct = RFT_Structure(
-			self.data()
-		)
-
-		return newStruct
-
-
-
 	# ~~~~~ To Dictionary ~~~~
 	def toDict(self):
 		out = {}
