@@ -20,7 +20,6 @@ from RFTLib.Graph import *
 from RFTLib.Graph.Window import *
 
 
-
 if (__name__ == "__main__"):
 	graph = RFT_Graph(256 * 3, 256 * 3)
 

@@ -1,4 +1,5 @@
 from RFTLib.Require import *
+from RFTLib.Core.Exception import *
 
 
 
@@ -24,13 +25,9 @@ class Entry:
 		# Read entire file
 		data = file.read()
 
-		try:
-			# Load as qimage
-			img = self.QImage.fromData(data)
-			pix = self.QPixmap.fromImage(img)
-
-		except:
-			pix = self.QPixmap()
+		# Load as qimage
+		img = self.QImage.fromData(data)
+		pix = self.QPixmap.fromImage(img)
 
 		# Return data
 		return pix

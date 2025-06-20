@@ -58,7 +58,6 @@ class RFT_Buffer(RFT_Object):
 
 
 	# ~~~~~~~ Convert To Bytes ~~~~~~~
-	@classmethod
 	def toBytes(self, val:int | str | bytes | bytearray | tuple | list | dict):
 		out = bytearray()
 
@@ -197,32 +196,6 @@ class RFT_Buffer(RFT_Object):
 		out = RFT_Structure(out_)
 
 		return out
-
-
-	# ~~~~~ To Dictionary ~~~~
-	def toDict(self):
-		return self.data
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	# ~~~~~~~ Compress ~~~~~~~
-	def compress(self):
-		data = zlib.compress(
-			self.data
-		)
-
-		return RFT_Buffer(data)
-
-
-	# ~~~~~~ Decompress ~~~~~~
-	def decompress(self):
-		data = zlib.decompress(
-			self.data
-		)
-
-		return RFT_Buffer(data)
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -230,10 +203,8 @@ class RFT_Buffer(RFT_Object):
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	# ~~~~~~~ File Read ~~~~~~
 	def read(self, file, size:int):
-		self.data = bytearray(
-			file.read(
-				size
-			)
+		self += file.read(
+			size
 		)
 
 

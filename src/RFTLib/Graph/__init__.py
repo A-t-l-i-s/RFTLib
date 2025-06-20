@@ -265,7 +265,7 @@ class RFT_Graph(RFT_Object):
 
 					elif (isinstance(v, RFT_Point)):
 						# Draw point
-						self.data[pos.y, pos.x] = color.toRGBA()
+						self.data[v.y, v.x] = color.toRGBA()
 
 
 					elif (isinstance(v, RFT_Polygon)):

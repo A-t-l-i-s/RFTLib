@@ -4,16 +4,16 @@ from ..Object import *
 from ..Exception import *
 from ..Structure import *
 
-from .entries.json import Entry as RFT_Resource_JSON
-from .entries.yaml import Entry as RFT_Resource_YAML
-from .entries.toml import Entry as RFT_Resource_TOML
+from .json import Entry as RFT_Resource_JSON
+from .yaml import Entry as RFT_Resource_YAML
+from .toml import Entry as RFT_Resource_TOML
 
-from .entries.raw import Entry as RFT_Resource_RAW
-from .entries.text import Entry as RFT_Resource_TEXT
+from .raw import Entry as RFT_Resource_RAW
+from .text import Entry as RFT_Resource_TEXT
 
-from .entries.qt.qicon import Entry as RFT_Resource_QT_QICON
-from .entries.qt.qimage import Entry as RFT_Resource_QT_QIMAGE
-from .entries.qt.qpixmap import Entry as RFT_Resource_QT_QPIXMAP
+from .qt.qicon import Entry as RFT_Resource_QT_QICON
+from .qt.qimage import Entry as RFT_Resource_QT_QIMAGE
+from .qt.qpixmap import Entry as RFT_Resource_QT_QPIXMAP
 
 
 
@@ -53,7 +53,7 @@ class RFT_Resource(RFT_Object):
 
 
 	# ~~~~~~~~~~~~~ Load ~~~~~~~~~~~~~
-	def load(self):
+	def load(self, callback = None):
 		# Create structure
 		data = RFT_Structure({})
 
@@ -65,7 +65,7 @@ class RFT_Resource(RFT_Object):
 					en.init(en)
 
 				except:
-					RFT_Exception.Traceback().print()
+					...
 
 
 		# Resolve path
@@ -77,38 +77,77 @@ class RFT_Resource(RFT_Object):
 				with zipfile.ZipFile(path, "r") as zfile:
 					for f in zfile.infolist():
 						if (not f.is_dir()):
+							name = f.filename
+
 							# Create path
-							p = Path(f.filename)
+							p = Path(name)
 
 							# Get attributes
 							attr, ext = self.getAttr(p)
 
 							# Open and Process file
-							with zfile.open(f.filename, "r") as file:
-								self.processFile(
-									attr, ext, file, data
-								)
+							while True:
+								retry = False
+								
+								with zfile.open(name, "r") as file:
+									try:
+										self.processFile(
+											attr, ext, file, data
+										)
+
+									except:
+										exc = RFT_Exception(f"Failed to load file \"{name}\"")
+
+										if (callback is not None):
+											retry = callback(exc, p)
+
+										else:
+											raise exc
+
+									finally:
+										if (not retry):
+											break
+
 
 
 			else:
-				for f in path.glob("**/*"):
+				for f in self.path.glob("**/*"):
 					if (not f.is_dir()):
 						# Format path and file to correct object structure naming
 						# Resolve file path
-						f = f.resolve()
+						f_ = f.resolve()
 						
 						# Get parent/child path
-						parent = f.as_posix()
+						parent = f_.as_posix()
 						child = Path(parent.replace(path.as_posix(), ""))
+
+						name = Path(child.as_posix().strip("/"))
 
 						# Get attribute
 						attr, ext = self.getAttr(child)
 
 						# Open and Process file
-						with f.open("rb") as file:
-							self.processFile(
-								attr, ext, file, data
-							)
+						while True:
+							retry = False
+							
+							with f.open("rb") as file:
+								try:
+									self.processFile(
+										attr, ext, file, data
+									)
+
+								except:
+									exc = RFT_Exception(f"Failed to load file \"{name}\"")
+
+									if (callback is not None):
+										retry = callback(exc, name)
+
+									else:
+										raise exc
+
+								finally:
+									if (not retry):
+										break
 
 
 		# Return structure data
@@ -148,6 +187,8 @@ class RFT_Resource(RFT_Object):
 
 
 	def processFile(self, attr, ext, file, data):
+		attr = list(attr)
+
 		# End path
 		attrEnd = attr.pop(-1)
 
@@ -160,14 +201,19 @@ class RFT_Resource(RFT_Object):
 						d = en.load(en, file)
 
 					except:
-						RFT_Exception.Traceback().print()
+						raise RFT_Exception.Traceback()
 
 					else:
 						# If any parent attributes then allocate some
 						parent = data.allocate(attr)
 
-						# Set value inside the parent
-						parent[attrEnd] = d
+						if (parent.containsInst(attrEnd, RFT_Structure)):
+							# Default value
+							parent[attrEnd].default(d)
+
+						else:
+							# Set value inside the parent
+							parent[attrEnd] = d
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 

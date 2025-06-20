@@ -14,29 +14,32 @@ __all__ = ("RFT_Structure",)
 
 
 class RFT_Structure(RFT_Object):
-	def __init__(self, struct:dict = None, *, defaults:dict = {}, readonly:bool = False):
-		# Create new dict
+	def __init__(self, struct:object = None, *, defaults:dict = {}, readonly:bool = False, showMagic:bool = False):
+		# If no struct then create one
 		if (struct == None):
 			struct = dict()
 
 
-		# Convert struct to dict
+		# Set new variables
+		newStruct = struct
+		newDefaults = defaults
+
+		object.__setattr__(self, "__readonly__", readonly)
+
+
+		# ~~~~ Convert To Dict ~~~
 		if (isinstance(struct, RFT_Structure)):
 			newStruct = struct.data()
-		else:
-			newStruct = struct
 
 
-		# Convert defaults to dict
 		if (isinstance(defaults, RFT_Structure)):
 			newDefaults = defaults.data()
-		else:
-			newDefaults = defaults
+		# ~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
-		# If newStruct is a dictionary
 		if (isinstance(newStruct, dict)):
+			# ~~~~~~ Dictionary ~~~~~~
 			# Copy dictionary
 			data = copy.deepcopy(newDefaults)
 			data.update(newStruct)
@@ -48,16 +51,54 @@ class RFT_Structure(RFT_Object):
 
 				if (isinstance(v, dict)):
 					# Convert to structure
-					v = RFT_Structure(v)
-					data[k] = v
+					data[k] = RFT_Structure(v)
 
 
+			# Set new object data
 			object.__setattr__(self, "__data__", data)
-			object.__setattr__(self, "__readonly__", readonly)
+			# ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+		elif (isinstance(newStruct, RFT_Object) or (isinstance(newStruct, type) and issubclass(newStruct, RFT_Object))):
+			# ~~~~~~~~ Object ~~~~~~~~
+			# New dictionary
+			data = dict()
+
+			if (isinstance(newStruct, type)):
+				obj = newStruct.copy(newStruct)
+
+			else:
+				obj = newStruct.copy()
+
+			# Iterate through attributes
+			for k in obj.__dict__.keys():
+				if (showMagic or not (k.startswith("__") and k.endswith("__"))):
+					data[k] = getattr(obj, k)
+
+
+			# Set new object data
+			object.__setattr__(self, "__data__", data)
+			# ~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 		else:
-			raise TypeError
+			# ~~~~ Unknown Object ~~~~
+			# New dictionary
+			data = dict()
 
+			for k in newStruct.__dict__.keys():
+				if (showMagic or not (k.startswith("__") and k.endswith("__"))):
+					v = getattr(newStruct, k)
+
+					if (not isinstance(v, int | float | complex | str | list | tuple | range | set | bool | bytes | bytearray | memoryview)):
+						data[k] = RFT_Structure(v)
+
+					else:
+						data[k] = v
+
+			# Set new object data
+			object.__setattr__(self, "__data__", data)
+			# ~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
@@ -74,7 +115,7 @@ class RFT_Structure(RFT_Object):
 
 
 	def __setattr__(self, attr:str, value):
-		if (not self.__readonly__):
+		if (not self.readonly()):
 			if (self.setEvent(attr)):
 				# Get dict data
 				v = self.data()
@@ -169,12 +210,31 @@ class RFT_Structure(RFT_Object):
 		)
 
 
-
 	def __add__(self, value):
-		if (isinstance(value, (dict, RFT_Structure))):
-			self.default(value)
+		value_ = RFT_Structure(value)
+		self.default(value_)
 
 		return self
+
+
+	def __mul__(self, value):
+		value_ = RFT_Structure(value)
+		for k, v in value_.items():
+			self[k] = v
+
+		return self
+
+
+	def __str__(self, *, showMagic:bool = False, indent:int = 0, found:list = [], ignore:list = []):
+		o = RFT_Object()
+		o.__dict__ = self.data()
+
+		return o.__str__(
+			showMagic = showMagic,
+			indent = indent,
+			found = found,
+			ignore = dir(RFT_Object) + ignore
+		)
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -183,6 +243,11 @@ class RFT_Structure(RFT_Object):
 	# ~~~~~ Get Raw Data ~~~~~
 	def data(self):
 		return self.__dict__["__data__"]
+
+
+	# ~~~~~ Copy Raw Data ~~~~
+	def copy(self):
+		return RFT_Structure(self)
 
 
 	# ~~~~~~~~ Get Key ~~~~~~~
@@ -215,20 +280,39 @@ class RFT_Structure(RFT_Object):
 		return d.values()
 
 
+	# ~~~~~ Wait for key ~~~~~
+	def waitFor(self, attr:str | list | tuple, *, timeout:int | float = -1):
+		start = time.time()
+
+		while True:
+			if (self.contains(attr)):
+				return self[attr]
+
+			else:
+				if (timeout > 0):
+					if (time.time() - start > timeout):
+						return None
+
+				time.sleep(0.01)
+
+
 	# ~~~~~~ If readonly ~~~~~
 	def readonly(self):
 		return self.__dict__["__readonly__"]
+
+	def setReadonly(self, value:bool):
+		object.__setattr__(self, "__readonly__", bool(value))
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
 	# ~~~~~~~~~ Contains Data ~~~~~~~~
 	# ~~~~~~~ Contains ~~~~~~~
-	def contains(self, attr:tuple | list | str):
+	def contains(self, attr:str | tuple | list):
 		d = self.data()
 		k = d.keys()
 
-		if (isinstance(attr, (list, tuple))):
+		if (isinstance(attr, list | tuple)):
 			return all(
 				[a in k for a in attr]
 			)
@@ -239,12 +323,23 @@ class RFT_Structure(RFT_Object):
 
 
 	# ~~~~~ Contains Inst ~~~~
-	def containsInst(self, attr:str, type_:type):
-		if (self.contains(attr)):
-			if (isinstance(self[attr], type_)):
-				return True
+	def containsInst(self, attr:str | list | tuple, type_:type):
+		l = []
 
-		return False
+		if (isinstance(attr, str)):
+			attr = (attr,)
+
+		for a in attr:
+			if (self.contains(a)):
+				l.append(
+					isinstance(self[a], type_)
+				)
+
+			else:
+				l.append(False)
+					
+
+		return all(l)
 
 
 
@@ -270,21 +365,42 @@ class RFT_Structure(RFT_Object):
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+	# ~~~~~~ First/Last ~~~~~~
+	def first(self):
+		for k, v in self.items():
+			return k
+
+
+	def last(self):
+		keys = tuple(self.keys())
+
+		if (keys):
+			return keys[-1]
+	# ~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 	# ~~~~~~~~~~ Remove Data ~~~~~~~~~
 	# ~~~~~~~~~~ Pop ~~~~~~~~~
 	def pop(self, attr:str):
-		d = self.data()
+		if (not self.readonly()):
+			d = self.data()
 
-		return d.pop(attr)
+			return d.pop(attr)
+
+		else:
+			raise RFT_Exception("Structure is readonly", RFT_Exception.ERROR)
 
 
 
 	# ~~~~~~~~~ Clear ~~~~~~~~
 	def clear(self):
-		d = self.data()
+		if (not self.readonly()):
+			d = self.data()
 
-		d.clear()
+			d.clear()
+
+		else:
+			raise RFT_Exception("Structure is readonly", RFT_Exception.ERROR)
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -296,12 +412,16 @@ class RFT_Structure(RFT_Object):
 			if (not self.contains(k)):
 				self[k] = v
 
+		return self
+
 
 
 	# ~~~~~ Default Inst ~~~~~
 	def defaultInst(self, attr:str, value, type_:type):
 		if (not self.containsInst(attr, type_)):
 			self[attr] = value
+
+		return self
 
 
 
@@ -350,14 +470,14 @@ class RFT_Structure(RFT_Object):
 			if (parent.contains(p)):
 				v = parent[p]
 
-				if (isinstance(v,RFT_Structure)):
+				if (isinstance(v, RFT_Structure)):
 					parent = v
 
 				else:
 					return None
 
 			else:
-				v = RFT_Structure({})
+				v = RFT_Structure()
 
 				parent[p] = v
 				parent = v

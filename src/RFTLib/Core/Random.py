@@ -51,6 +51,13 @@ class RFT_Random(RFT_Object):
 	def buffer(self, n:int = 1):
 		return RFT_Buffer(self.bytes(n))
 
+	def rgb(self):
+		return (
+			self.range(0x00, 0xff),
+			self.range(0x00, 0xff),
+			self.range(0x00, 0xff)
+		)
+
 
 
 

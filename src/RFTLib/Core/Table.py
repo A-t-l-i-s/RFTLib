@@ -22,7 +22,9 @@ class RFT_Table(RFT_Object):
 		self.running = False
 		self.indent = False
 
-		self.data = RFT_Structure({})
+		self.thread = None
+
+		self.data = RFT_Structure()
 		self.data.assignGetEvent(self.getEvent)
 		self.data.assignSetEvent(self.setEvent)
 
@@ -160,23 +162,37 @@ class RFT_Table(RFT_Object):
 				self.writeFile(k)
 		
 		except:
-			...
+			raise RFT_Exception.Traceback()
 
 
 
 	# ~~~~~~ Save Every ~~~~~~
-	def saveEvery(self, secs):
-		def call():
-			while self.running:
-				# Save all tables
-				self.saveAll()
-
-				# Delay in seconds
-				time.sleep(secs)
-
-
+	def saveEvery(self, secs:int | float):
 		self.running = True
-		threading._start_new_thread(call, (), {})
+
+		if (self.thread is not None):
+			self.running = False
+			self.thread.join()
+
+		self.thread = threading.Thread(
+			target = self.saveEvery_,
+			args = (secs,),
+			kwargs = {},
+			daemon = True
+		)
+
+		self.thread.start()
+
+
+
+	# ~~~~~~~~ Thread ~~~~~~~~
+	def saveEvery_(self, secs:int | float):
+		while self.running:
+			# Delay in seconds
+			time.sleep(secs)
+
+			# Save all tables
+			self.saveAll()
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -186,6 +202,17 @@ class RFT_Table(RFT_Object):
 	def wait(self):
 		while self.updating:
 			time.sleep(0.01)
+
+
+	# ~~~~~~~~~ Clear ~~~~~~~~
+	def clear(self, stop:bool = False):
+		self.running = not stop
+
+		for f in self.path.iterdir():
+			p = Path(f)
+			
+			if (p.is_file()):
+				os.remove(p)
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 

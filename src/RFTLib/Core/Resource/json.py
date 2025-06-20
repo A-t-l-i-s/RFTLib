@@ -1,4 +1,5 @@
 from RFTLib.Require import *
+from RFTLib.Core.Exception import *
 from RFTLib.Core.Structure import *
 
 
@@ -21,17 +22,15 @@ class Entry:
 
 
 	def load(self, file):
-		try:
-			# Read file
-			data_ = self.json.load(file)
-		
-		except:
-			# Default
-			data_ = {}
+		# Read file
+		data_ = self.json.load(file)
 
-		finally:
+		if (isinstance(data_, dict)):
 			# Convert to struct
 			data = RFT_Structure(data_)
+
+		else:
+			data = data_
 
 
 		# Return data

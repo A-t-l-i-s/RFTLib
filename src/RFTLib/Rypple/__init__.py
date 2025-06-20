@@ -3,8 +3,12 @@ from RFTLib.Require import *
 from RFTLib.Core.Object import *
 from RFTLib.Core.Structure import *
 
-from .scope import *
-from .regex import *
+from .C import *
+from .CPP import *
+from .Python import *
+
+from .Process import *
+from .Filesystem import *
 
 
 
@@ -12,8 +16,12 @@ from .regex import *
 
 __all__ = (
 	"RFT_Rypple",
-	"RFT_Rypple_Scope",
-	"RFT_Rypple_Regex"
+	"RFT_Rypple_Process",
+	"RFT_Rypple_Filesystem",
+
+	"RFT_Rypple_C",
+	"RFT_Rypple_CPP",
+	"RFT_Rypple_Python"
 )
 
 
@@ -21,16 +29,29 @@ __all__ = (
 
 
 class RFT_Rypple(RFT_Object):
+	default = RFT_Structure({
+	})
+
+
+
 	@classmethod
-	def read(self, file):
-		quotes = []
+	def begin(self, *plugins: tuple | list) -> RFT_Structure:
+		scope = self.default.copy()
+
+		for pl in plugins:
+			pl.scope = scope
+
+			s = RFT_Structure(pl)
+			for k, v in s.items():
+				if (callable(v)):
+					scope[k] = v
+
+		return scope
 
 
-		for l in file.readlines():
-			s = RFT_Rypple_Regex.readStatement(l)
-
-			if (s):
-				print(s.toDict())
+	@classmethod
+	def end(self, scope):
+		scope.clear()
 
 
 

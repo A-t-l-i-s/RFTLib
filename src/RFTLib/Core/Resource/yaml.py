@@ -1,4 +1,5 @@
 from RFTLib.Require import *
+from RFTLib.Core.Exception import *
 from RFTLib.Core.Structure import *
 
 
@@ -21,23 +22,22 @@ class Entry:
 
 
 	def load(self, file):
-		try:
-			# Read file
-			data_ = self.yaml.load(
-				file,
-				Loader = self.yaml.FullLoader
-			)
+		# Read file
+		data_ = self.yaml.load(
+			file,
+			Loader = self.yaml.FullLoader
+		)
 
-			if (data_ == None):
-				data_ = {}
-		
-		except:
-			# Default
+		if (data_ == None):
 			data_ = {}
+	
 
-		finally:
+		if (isinstance(data_, dict)):
 			# Convert to struct
 			data = RFT_Structure(data_)
+
+		else:
+			data = data_
 
 
 		# Return data

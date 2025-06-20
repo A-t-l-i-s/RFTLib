@@ -1,3 +1,5 @@
+import cv2
+
 from RFTLib.Require import *
 
 from RFTLib.Core.Buffer import *

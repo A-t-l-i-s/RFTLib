@@ -16,7 +16,7 @@ __all__ = ("RFT_Script",)
 
 
 class RFT_Script(RFT_Object):
-	def __init__(self, path:str):
+	def __init__(self, path:str | Path):
 		self.path = Path(path)
 		
 		if (not self.path.is_file()):
@@ -29,14 +29,12 @@ class RFT_Script(RFT_Object):
 
 
 	# ~~~~~~~~~~~~~ Load ~~~~~~~~~~~~~
-	def load(self):
+	def load(self, *, callback = None):
 		# Create structure
-		data = RFT_Structure({})
-
+		data = RFT_Structure()
 
 		# Resolve path
 		path = self.path.resolve()
-
 
 		if (path.exists()):
 			if (path.is_file()):
@@ -44,40 +42,55 @@ class RFT_Script(RFT_Object):
 				with zipfile.ZipFile(path, "r") as zfile:
 					for f in zfile.infolist():
 						if (not f.is_dir()):
+							name = f.filename
+
 							# Create path
-							p = Path(f.filename)
+							p = Path(name)
 
 							# Get attributes
 							attr, ext = RFT_Resource.getAttr(p)
 							attrEnd = attr.pop(-1)
 
 							if (ext in ("py", "pyc")):
-								with zfile.open(f.filename, "r") as file:
-									# Read file
-									fileData = file.read()
+								while True:
+									retry = False
 
-									try:
-										# Create empty module spec
-										spec = importlib.util.spec_from_loader("__RFTScript__", loader = None)
+									with zfile.open(name, "r") as file:
+										# Read file
+										fileData = file.read()
 
-										# Get module
-										mod = importlib.util.module_from_spec(spec)
+										try:
+											# Create empty module spec
+											spec = importlib.util.spec_from_loader("__RFTScript__", loader = None)
 
-										# Execute code
-										exec(fileData, mod.__dict__)
+											# Get module
+											mod = importlib.util.module_from_spec(spec)
+
+											# Execute code
+											exec(fileData, mod.__dict__)
+											
+											# Allocate scope
+											scope = RFT_Structure(mod.__dict__)
 										
-										# Allocate scope
-										scope = RFT_Structure(mod.__dict__)
-									
-									except:
-										RFT_Exception.Traceback().print()
+										except:
+											exc = RFT_Exception.Traceback()
+											
+											if (callback is not None):
+												retry = callback(exc, p)
 
-									else:
-										# If any parent attributes then allocate some
-										parent = data.allocate(attr)
+											else:
+												raise exc
 
-										# Set value inside the parent
-										parent[attrEnd] = scope
+										else:
+											# If any parent attributes then allocate some
+											parent = data.allocate(attr)
+
+											# Set value inside the parent
+											parent[attrEnd] = scope
+
+										finally:
+											if (not retry):
+												break
 
 
 
@@ -90,35 +103,50 @@ class RFT_Script(RFT_Object):
 						
 						# Get parent/child path
 						parent = f.as_posix()
-						child = Path(parent.replace(path.as_posix(), ""))
+						child = Path(parent.replace(path.resolve().as_posix(), ""))
+
+						name = child.as_posix().strip("/")
 
 						# Get attribute
 						attr, ext = RFT_Resource.getAttr(child)
 						attrEnd = attr.pop(-1)
 
 						if (ext in ("py", "pyc")):
-							try:
-								# Import module spec
-								spec = importlib.util.spec_from_file_location("__RFTScript__", f)
+							while True:
+								retry = False
 
-								# Get module
-								mod = importlib.util.module_from_spec(spec)
+								try:
+									# Import module spec
+									spec = importlib.util.spec_from_file_location("__RFTScript__", f)
 
-								# Compile module
-								spec.loader.exec_module(mod)
+									# Get module
+									mod = importlib.util.module_from_spec(spec)
 
-								# Module dict to scope
-								scope = RFT_Structure(mod.__dict__)
+									# Compile module
+									spec.loader.exec_module(mod)
 
-							except:
-								RFT_Exception.Traceback().print()
+									# Module dict to scope
+									scope = RFT_Structure(mod.__dict__)
 
-							else:
-								# If any parent attributes then allocate some
-								parent = data.allocate(attr)
+								except:
+									exc = RFT_Exception.Traceback()
+											
+									if (callback is not None):
+										retry = callback(exc, name)
 
-								# Set value inside the parent
-								parent[attrEnd] = scope
+									else:
+										raise exc
+
+								else:
+									# If any parent attributes then allocate some
+									parent = data.allocate(attr)
+
+									# Set value inside the parent
+									parent[attrEnd] = scope
+
+								finally:
+									if (not retry):
+										break
 
 
 		# Return structure data

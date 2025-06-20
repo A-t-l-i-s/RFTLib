@@ -1,4 +1,5 @@
 from RFTLib.Require import *
+from RFTLib.Core.Exception import *
 
 
 
@@ -28,16 +29,12 @@ class Entry:
 		# Allocate icon
 		ico = self.QIcon()
 
-		try:
-			# Load as qimage
-			img = self.QImage.fromData(data)
-			pix = self.QPixmap.fromImage(img)
+		# Load as qimage
+		img = self.QImage.fromData(data)
+		pix = self.QPixmap.fromImage(img)
 
-			# Add pixmap
-			ico.addPixmap(pix)
-
-		except:
-			...
+		# Add pixmap
+		ico.addPixmap(pix)
 
 		# Return data
 		return ico

@@ -14,12 +14,12 @@ __all__ = ("Entry",)
 class Entry:
 	def load(self, file):
 		# Allocate buffer
-		data = RFT_Buffer()
+		buf = RFT_Buffer()
 
 		# Read entire file
-		data += file.read()
+		buf.read(file)
 
 		# Return data
-		return data
+		return buf
 
 

@@ -36,36 +36,45 @@ class RFT_Object(object):
 				)
 
 
+
 	# ~~~~~~~~~ Copy ~~~~~~~~~
 	def copy(self):
 		return copy.deepcopy(self)
+
+
+
+	# ~~~~~~~~~ Print ~~~~~~~~
+	def print(self, *, end:str = "\n"):
+		print(str(self), end = end)
+
+		return self
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 	# ~~~~~~~~~~ Attributes ~~~~~~~~~~
-	def tryattr(self, attr, ret = None):
-		if (hasattr(self, attr)):
-			return getattr(self, attr)
+	def tryattr(self, attr:str, default = None):
+		if (self.hasattr(attr)):
+			return self.getattr(attr)
 
 		else:
-			return ret
+			return default
 
 
-	def hasattr(self, attr):
+	def hasattr(self, attr:str):
 		return hasattr(self, attr)
 
 
-	def getattr(self, attr):
+	def getattr(self, attr:str):
 		return getattr(self, attr)
 
 
-	def setattr(self, attr, value):
+	def setattr(self, attr:str, value):
 		setattr(self, attr, value)
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 	# ~~~~~~~~~ Magic Methods ~~~~~~~~
-	def __str__(self, showMagic:bool = False, indent:int = 0, found = []):
+	def __str__(self, *, showMagic:bool = False, indent:int = 0, found:list = [], ignore:list = []):
 		# Variables
 		lines = []
 
@@ -98,6 +107,11 @@ class RFT_Object(object):
 
 				# If value is blacklisted
 				elif (isinstance(v, (types.BuiltinFunctionType, types.BuiltinMethodType, types.MethodWrapperType))):
+					removed.append(k)
+
+
+				# If key in ignore list
+				elif (k in ignore):
 					removed.append(k)
 
 
@@ -145,8 +159,9 @@ class RFT_Object(object):
 			for k, v in i:
 				if (isinstance(v, RFT_Object)):
 					if (v not in found):
-						# Add newline
-						lines.append("")
+						if (len(found) > 1):
+							# Add newline
+							lines.append("")
 
 						found.append(v)
 						
@@ -248,14 +263,14 @@ class RFT_Object(object):
 
 				# Format type string
 				typeStr = f"<{n}>"
-				typeStr = typeStr.ljust(longestType + len(typeStr) - len(n) + 3)
 
 
-				nameStr = k.ljust(longest + 3)
+				if (isinstance(v, RFT_Object)):
+					# Combine all into single line
+					l = f"   {typeStr} {k} {o}"
 
-
-				# Combine all into single line
-				l = "   " + typeStr + nameStr + o
+				else:
+					l = f"   {typeStr} {k}: {o}"
 
 
 				# Add a newline of previous value is an object and current isn't
