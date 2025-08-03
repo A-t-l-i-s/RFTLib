@@ -103,6 +103,14 @@ class RFT_Exception(BaseException):
 
 	def __str__(self):
 		return self.message()
+
+
+	def list(self):
+		msg = self.message(extra = False)
+		msg = msg.strip()
+		arr = msg.split("\n")
+
+		return arr
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 

@@ -173,8 +173,9 @@ class RFT_Resource(RFT_Object):
 				name += "_"
 
 		# Add file stem
-		p += "." + name
-		p = p.strip(".")
+		if (name != "_"):
+			p += "." + name
+			p = p.strip(".")
 
 		# Split path into tuple
 		attr = p.split(".")

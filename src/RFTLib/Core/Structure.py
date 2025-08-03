@@ -444,7 +444,7 @@ class RFT_Structure(RFT_Object):
 				# Get value in namespace
 				val = parent[a]
 
-				if (isinstance(val,RFT_Structure)):
+				if (isinstance(val, RFT_Structure)):
 					# Set new parent
 					parent = val
 
