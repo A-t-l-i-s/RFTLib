@@ -1,10 +1,9 @@
 from RFTLib.Require import *
 
-from .Buffer import *
-from .Object import *
-from .Structure import *
-
-
+from RFTLib.Core.Object import *
+from RFTLib.Core.Buffer import *
+from RFTLib.Core.Exception import *
+from RFTLib.Core.Structure import *
 
 
 
@@ -12,43 +11,55 @@ __all__ = ("RFT_Table",)
 
 
 
-
-
 class RFT_Table(RFT_Object):
-	def __init__(self, path:str):
-		self.path = Path(path)
+	def __init__(self, path:str, struct:dict | RFT_Object = None, *, default:str | bytes | dict | RFT_Object = {}, indent:bool = False):
+		self.path = pathlib.Path(path)
 
 		self.updating = False
 		self.running = False
-		self.indent = False
-
+		self.indent = indent
 		self.thread = None
 
-		self.data = RFT_Structure()
-		self.data.assignGetEvent(self.getEvent)
-		self.data.assignSetEvent(self.setEvent)
-
-		# Verify path
-		self.path.mkdir(
-			parents = True,
-			exist_ok = True
+		# Allocate data
+		self.data = RFT_Structure(
+			struct,
+			getEvent = self.getEvent,
+			setEvent = self.setEvent
 		)
 
+		# Set default buffer
+		self.default = RFT_Buffer(default)
 
+
+		# Check if path is a file
+		if (self.path.is_file()):
+			raise RFT_Exception("Directory is file")
+
+		else:
+			# Verify integrity of path
+			self.path.mkdir(
+				parents = True,
+				exist_ok = True
+			)
+
+
+	# ~~~~~~~~~~ RFT Methods ~~~~~~~~~
+	def __rft_clear__(self):
+		self.data.clear()
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 	# ~~~~~~~~~~~~ Events ~~~~~~~~~~~~
 	def getEvent(self, attr:str):
 		self.wait()
 
-		if (not self.data.contains(attr)):
-			self.readFile(attr)
-		
+		if (attr not in self.data):
+	 		self.readFile(attr)
+	
 		return True
 
 	def setEvent(self, attr:str):
 		return True
-
 
 
 	def tableGetEvent(self, attr:str):
@@ -61,19 +72,23 @@ class RFT_Table(RFT_Object):
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+	# ~~~~~~~~~ Wait ~~~~~~~~~
+	def wait(self):
+		while self.updating:
+			time.sleep(0.01)
+
 
 	# ~~~~~~~ File Input/Output ~~~~~~
 	# ~~~~~~ Touch File ~~~~~~
 	def touchFile(self, attr:str):
 		path = self.path / (attr + ".table")
 
-		# Get attr data
-		data = self.data.get(attr)
-
-		if (not isinstance(data, RFT_Structure)):
-			struct = RFT_Structure({})
-			struct.assignGetEvent(self.tableGetEvent)
-			struct.assignSetEvent(self.tableSetEvent)
+		# Allocate new structure if needed
+		if (not self.data.containsInst(attr, RFT_Structure)):
+			struct = RFT_Structure(
+				getEvent = self.tableGetEvent,
+				setEvent = self.tableSetEvent
+			)
 			
 			self.data[attr] = struct
 
@@ -81,12 +96,9 @@ class RFT_Table(RFT_Object):
 		# Allocate new file if needed
 		if (not path.exists()):
 			with path.open("wb") as file:
-				file.write(b"{}")
-
+				self.default.write(file)
 
 		return path
-
-
 
 	# ~~~~~~~ Read File ~~~~~~
 	def readFile(self, attr:str):
@@ -96,26 +108,30 @@ class RFT_Table(RFT_Object):
 		# Start Updating
 		self.updating = True
 
-		# Read file data
-		with path.open("r") as file:
-			try:
-				data = json.load(file)
-			except:
-				data = {}
+		with RFT_Buffer() as buf:
+			# Read file data
+			with path.open("r") as file:
+				buf.read(file)
 
+				try:
+					data = RFT_Structure(
+						buf,
+						getEvent = self.tableGetEvent,
+						setEvent = self.tableSetEvent
+					)
 
-		# Convert to structure
-		struct = RFT_Structure(data)
-		struct.assignGetEvent(self.tableGetEvent)
-		struct.assignSetEvent(self.tableSetEvent)
-		
-		# Set value
-		self.data[attr] = struct
+				except:
+					data = {}
+
+					# Backup file
+					with path.with_suffix(".error").open("wb") as errFile:
+						buf.write(errFile)
+
+				finally:
+					self.data[attr] = data
 
 		# End Updating
 		self.updating = False
-
-
 
 	# ~~~~~~ Write File ~~~~~~
 	def writeFile(self, attr:str):
@@ -132,11 +148,11 @@ class RFT_Table(RFT_Object):
 		with path.open("w") as file:
 			try:
 				# Convert to python dict
-				data_ = data.toDict()
+				dataOut = data.normalize()
 
 				# Dump json data to file
 				json.dump(
-					data_,
+					dataOut,
 					file,
 					skipkeys = False,
 					default = lambda o: None,
@@ -146,34 +162,28 @@ class RFT_Table(RFT_Object):
 				)
 			
 			except:
-				file.write("{}")
+				file.write(self.default)
 
 		# End Updating
 		self.updating = False
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-
 	# ~~~~~~~~~~ File Saving ~~~~~~~~~
 	# ~~~~~~~ Save All ~~~~~~~
 	def saveAll(self):
-		try:
-			for k in self.data.keys():
-				self.writeFile(k)
-		
-		except:
-			raise RFT_Exception.Traceback()
-
+		for k in self.data.keys():
+			self.writeFile(k)
 
 
 	# ~~~~~~ Save Every ~~~~~~
 	def saveEvery(self, secs:int | float):
-		self.running = True
-
+		# If thread is already running then wait for it to exit
 		if (self.thread is not None):
 			self.running = False
 			self.thread.join()
 
+		# Create new thread
 		self.thread = threading.Thread(
 			target = self.saveEvery_,
 			args = (secs,),
@@ -181,42 +191,20 @@ class RFT_Table(RFT_Object):
 			daemon = True
 		)
 
+		# Start thread
 		self.thread.start()
-
-
 
 	# ~~~~~~~~ Thread ~~~~~~~~
 	def saveEvery_(self, secs:int | float):
+		# Reset running flag
+		self.running = True
+
 		while self.running:
 			# Delay in seconds
 			time.sleep(secs)
 
 			# Save all tables
 			self.saveAll()
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-
-	# ~~~~~~~~~~~~ Safety ~~~~~~~~~~~~
-	# ~~~~~~~~~ Wait ~~~~~~~~~
-	def wait(self):
-		while self.updating:
-			time.sleep(0.01)
-
-
-	# ~~~~~~~~~ Clear ~~~~~~~~
-	def clear(self, stop:bool = False):
-		self.running = not stop
-
-		for f in self.path.iterdir():
-			p = Path(f)
-			
-			if (p.is_file()):
-				os.remove(p)
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-
-
+	# # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 

@@ -15,170 +15,153 @@ __all__ = ("RFT_Rypple_C",)
 
 
 class RFT_Rypple_C(RFT_Object):
-	inFile_:str = None
-	outFile_:str = None
+	def __init__(self, parent):
+		self.parent = parent
+		self.scope = RFT_Structure()
 
-	static_:bool = False
-	shared_:bool = False
-	ui_:bool = False
+		self.scope.inFile:str = None
+		self.scope.outFile:str = None
 
-	includePath_:list = []
-	libraryPath_:list = []
+		self.scope.isStatic:bool = False
+		self.scope.isShared:bool = False
+		self.scope.isWindow:bool = False
 
-	library_:list = []
-	version_:str = None
+		self.scope.includePath:list = []
+		self.scope.libraryPath:list = []
 
-	bit_:int = None
-	compression_:int = None
+		self.scope.library:list = []
+		self.scope.version:str = None
 
-	define_:dict = []
+		self.scope.bit:int = None
+		self.scope.compression:int = None
 
-	args_:list = []
-	exe_:str = ["gcc"]
+		self.scope.define:RFT_Structure = RFT_Structure()
+
+		self.scope.args:list = []
+		self.scope.executable:str = "gcc"
 
 
-	@classmethod
-	def exe(self, file:str):
-		self.exe_ = file
+
+	def executable(self, path:str):
+		self.scope.executable = path
 		return self
 
 
-	@classmethod
-	def inFile(self, file:str):
-		self.inFile_ = file
+	def inFile(self, path:str):
+		self.scope.inFile = path
 		return self
 
-	@classmethod
-	def outFile(self, file:str):
-		self.outFile_ = file
-		return self
-
-
-	@classmethod
-	def static(self, value:bool = True):
-		self.static_ = value
-		return self
-
-	@classmethod
-	def shared(self, value:bool = True):
-		self.shared_ = value
-		return self
-
-	@classmethod
-	def ui(self, value:bool = True):
-		self.ui_ = value
+	def outFile(self, path:str):
+		self.scope.outFile = path
 		return self
 
 
-	@classmethod
-	def includePath(self, path:str | Path):
-		self.includePath_.append(path)
+	def isStatic(self, value:bool = True):
+		self.scope.isStatic = value
 		return self
 
-	@classmethod
-	def libraryPath(self, path:str | Path):
-		self.libraryPath_.append(path)
+	def isShared(self, value:bool = True):
+		self.scope.shared = value
 		return self
 
-	@classmethod
+	def isWindow(self, value:bool = True):
+		self.scope.isWindow = value
+		return self
+
+
+	def includePath(self, path:str):
+		self.scope.includePath.append(path)
+		return self
+
+	def libraryPath(self, path:str):
+		self.scope.libraryPath.append(path)
+		return self
+
 	def library(self, name:str):
-		self.library_.append(name)
+		self.scope.library.append(name)
 		return self
 
 
-	@classmethod
-	def version(self, name:str):
-		self.version_ = name
+	def version(self, value:str):
+		self.scope.version = value
 		return self
 
-
-	@classmethod
 	def bit(self, value:int):
-		self.bit_ = value
+		self.scope.bit = value
 		return self
 
-	@classmethod
 	def compression(self, value:int):
-		self.compression_ = value
+		self.scope.compression = value
 		return self
 
 
-	@classmethod
-	def define(self, value:str):
-		self.define_.append(value)
+	def define(self, key:str, value:object = None):
+		self.scope.define[key] = value
+		return self
 
-	@classmethod
-	def defineRemove(self, value:str):
-		self.define_.remove(value)
-
-
-	@classmethod
-	def add(self, value:str | tuple | list):
-		if (isinstance(value, str)):
-			value = (value,)
-
-		self.args_ += value
-		
+	def defineRemove(self, key:str):
+		self.scope.define.pop(key)
 		return self
 
 
-	@classmethod
-	def args(self):
-		if (isinstance(self.exe_, list | tuple)):
-			args = [*self.exe_]
-
-		else:
-			args = [self.exe_]
+	def args(self, *args:str | tuple | list):
+		self.scope.args += args
+		return self
 
 
-		if (self.inFile_):
-			args.append(self.inFile_)
-
-		if (self.outFile_):
-			args.append(f"-o{self.outFile_}")
+	def done(self):
+		args = [self.scope.executable]
 
 
-		if (self.static_):
+		if (self.scope.inFile):
+			args.append(self.scope.inFile)
+
+		if (self.scope.outFile):
+			args.append(f"-o{self.scope.outFile}")
+
+
+		if (self.scope.isStatic):
 			args.append("-static")
 
-		if (self.shared_):
+		if (self.scope.isShared):
 			args.append("-shared")
 
-		if (self.ui_):
+		if (self.scope.isWindow):
 			args.append("-mwindows")
 
 
-		for v in self.includePath_:
+		for v in self.scope.includePath:
 			args.append(f"-I{v}")
 
-		for v in self.libraryPath_:
+		for v in self.scope.libraryPath:
 			args.append(f"-L{v}")
 
-		for v in self.library_:
+		for v in self.scope.library:
 			args.append(f"-l{v}")
 
 
-		if (self.version_):
-			args.append(f"--std={self.version_}")
+		if (self.scope.version):
+			args.append(f"--std={self.scope.version}")
 
-		if (self.bit_):
-			args.append(f"-m{self.bit_}")
+		if (self.scope.bit):
+			args.append(f"-m{self.scope.bit}")
 
-		if (self.compression_):
-			args.append(f"-O{self.compression_}")
-
-
-		for v in self.define_:
-			args.append(f"-D {v}")
-
-		return args + self.args_
+		if (self.scope.compression):
+			args.append(f"-O{self.scope.compression}")
 
 
-	@classmethod
-	def done(self):
-		return self.scope.run(
-			*self.args()
-		)
+		for k, v in self.scope.define.items():
+			if (v is None):
+				args.append(f"-D {k}")
+
+			else:
+				args.append(f"-D {k}={v}")
+
+
+		args += self.scope.args
+
+
+		return self.parent.Process.run(*args)
 
 
 

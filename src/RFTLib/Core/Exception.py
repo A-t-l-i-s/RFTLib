@@ -1,6 +1,6 @@
 from RFTLib.Require import *
 
-
+from .Object import *
 
 
 
@@ -8,201 +8,119 @@ __all__ = ("RFT_Exception",)
 
 
 
-
-
-class RFT_Exception(BaseException):
-	# ~~~~~~~~~~~ Variables ~~~~~~~~~~
-	INFO:int = 					0
-	WARNING:int = 				1
-	ERROR:int = 				2
-	CRITICAL:int = 				3
-
-	# Alert Status Types
-	ALERT_OK:int = 				0
-	ALERT_CANCEL:int = 			1
-
-	ALERT_YES:int = 			2
-	ALERT_NO:int = 				3
-
-	ALERT_IGNORE:int = 			4
-	ALERT_ABORT:int = 			5
-	ALERT_RETRY:int = 			6
-
-	# Alert Window Types
-	ALERT_WINDOW_OK:int = 		0
-	ALERT_WINDOW_INPUT:int = 	1
-	ALERT_WINDOW_CANCEL:int =	2
-	ALERT_WINDOW_RETRY:int =	3
-	ALERT_WINDOW_SCRIPT:int = 	4
+class RFT_Exception(BaseException, RFT_Object):
+	# ~~~~~~~~~~ Error Types ~~~~~~~~~
+	LOG = "Log"
+	INFO = "Info"
+	WARNING = "Warning"
+	ERROR = "Error"
+	CRITICAL = "Critical"
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-
-	def __init__(self,
-			text = "",
-			level = INFO
-		):
-
-		self.text = str(text)
+	def __init__(self, obj:str | RFT_Object, level:str = INFO):
+		# Set text and level
+		self.text = None
 		self.level = level
 
+		if (isinstance(obj, RFT_Object)):
+			obj.__rft_exception__(self)
+
+		else:
+			# Convert to string
+			self.text = obj
+
+
+	# ~~~~~~~~~ Magic Methods ~~~~~~~~
+	# ~~~~~~~ Operators ~~~~~~
+	def __eq__(self, obj:object) -> bool:
+		if (isinstance(obj, RFT_Exception)):
+			return obj.text == self.text and obj.level == self.level
+
+		else:
+			return obj == self.text
+
+
+	# ~~~~~~ Containers ~~~~~~
+	def __iter__(self) -> iter:
+		msg = self.message(extra = False)
+		msg = msg.strip()
+		return iter(msg.split("\n"))
+
+
+	# ~~~~~~ Converters ~~~~~~
+	def __bool__(self) -> bool:
+		return len(self.text) > 0
+
+	def __str__(self) -> str:
+		return self.message(extra = False)
+
+	def __repr__(self) -> str:
+		return RFT_Object.__str__(self)
+
+	def __format__(self, fmt:str) -> str:
+		return self.text
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+	# ~~~~~~~~~~ RFT Methods ~~~~~~~~~
+	def __rft_exception__(self, obj:RFT_Object):
+		obj.text = self.text
+		obj.level = self.level
+
+	def __rft_buffer__(self, obj:RFT_Object):
+		obj += self.message(extra = False)
+
+	def __rft_clear__(self):
+		self.text = None
+		self.level = None
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 	# ~~~~~~~~~~~~ Message ~~~~~~~~~~~
-	def message(self, *, extra:bool = True):
+	def message(self, *, extra:bool = True) -> str:
 		# Get current datetime
 		timestamp = datetime.datetime.now()
 
-
-		# No threat
-		if (self.level <= self.INFO):
-			type_ = "Info"
-
-
-		# Be aware
-		elif (self.level == self.WARNING):
-			type_ = "Warning"
-
-
-		# Is a problem
-		elif (self.level == self.ERROR):
-			type_ = "Error"
-
-
-		# Panic everything is wrong! (Critical)
-		else:
-			type_ = "Critical"
-
-
-
 		# Add extra info to msg
 		if (extra):
-			msg = f"[{timestamp.hour:>2}:{timestamp.minute:>2}:{str(timestamp.second) + '.' + str(timestamp.microsecond)[:4]:<7}]({type_}): {self.text}"
+			msg = f"[{timestamp.hour:>2}:{timestamp.minute:>2}:{str(timestamp.second) + '.' + str(timestamp.microsecond)[:4]:<7}]({self.level}): {self.text}"
 
 		else:
 			# Set msg to text
-			msg = self.text
-
+			msg = str(self.text)
 
 		return msg
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-
 	# ~~~~~~~~~~~~~ Print ~~~~~~~~~~~~
-	def print(self, *, end = "\n"):
+	def print(self, *, end:str = "\n") -> RFT_Object:
 		print(self.message(), end = end)
-		
 		return self
 
-	def printErr(self, *, end = "\n"):
+	def printErr(self, *, end:str = "\n") -> RFT_Object:
 		print(self.message(), end = end, file = sys.stderr)
-		
-		return self
-
-
-	def __str__(self):
-		return self.message()
-
-
-	def list(self):
-		msg = self.message(extra = False)
-		msg = msg.strip()
-		arr = msg.split("\n")
-
-		return arr
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-
-	# ~~~~~~~~~~~~~ Alert ~~~~~~~~~~~~
-	def alert(self, title:str = "RFT_Exception", type:int = ALERT_WINDOW_OK):
-		# Print to console
-		self.print()
-
-		if (sys.platform == "win32"):
-			if (type == self.ALERT_WINDOW_OK):
-				# Create window with one button Ok
-				match ctypes.windll.user32.MessageBoxW(None, self.message(extra = False), title, 0x00000000):
-					case 1:
-						return self.ALERT_OK
-
-					case 0:
-						return self.ALERT_CANCEL
-
-
-			elif (type == self.ALERT_WINDOW_INPUT):
-				# Create window with two buttons Yes and No
-				match ctypes.windll.user32.MessageBoxW(None, self.message(extra = False), title, 0x00000004):
-					case 6:
-						return self.ALERT_YES
-
-					case 7:
-						return self.ALERT_NO
-
-
-			elif (type == self.ALERT_WINDOW_CANCEL):
-				# Create window with two buttons Ok and Cancel
-				match ctypes.windll.user32.MessageBoxW(None, self.message(extra = False), title, 0x00000001):
-					case 1:
-						return self.ALERT_OK
-
-					case 2:
-						return self.ALERT_CANCEL
-
-
-			elif (type == self.ALERT_WINDOW_RETRY):
-				# Create window with two buttons Retry and Cancel
-				match ctypes.windll.user32.MessageBoxW(None, self.message(extra = False), title, 0x00000005):
-					case 4:
-						return self.ALERT_RETRY
-
-					case 2:
-						return self.ALERT_CANCEL
-
-
-			elif (type == self.ALERT_WINDOW_SCRIPT):
-				# Create window with three buttons Abort, Rety, and Ignore
-				match ctypes.windll.user32.MessageBoxW(None, self.message(extra = False), title, 0x00000002):
-					case 3:
-						return self.ALERT_ABORT
-
-					case 4:
-						return self.ALERT_RETRY
-
-					case 5:
-						return self.ALERT_IGNORE
-
-
-		return self.ALERT_CANCEL
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-
-	# ~~~~~~~~~~~~~ Wait ~~~~~~~~~~~~~
-	def wait(self, *, secs = None):
-		if (secs != None):
-			time.sleep(secs)
-
-		else:
-			input()
-
 		return self
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+
+	# ~~~~~~~ Normalize ~~~~~~
+	def normalize(self):
+		return BaseException(self.message(extra = False))
 
 
 	# ~~~~~~~~~ Class Methods ~~~~~~~~
 	@classmethod
-	def TypeError(cls, t:type, level:int = ERROR):
+	def TypeError(cls, type_:type, level:str = ERROR) -> RFT_Object:
 		return RFT_Exception(
-			f"Invalid type '{t.__name__}'",
+			f"Invalid type '{type_.__name__}'",
 			level
 		)
 
 
 	@classmethod
-	def NoValue(cls, level:int = ERROR):
+	def NoValue(cls, level:str = ERROR) -> RFT_Object:
 		return RFT_Exception(
 			"No value provided",
 			level
@@ -210,7 +128,7 @@ class RFT_Exception(BaseException):
 
 
 	@classmethod
-	def HasValue(cls, level:int = ERROR):
+	def HasValue(cls, level:str = ERROR) -> RFT_Object:
 		return RFT_Exception(
 			"Values are not needed",
 			level
@@ -218,9 +136,33 @@ class RFT_Exception(BaseException):
 
 
 	@classmethod
-	def Traceback(cls, level:int = WARNING):
+	def AttributeError(cls, type_:type, attr:str, level:str = ERROR) -> RFT_Object:
+		return RFT_Exception(
+			f"'{type_.__name__}' doesn't contain attribute '{attr}'",
+			level
+		)
+
+
+	@classmethod
+	def IndexError(cls, index:int, level:str = ERROR) -> RFT_Object:
+		return RFT_Exception(
+			f"Index out of range: {index}",
+			level
+		)
+
+
+	@classmethod
+	def Traceback(cls, level:str = WARNING) -> RFT_Object:
 		return RFT_Exception(
 			"\n" + traceback.format_exc().strip(),
+			level
+		)
+
+
+	@classmethod
+	def NotImplemented(cls, level:str = WARNING) -> RFT_Object:
+		return RFT_Exception(
+			"Not Implemented",
 			level
 		)
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

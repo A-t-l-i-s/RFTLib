@@ -17,24 +17,31 @@ __all__ = ("RFT_Rypple_CPP",)
 
 
 class RFT_Rypple_CPP(RFT_Object):
-	exe_:str = "g++"
+	def __init__(self, parent):
+		self.parent = parent
+		self.scope = self.parent.C.scope
+
+		self.parent.C.executable("g++")
+
+		self.executable = self.parent.C.executable
+		self.inFile = self.parent.C.inFile
+		self.outFile = self.parent.C.outFile
+		self.isStatic = self.parent.C.isStatic
+		self.isShared = self.parent.C.isShared
+		self.isWindow = self.parent.C.isWindow
+		self.includePath = self.parent.C.includePath
+		self.libraryPath = self.parent.C.libraryPath
+		self.library = self.parent.C.library
+		self.version = self.parent.C.version
+		self.bit = self.parent.C.bit
+		self.compression = self.parent.C.compression
+		self.define = self.parent.C.define
+		self.defineRemove = self.parent.C.defineRemove
+		self.args = self.parent.C.args
 
 
 
-	@classmethod
-	def exe(self, file:str):
-		self.exe_ = file
-		return self
-
-
-	@classmethod
 	def done(self):
-		exe_ = RFT_Rypple_C.exe_
-		RFT_Rypple_C.exe_ = self.exe_
-		
-		ret = RFT_Rypple_C.done()
-		RFT_Rypple_C.exe_ = exe_
-
-		return ret
+		return self.parent.C.done()
 
 

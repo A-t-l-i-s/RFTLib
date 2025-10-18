@@ -16,63 +16,59 @@ __all__ = ("RFT_Rypple_Python",)
 
 
 class RFT_Rypple_Python(RFT_Object):
-	file_:str = None
-	bytecode_:bool = False
-	buffered_:bool = False
+	def __init__(self, parent):
+		self.parent = parent
+		self.scope = RFT_Structure()
 
-	args_:list = []
+		self.scope.file:str = None
 
-	if (sys.platform == "win32"):
-		exe_:str = "py"
+		self.scope.bytecode:bool = False
+		self.scope.buffered:bool = False
 
-	else:
-		exe_:str = "python3"
+		self.scope.args:list = []
+		self.scope.executable:str = "python"
 
 
 
-	@classmethod
+	def executable(self, path:str):
+		self.scope.executable = path
+		return self
+
+
 	def file(self, file:str):
-		self.file_ = file
+		self.scope.file = file
 		return self
 
 
-	@classmethod
 	def bytecode(self, value:bool = True):
-		self.bytecode_ = value
+		self.scope.bytecode = value
 		return self
 
-	@classmethod
 	def buffered(self, value:bool = True):
-		self.buffered_ = value
+		self.scope.buffered = value
 		return self
 
 
-	@classmethod
-	def add(self, name:str):
-		self.args_.append(name)
+	def args(self, *args:str | tuple | list):
+		self.scope.args += args
 		return self
 
 
-	@classmethod
-	def args(self):
-		args = [self.exe_]
+	def done(self):
+		args = [self.scope.executable]
 
-		if (not self.bytecode_):
+		if (not self.scope.bytecode):
 			args.append("-B")
 
-		if (not self.buffered_):
+		if (not self.scope.buffered):
 			args.append("-u")
 
-		if (self.file_):
-			args.append(self.file_)
-
-		return args + self.args_
+		if (self.scope.file):
+			args.append(self.scope.file)
 
 
-	@classmethod
-	def done(self):
-		return self.scope.run(
-			*self.args()
-		)
+		args += self.scope.args
 
+
+		return self.parent.Process.run(*args)
 

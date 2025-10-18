@@ -15,61 +15,53 @@ __all__ = ("RFT_Rypple_Filesystem",)
 
 
 class RFT_Rypple_Filesystem(RFT_Object):
-	path_ = Path("file")
+	def __init__(self, parent):
+		self.parent = parent
+		self.scope = RFT_Structure()
+
+		self.scope.path = pathlib.Path("file")
 
 
-	@classmethod
-	def path(self, path:str | Path):
-		self.path_ = Path(path)
 
+	def path(self, path:str):
+		self.scope.path = pathlib.Path(path)
 		return self
 
 
-	@classmethod
 	def touch(self):
-		self.path_.touch()
+		self.scope.path.touch()
 		return self
 
 
-	@classmethod
-	def write(self, buf: RFT_Buffer):
+	def write(self, buf:RFT_Buffer):
 		buf = RFT_Buffer(buf)
 
-		with self.path_.open("ab") as file:
+		with self.scope.path.open("ab") as file:
 			file.write(buf.data)
 
 		return self
 
 
-	@classmethod
 	def remove(self):
-		if (self.path_.is_file()):
-			os.remove(self.path_)
+		if (self.scope.path.is_file()):
+			os.remove(self.scope.path)
 
 		return self
 
 
-	@classmethod
-	def isFile(self):
-		return self.path_.is_file()
-
-	@classmethod
-	def isDir(self):
-		return self.path_.is_dir()
-
-
-	@classmethod
-	def chdir(self, path:str | Path = None):
+	def chdir(self, path:str = None):
 		if (path == None):
-			path = self.path_
+			path = self.scope.path
 
 		else:
-			path = Path(path)
+			path = pathlib.Path(path)
 
 		if (path.is_file()):
 			path = path.parent
 
 		os.chdir(path)
+
+		return self
 
 
 

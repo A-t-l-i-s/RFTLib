@@ -5,229 +5,132 @@ from .Exception import *
 
 
 
-
-
 __all__ = ("RFT_Structure",)
 
 
 
-
-
 class RFT_Structure(RFT_Object):
-	def __init__(self, struct:object = None, *, defaults:dict = {}, readonly:bool = False, showMagic:bool = False):
-		# If no struct then create one
-		if (struct == None):
-			struct = dict()
+	def __init__(self, obj:dict | RFT_Object = None, *, getEvent:object = None, setEvent:object = None):
+		# Define main data structure
+		self.setattr("__rft_data__", dict())
 
 
-		# Set new variables
-		newStruct = struct
-		newDefaults = defaults
+		# ~~~~~~~~~ None ~~~~~~~~~
+		if (obj is None):
+			...
 
-		object.__setattr__(self, "__readonly__", readonly)
+		# ~~~~~~ Dictionary ~~~~~~
+		elif (isinstance(obj, dict)):
+			for k, v in obj.items():
+				self[str(k)] = v
+
+		# ~~~~~~~~ Object ~~~~~~~~
+		elif (isinstance(obj, RFT_Object)):
+			obj.__rft_structure__(self)
+
+		else:
+			raise RFT_Exception.TypeError(type(obj))
 
 
-		# ~~~~ Convert To Dict ~~~
-		if (isinstance(struct, RFT_Structure)):
-			newStruct = struct.data()
-
-
-		if (isinstance(defaults, RFT_Structure)):
-			newDefaults = defaults.data()
+		# ~~~~~~~ Get Event ~~~~~~
+		if (getEvent is not None):
+			self.setattr("__rft_get_event__", getEvent)
+		# ~~~~~~~~~~~~~~~~~~~~~~~~
+		
+		# ~~~~~~~ Set Event ~~~~~~
+		if (setEvent is not None):
+			self.setattr("__rft_set_event__", setEvent)
 		# ~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
-		if (isinstance(newStruct, dict)):
-			# ~~~~~~ Dictionary ~~~~~~
-			# Copy dictionary
-			data = copy.deepcopy(newDefaults)
-			data.update(newStruct)
-
-
-			# Iterate keys
-			for k in data.keys():
-				v = data[k]
-
-				if (isinstance(v, dict)):
-					# Convert to structure
-					data[k] = RFT_Structure(v)
-
-
-			# Set new object data
-			object.__setattr__(self, "__data__", data)
-			# ~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-		elif (isinstance(newStruct, RFT_Object) or (isinstance(newStruct, type) and issubclass(newStruct, RFT_Object))):
-			# ~~~~~~~~ Object ~~~~~~~~
-			# New dictionary
-			data = dict()
-
-			if (isinstance(newStruct, type)):
-				obj = newStruct.copy(newStruct)
-
-			else:
-				obj = newStruct.copy()
-
-			# Iterate through attributes
-			for k in obj.__dict__.keys():
-				if (showMagic or not (k.startswith("__") and k.endswith("__"))):
-					data[k] = getattr(obj, k)
-
-
-			# Set new object data
-			object.__setattr__(self, "__data__", data)
-			# ~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-		else:
-			# ~~~~ Unknown Object ~~~~
-			# New dictionary
-			data = dict()
-
-			for k in newStruct.__dict__.keys():
-				if (showMagic or not (k.startswith("__") and k.endswith("__"))):
-					v = getattr(newStruct, k)
-
-					if (not isinstance(v, int | float | complex | str | list | tuple | range | set | bool | bytes | bytearray | memoryview)):
-						data[k] = RFT_Structure(v)
-
-					else:
-						data[k] = v
-
-			# Set new object data
-			object.__setattr__(self, "__data__", data)
-			# ~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-
-
-	# ~~~~~~~~ Attr Assignment ~~~~~~~
-	def __getattr__(self, attr:str):
-		if (self.getEvent(attr)):
-			# Get dict data
-			v = self.data()
-
-			# Return value
-			return v[attr]
-
-
-
-	def __setattr__(self, attr:str, value):
-		if (not self.readonly()):
-			if (self.setEvent(attr)):
-				# Get dict data
-				v = self.data()
-
-				# Convert value to structure
-				if (isinstance(value, dict)):
-					value_ = RFT_Structure(value)
-				else:
-					value_ = value
-
-				# Set value
-				v[attr] = value_
-
-		else:
-			raise RFT_Exception("Structure is readonly", RFT_Exception.ERROR)
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-
-	# ~~~~~~~~ Item Assignment ~~~~~~~
-	def __getitem__(self, path:tuple | list | str):
-		if (not isinstance(path, (list, tuple))):
-			path = [path]
-
-
-		if (len(path) > 1):
-			# Get final attribute
-			attr = path[-1]
-
-			# Get parent
-			parent = self.parent(path)
-
-			# If parent found
-			if (parent != None):
-				return RFT_Structure.__getattr__(parent, attr)
-
-
-		else:
-			attr = str(path[0])
-
-			return self.__getattr__(attr)
-
-
-
-	def __setitem__(self, path:tuple | list | str, value):
-		if (not isinstance(path, (list, tuple))):
-			path = [path]
-
-
-		if (len(path) > 1):
-			# Get final attribute
-			attr = path[-1]
-
-			# Get parent
-			parent = self.parent(path)
-
-			# If parent found
-			if (parent != None):
-				return RFT_Structure.__setattr__(parent, attr, value)
-
-
-		else:
-			attr = str(path[0])
-
-			self.__setattr__(attr, value)
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-
-	# ~~~~~~~~~~~~ Events ~~~~~~~~~~~~
-	def getEvent(self, attr:str):
-		return True
-
-	def assignGetEvent(self, func):
-		object.__setattr__(self, "getEvent", func)
-
-
-
-	def setEvent(self, attr:str):
-		return True
-
-	def assignSetEvent(self, func):
-		object.__setattr__(self, "setEvent", func)
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-
 	# ~~~~~~~~~ Magic Methods ~~~~~~~~
-	def __len__(self):
+	# ~~~~~~~ Operators ~~~~~~
+	def __add__(self, obj:dict | RFT_Object) -> RFT_Object:
+		self.default(obj)
+		return self
+
+	def __sub__(self, attr:str | list | tuple | int) -> RFT_Object:
+		self.pop(attr)
+		return self
+
+	def __mul__(self, obj:dict | RFT_Object) -> RFT_Object:
+		self.default(obj, force = True)
+		return self
+
+	def __eq__(self, obj:object) -> bool:
+		if (isinstance(obj, RFT_Structure)):
+			return obj.data == self.data
+
+		else:
+			return obj == self.data
+
+
+	# ~~~~~~ Containers ~~~~~~
+	def __len__(self) -> int:
 		return len(
 			self.keys()
 		)
 
+	def __getattr__(self, attr:str) -> object:
+		if (self.__rft_get_event__(attr)):
+			try:
+				# Return value
+				return self.__dict__["__rft_data__"][attr]
 
-	def __add__(self, value):
-		value_ = RFT_Structure(value)
-		self.default(value_)
+			except:
+				raise RFT_Exception.AttributeError(type(self), attr)
 
-		return self
+	def __setattr__(self, attr:str, value:object):
+		if (self.__rft_set_event__(attr)):
+			# Convert value to structure
+			if (isinstance(value, dict)):
+				# Convert to structure
+				self.__dict__["__rft_data__"][attr] = RFT_Structure(value)
+
+			else:
+				# Set value
+				self.__dict__["__rft_data__"][attr] = value
+
+	def __getitem__(self, attr:str | list | tuple | int) -> object:
+		# Get parent
+		parent, key = self.parent(attr)
+
+		# Get value
+		return parent.__getattr__(
+			key
+		)
+
+	def __setitem__(self, attr:str | list | tuple | int, value:object):
+		# Get parent
+		parent, key = self.parent(attr)
+
+		# Set value
+		return parent.__setattr__(
+			key,
+			value
+		)
+
+	def __delitem__(self, attr:str | list | tuple | int) -> object:
+		self.pop(attr)
+
+	def __iter__(self) -> iter:
+		return iter(self.keys())
+
+	def __reversed__(self) -> iter:
+		return iter(reversed(self.keys()))
+
+	def __contains__(self, attr:str | tuple | list | int) -> bool:
+		return self.contains(attr)
 
 
-	def __mul__(self, value):
-		value_ = RFT_Structure(value)
-		for k, v in value_.items():
-			self[k] = v
+	# ~~~~~~ Converters ~~~~~~
+	def __bool__(self) -> bool:
+		return len(self) > 0
 
-		return self
-
-
-	def __str__(self, *, showMagic:bool = False, indent:int = 0, found:list = [], ignore:list = []):
+	def __str__(self, *, showMagic:bool = False, indent:int = 0, found:list = [], ignore:list = []) -> str:
 		o = RFT_Object()
-		o.__dict__ = self.data()
+		o.__dict__ = self.__dict__["__rft_data__"]
 
 		return o.__str__(
 			showMagic = showMagic,
@@ -235,276 +138,237 @@ class RFT_Structure(RFT_Object):
 			found = found,
 			ignore = dir(RFT_Object) + ignore
 		)
+
+	def __repr__(self) -> str:
+		return RFT_Object.__str__(self)
+
+	def __format__(self, fmt:str) -> str:
+		return RFT_Object.__str__(self)
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+	# ~~~~~~~~~~ RFT Methods ~~~~~~~~~
+	def __rft_buffer__(self, obj:RFT_Object):
+		obj += self.data
 
-	# ~~~~~~~~~ Retrieve Data ~~~~~~~~
-	# ~~~~~ Get Raw Data ~~~~~
-	def data(self):
-		return self.__dict__["__data__"]
+	def __rft_structure__(self, obj:RFT_Object):
+		obj.setattr("__rft_get_event__", self.__rft_get_event__)
+		obj.setattr("__rft_set_event__", self.__rft_set_event__)
+
+		for k, v in self.items():
+			if (isinstance(v, RFT_Object)):
+				obj[k] = RFT_Structure(v)
+
+			else:
+				obj[k] = v
+
+	def __rft_enum__(self, obj:RFT_Object):
+		for k in self.keys():
+			obj += k
+
+	def __rft_clear__(self):
+		self.clear()
+
+	def __rft_get_event__(self, attr:str) -> bool:
+		return True
+
+	def __rft_set_event__(self, attr:str) -> bool:
+		return True
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-	# ~~~~~ Copy Raw Data ~~~~
-	def copy(self):
-		return RFT_Structure(self)
+	# ~~~~~~~ Raw Data ~~~~~~~
+	@property
+	def data(self) -> dict:
+		return self.__dict__["__rft_data__"]
+
+
+	# ~~~~~~~~ Parent ~~~~~~~~
+	def parent(self, attr:str | tuple | list | int, *, allocate:bool = False) -> RFT_Object:
+		"""
+		Gets parent structure of given attr path.
+		"""
+		attr = self.formatAttr(attr)
+		attrEnd = attr.pop(-1)
+
+		# Default parent
+		parent = self
+
+		for k in attr:
+			# If integer then get key by index
+			if (isinstance(k, int)):
+				k = parent.index(k)
+
+			if (k in parent.keys()):
+				# Get value in namespace
+				v = parent[k]
+
+				if (isinstance(v, RFT_Structure)):
+					# Set new parent
+					parent = v
+
+				else:
+					# Doesn't exist or invalid value
+					raise RFT_Exception.TypeError(type(v))
+
+			else:
+				if (allocate):
+					# If allocate then create new structure and assign it as new parent
+					parent[k] = RFT_Structure()
+					parent = parent[k]
+
+				else:
+					# Key doesn't exist
+					raise RFT_Exception.AttributeError(k)
+
+
+		# Get attribute end key
+		if (isinstance(attrEnd, int)):
+			attrEnd = parent.index(attrEnd)
+
+		return parent, attrEnd
 
 
 	# ~~~~~~~~ Get Key ~~~~~~~
-	def get(self, key, default = None):
-		if (self.contains(key)):
-			return self[key]
+	def get(self, attr:str | list | tuple | int, default:object = None) -> object:
+		parent, key = self.parent(attr)
+
+		if (parent.contains(key)):
+			return parent[key]
 
 		else:
 			return default
 
 
 	# ~~~~~ Get All Keys ~~~~~
-	def keys(self):
-		d = self.data()
-
-		return d.keys()
+	def keys(self) -> tuple[str]:
+		return tuple(self.__dict__["__rft_data__"].keys())
 
 
 	# ~~~~~ Get All Items ~~~~
-	def items(self):
-		d = self.data()
-
-		return d.items()
+	def items(self) -> tuple[str, object]:
+		return tuple(self.__dict__["__rft_data__"].items())
 
 
 	# ~~~~ Get All Values ~~~~
-	def values(self):
-		d = self.data()
-
-		return d.values()
+	def values(self) -> tuple[object]:
+		return tuple(self.__dict__["__rft_data__"].values())
 
 
-	# ~~~~~ Wait for key ~~~~~
-	def waitFor(self, attr:str | list | tuple, *, timeout:int | float = -1):
-		start = time.time()
+	# ~~~~~~~~~ Index ~~~~~~~~
+	def index(self, index:int) -> str:
+		keys = self.keys()
 
-		while True:
-			if (self.contains(attr)):
-				return self[attr]
+		if (len(keys) - 1 >= index >= 0):
+			return keys[index]
 
-			else:
-				if (timeout > 0):
-					if (time.time() - start > timeout):
-						return None
-
-				time.sleep(0.01)
+		else:
+			raise RFT_Exception.IndexError(index)
 
 
-	# ~~~~~~ If readonly ~~~~~
-	def readonly(self):
-		return self.__dict__["__readonly__"]
-
-	def setReadonly(self, value:bool):
-		object.__setattr__(self, "__readonly__", bool(value))
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-
-	# ~~~~~~~~~ Contains Data ~~~~~~~~
 	# ~~~~~~~ Contains ~~~~~~~
-	def contains(self, attr:str | tuple | list):
-		d = self.data()
-		k = d.keys()
-
-		if (isinstance(attr, list | tuple)):
-			return all(
-				[a in k for a in attr]
-			)
+	def contains(self, attr:str | tuple | list | int) -> bool:
+		try:
+			parent, key = self.parent(attr)
+		
+		except:
+			return False
 
 		else:
-			return attr in k
+			return key in parent.keys()
 
 
-
-	# ~~~~~ Contains Inst ~~~~
-	def containsInst(self, attr:str | list | tuple, type_:type):
-		l = []
-
-		if (isinstance(attr, str)):
-			attr = (attr,)
-
-		for a in attr:
-			if (self.contains(a)):
-				l.append(
-					isinstance(self[a], type_)
-				)
-
-			else:
-				l.append(False)
-					
-
-		return all(l)
+	# ~~~ Contains Instance ~~
+	def containsInst(self, attr:str | list | tuple | int, type_:type) -> bool:
+		return isinstance(self.get(attr), type_)
 
 
-
-	# ~~~~~~~~~~ All ~~~~~~~~~
-	def all(self):
-		vals = []
-
-		for k, v in self.items():
-			vals.append(bool(v))
-
-		return vals.all()
+	# ~~~~~~~ All True ~~~~~~~
+	def all(self) -> bool:
+		return all([bool(v) for v in self.values()])
 
 
-
-	# ~~~~~~~~~~ Any ~~~~~~~~~
-	def any(self):
-		vals = []
-
-		for k, v in self.items():
-			vals.append(bool(v))
-
-		return vals.any()
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	# ~~~~~~~ Any True ~~~~~~~
+	def any(self) -> bool:
+		return any([bool(v) for v in self.values()])
 
 
-	# ~~~~~~ First/Last ~~~~~~
-	def first(self):
-		for k, v in self.items():
-			return k
-
-
-	def last(self):
-		keys = tuple(self.keys())
-
-		if (keys):
-			return keys[-1]
-	# ~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-	# ~~~~~~~~~~ Remove Data ~~~~~~~~~
 	# ~~~~~~~~~~ Pop ~~~~~~~~~
-	def pop(self, attr:str):
-		if (not self.readonly()):
-			d = self.data()
-
-			return d.pop(attr)
-
-		else:
-			raise RFT_Exception("Structure is readonly", RFT_Exception.ERROR)
-
+	def pop(self, attr:str | tuple | list | int) -> object:
+		parent, key = self.parent(attr)
+		return parent.__dict__["__rft_data__"].pop(key)
 
 
 	# ~~~~~~~~~ Clear ~~~~~~~~
-	def clear(self):
-		if (not self.readonly()):
-			d = self.data()
-
-			d.clear()
-
-		else:
-			raise RFT_Exception("Structure is readonly", RFT_Exception.ERROR)
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	def clear(self) -> RFT_Object:
+		self.__dict__["__rft_data__"].clear()
+		return self
 
 
-
-	# ~~~~~~~~~ Allocate Data ~~~~~~~~
 	# ~~~~~~~~ Default ~~~~~~~
-	def default(self, struct):
+	def default(self, struct:dict | RFT_Object, *, force:bool = False) -> RFT_Object:
 		for k, v in struct.items():
-			if (not self.contains(k)):
+			k = str(k)
+
+			if (not self.contains(k) or force):
 				self[k] = v
 
 		return self
 
 
-
 	# ~~~~~ Default Inst ~~~~~
-	def defaultInst(self, attr:str, value, type_:type):
-		if (not self.containsInst(attr, type_)):
-			self[attr] = value
+	def defaultInst(self, attr:str, value:object, type_:type, *, force:bool = False) -> RFT_Object:
+		parent, key = self.parent(attr)
+
+		if (not parent.containsInst(key, type_) or force):
+			parent[key] = value
 
 		return self
 
 
+	# ~~~ Format Attribute ~~~
+	def formatAttr(self, attr:str | tuple | list | int) -> tuple[str | int]:
+		"""
+		Format any input and return a proper attr as a tuple
+		"""
+		outAttr = []
 
-	# ~~~~~~~~ Parent ~~~~~~~~
-	# Gets parent structure of given path
-	def parent(self, path:tuple | list | str):
-		if (not isinstance(path, (list, tuple))):
-			path = [path]
-
-
-		# Default parent
-		parent = None
-
-
-		if (len(path) > 0):
-			# Set parent
-			parent = self
-			
-			for i,a in enumerate(path[:-1]):
-				# Get value in namespace
-				val = parent[a]
-
-				if (isinstance(val, RFT_Structure)):
-					# Set new parent
-					parent = val
+		if (not isinstance(attr, tuple | list)):
+			if (attr is not None):
+				if (isinstance(attr, int)):
+					outAttr.append(attr)
 
 				else:
-					# Doesn't exist or invalid value
-					parent = None
-					break
+					for s in str(attr).split("."):
+						s = s.strip()
+
+						if (s):
+							outAttr.append(s)
+
+		else:
+			for v in attr:
+				outAttr += self.formatAttr(v)
 
 
-		return parent
+		if (len(outAttr) > 0):
+			return outAttr
+
+		else:
+			raise RFT_Exception("Attribute is empty.")
 
 
-
-	# ~~~~~~~ Allocate ~~~~~~~
-	def allocate(self, path:tuple | list | str):
-		if (not isinstance(path, (list, tuple))):
-			path = [path]
-
-
-		parent = self
-
-		for p in path:
-			if (parent.contains(p)):
-				v = parent[p]
-
-				if (isinstance(v, RFT_Structure)):
-					parent = v
-
-				else:
-					return None
-
-			else:
-				v = RFT_Structure()
-
-				parent[p] = v
-				parent = v
-
-
-		return parent
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-
-	# ~~~~~~~~~ Convert Data ~~~~~~~~~
-	# ~~~~~ To Dictionary ~~~~
-	def toDict(self):
+	# ~~~~~~~ Normalize ~~~~~~
+	def normalize(self):
 		out = {}
 
-		for k,v in self.data().items():
+		for k, v in self.items():
 			if (isinstance(v, RFT_Object)):
-				if (hasattr(v, "toDict")):
-					out[k] = v.toDict()
+				out[k] = v.normalize()
 
-				else:
-					out[k] = v
 			else:
 				out[k] = v
 
 		return out
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 

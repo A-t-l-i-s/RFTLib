@@ -1,9 +1,7 @@
 from RFTLib.Require import *
 
-from .Object import *
-from .Exception import *
-
-
+from RFTLib.Core.Object import *
+from RFTLib.Core.Exception import *
 
 
 
@@ -11,10 +9,8 @@ __all__ = ("RFT_Math",)
 
 
 
-
-
 class RFT_Math(RFT_Object):
-	def pairing(a:int | float, b:int | float):
+	def pairing(a:int | float, b:int | float) -> int | float:
 		if (isinstance(a, (int | float))):
 			if (isinstance(b, (int | float))):
 				if (a >= 0):
@@ -39,6 +35,10 @@ class RFT_Math(RFT_Object):
 				raise RFT_Exception.TypeError(type(b))
 		else:
 			raise RFT_Exception.TypeError(type(a))
+
+
+	def interpolate(num1:int | float, num2:int | float, factor:float) -> int | float:
+		return num1 + factor * (num2 - num1)
 
 
 

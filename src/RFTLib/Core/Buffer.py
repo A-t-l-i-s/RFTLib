@@ -2,8 +2,7 @@ from RFTLib.Require import *
 
 from .Object import *
 from .Structure import *
-
-
+from .Exception import *
 
 
 
@@ -11,209 +10,291 @@ __all__ = ("RFT_Buffer",)
 
 
 
-
-
 class RFT_Buffer(RFT_Object):
-	def __init__(self, data:int | str | bytes | bytearray | tuple | list | dict = None):
-		self.data = self.toBytes(data)
+	def __init__(self, obj:bytes | bytearray | str | tuple | list | range | int | dict | map | set | RFT_Object = None):
+		# Define main data structure
+		self.setattr("__rft_data__", bytearray())
 
+		if (isinstance(obj, RFT_Object)):
+			obj.__rft_buffer__(self)
+
+		else:
+			self.add(obj)
 
 
 	# ~~~~~~~~~ Magic Methods ~~~~~~~~
-	def __add__(self, val:int | str | bytes | bytearray | tuple | list | dict):
-		self.data += self.toBytes(val)
-
+	# ~~~~~~ Arithmetic ~~~~~~
+	def __add__(self, obj:bytes | bytearray | str | tuple | list | range | int | dict | map | set | RFT_Object) -> RFT_Object:
+		self.add(obj)
 		return self
 
-	def __sub__(self, num:int):
-		for i in range(num):
-			self.pop(-1)
-
+	def __sub__(self, length:int) -> RFT_Object:
+		self.deflate(length)
 		return self
 
-	def __mul__(self, num:int):
-		self.data = self.data * num
+	def __mul__(self, length:int) -> RFT_Object:
+		length -= 1
 
+		if (length >= 0):
+			self.add(self.data * length, start = len(self))
+		else:
+			self.clear()
+		
 		return self
 
+	def __eq__(self, obj:object) -> bool:
+		if (isinstance(obj, RFT_Buffer)):
+			return obj.data == self.data
+
+		else:
+			return RFT_Buffer(obj).data == self.data
 
 
-	def __len__(self):
+	# ~~~~~~ Containers ~~~~~~
+	def __len__(self) -> int:
 		return len(self.data)
 
+	def __getitem__(self, index:int) -> int:
+		return self.data[index]
+
+	def __setitem__(self, index:int, value:int | str):
+		self.data[index] = value
+
+	def __delitem__(self, index:int):
+		self.pop(index)
+
+	def __iter__(self) -> iter:
+		return iter(self.data)
+
+	def __reversed__(self) -> iter:
+		return iter(reversed(self.data))
+
+	def __contains__(self, buf:bytes | RFT_Object) -> bool:
+		return self.find(buf) > -1
 
 
-	def __iter__(self):
-		return self.iter()
+	# ~~~~ Type Conversion ~~~
+	def __int__(self) -> int:
+		return self.toInt()
 
+	def __complex__(self) -> complex:
+		return complex(self.toInt())
 
+	def __index__(self) -> int:
+		raise RFT_Exception.NotImplemented()
 
-	def __getitem__(self, i:int):
-		return self.data[i]
+	def __bool__(self) -> bool:
+		return len(self) > 0
 
-	def __setitem__(self, i:int, v:int | str):
-		self.data[i] = v
+	def __str__(self) -> str:
+		return RFT_Object.__str__(self)
+
+	def __repr__(self) -> str:
+		return RFT_Object.__str__(self)
+
+	def __bytes__(self) -> bytes:
+		return bytes(self.data)
+
+	def __format__(self, fmt:str) -> str:
+		return self.toStr()
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+	# ~~~~~~~~~~ RFT Methods ~~~~~~~~~
+	def __rft_exception__(self, obj:RFT_Object):
+		obj.text = self.toStr()
 
-	# ~~~~~~~ Convert To Bytes ~~~~~~~
-	def toBytes(self, val:int | str | bytes | bytearray | tuple | list | dict):
-		out = bytearray()
+	def __rft_buffer__(self, obj:RFT_Object):
+		obj += self.data
 
+	def __rft_structure__(self, obj:RFT_Object):
+		try:
+			obj += json.loads(self.data)
 
+		except:
+			raise RFT_Exception("Failed to parse content.")
 
-		# ~~~~~~~~ Buffer ~~~~~~~~
-		if (isinstance(val, RFT_Buffer)):
-			out = val.data
-
-
-
-		# ~~~~~~~~ Integer ~~~~~~~
-		elif (isinstance(val, int)):
-			if (val == 0):
-				out = bytearray([0])
-
-			else:
-				size = (val.bit_length() + 7) // 8
-				
-				out = bytearray(size)
-				
-				for i in range(size):
-					out[size - i - 1] = (val >> (8 * i)) & 0xff
+	def __rft_clear__(self):
+		self.clear()
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+	# ~~~~~~~ Raw Data ~~~~~~~
+	@property
+	def data(self) -> bytearray:
+		return self.__dict__["__rft_data__"]
+
+
+	# ~~~~~~~~~~ Add ~~~~~~~~~
+	def add(self, obj:bytes | bytearray | str | tuple | list | range | int | dict | map | set | RFT_Object, *, start:int = -1) -> RFT_Object:
+		buf = bytearray()
+
+		# ~~~~~~~~~ None ~~~~~~~~~
+		if (obj is None):
+			...
 
 		# ~~~~~~~~~ Bytes ~~~~~~~~
-		elif (isinstance(val, bytes | bytearray)):
-			out = bytearray(val)
-
+		elif (isinstance(obj, bytes | bytearray)):
+			buf += obj
 
 
 		# ~~~~~~~~ String ~~~~~~~~
-		elif (isinstance(val, str)):
-			out = bytearray(val, "utf-8")
-
+		elif (isinstance(obj, str)):
+			buf += bytearray(obj, "utf-8")
 
 
 		# ~~~~~~~~~ Array ~~~~~~~~
-		elif (isinstance(val, (tuple, list, range, types.GeneratorType))):
-			for v in val:
-				out += self.toBytes(v)
+		elif (isinstance(obj, tuple | list | range)):
+			buf += bytearray(obj)
 
+
+		# ~~~~~~~~ Integer ~~~~~~~
+		elif (isinstance(obj, int)):
+			if (obj == 0):
+				buf += bytearray(1)
+
+			else:
+				size = (obj.bit_length() + 7) // 8
+				
+				buf += bytearray(size)
+				
+				for i in range(size):
+					buf[size - i - 1] = (obj >> (8 * i)) & 0xff
 
 
 		# ~~~~~~ Structure ~~~~~~~
-		elif (isinstance(val, (dict, map, set, RFT_Structure))):
-			if (isinstance(val, RFT_Structure)):
-				val = val.toDict()
+		elif (isinstance(obj, dict | map | set)):
+			try:
+				objStr = json.dumps(
+					dict(obj),
+					skipkeys = False,
+					default = lambda o: None
+				)
 
-			elif (isinstance(val, (map, set))):
-				val = dict(val)
+			except:
+				raise RFT_Exception("Failed to dump dictionary.")
 
-
-			out_ = json.dumps(
-				val,
-				skipkeys = False,
-				default = lambda o: None
-			)
-			out = bytearray(out_, "utf-8")
-
+			else:
+				buf += bytearray(objStr, "utf-8")
 
 
-		# ~~~~~~~~~ UUID ~~~~~~~~~
-		elif (isinstance(val, uuid.UUID)):
-			out = bytearray(
-				val.bytes
-			)
+		# ~~~~~~ RFT Object ~~~~~~
+		elif (isinstance(obj, RFT_Object)):
+			tempBuf = RFT_Buffer(obj)
+			buf += tempBuf.data
 
 
-
-		# ~~~~~~~~~ None ~~~~~~~~~
-		elif (val is None):
-			...
+		else:
+			raise RFT_Exception.TypeError(type(obj))
 
 
+		curLen = len(self)
+		bufLen = len(buf)
+		
+		if (start >= 0):
+			maxLen = start + bufLen
 
-		return out
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+			# Check if buffer need to extend
+			if (maxLen > curLen):
+				self.inflate(maxLen - curLen)
+
+		else:
+			start = curLen
+			self.inflate(curLen + bufLen)
 
 
+		# Place new characters in buffer
+		for i, c in enumerate(buf):
+			self[start + i] = c
 
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	# ~~~~~~~~ Iterate ~~~~~~~
-	def iter(self):
-		return iter(self.data)
-
-
-	# ~~~~ Reverse Iterate ~~~
-	def riter(self):
-		return reversed(self.data)	
+		return self
 
 
 	# ~~~~~~~~~~ Pop ~~~~~~~~~
-	def pop(self, i:int):
-		return self.data.pop(i)
+	def pop(self, index:int) -> int:
+		return self.data.pop(index)
+
+
+	# ~~~~~~~~ Resize ~~~~~~~~
+	def resize(self, length:int) -> RFT_Object:
+		l = len(self)
+
+		if (l == length):
+			...
+
+		elif (length > l):
+			self.inflate(length - l)
+
+		else:
+			self.deflate(l - length)
+
+		return self
+
+
+	# ~~~~~~~~ Inflate ~~~~~~~
+	def inflate(self, length:int) -> RFT_Object:
+		self.__dict__["__rft_data__"] += bytearray(max(length, 0))
+		return self
+
+
+	# ~~~~~~~~ Deflate ~~~~~~~
+	def deflate(self, length:int) -> RFT_Object:
+		for i in range(max(length, 0)):
+			self.pop(-1)
+		return self
 
 
 	# ~~~~~~~~~ Clear ~~~~~~~~
-	def clear(self):
-		self.data = bytearray()
+	def clear(self) -> RFT_Object:
+		self.data.clear()
+		return self
 
 
 	# ~~~~~~~~~ Find ~~~~~~~~~
-	def find(self, char: bytes):
-		return self.data.find(char)
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	def find(self, obj:bytes | bytearray | str | tuple | list | range | int | dict | map | set | RFT_Object) -> int:
+		with RFT_Buffer(obj) as buf:
+			return self.data.find(buf.data)
 
 
-
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	# ~~~~ To Hexidecimal ~~~~
-	def toHex(self):
+	def toHex(self) -> str:
 		return self.data.hex()
 
 
 	# ~~~~~~ To Integer ~~~~~~
-	def toInt(self):
+	def toInt(self) -> int:
 		out = 0
 
-		for i, c in enumerate(self.riter()):
+		for i, c in enumerate(reversed(self)):
 			out += c << (i * 8)
 
 		return out
 
 
 	# ~~~~~~~ To String ~~~~~~
-	def toStr(self):
-		return self.data.decode("utf-8")
+	def toStr(self) -> str:
+		return str(self.data, "utf-8")
 
 
-	# ~~~~~ To Structure ~~~~~
-	def toStruct(self):
-		out_ = json.loads(self.data)
-
-		out = RFT_Structure(out_)
-
-		return out
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	# ~~~~~~~ File Read ~~~~~~
-	def read(self, file, size:int):
+	def read(self, file:object, size:int = -1) -> RFT_Object:
 		self += file.read(
 			size
 		)
+		return self
 
 
 	# ~~~~~~ File Write ~~~~~~
-	def write(self, file):
+	def write(self, file:object) -> RFT_Object:
 		file.write(
 			self.data
 		)
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		return self
+
+
+	# ~~~~~~~ Normalize ~~~~~~
+	def normalize(self):
+		return self.data
 
 
 

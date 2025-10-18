@@ -2,83 +2,52 @@ from RFTLib.Require import *
 
 
 
-
-
 __all__ = ("RFT_Object",)
 
 
 
-
-
 class RFT_Object(object):
-	# ~~~~~~~~~~~~ Globals ~~~~~~~~~~~
-	# ~~~~~~~~~ Lift ~~~~~~~~~
-	def lift(self, name:str):
-		setattr(
-			builtins,
-			name,
-			self
-		)
+	# ~~~~~~~~~~ Attributes ~~~~~~~~~~
+	def hasattr(self, attr:str) -> bool:
+		return hasattr(self, attr)
 
+	def getattr(self, attr:str, default:object = None) -> object:
+		return getattr(self, attr, default)
 
-	# ~~~~~~~~~ Drop ~~~~~~~~~
-	def drop(self, name:str):
-		# If had attribute
-		if (hasattr(builtins, name)):
-			# Get value
-			v = getattr(builtins, name)
-
-			if (v == self):
-				# Delete attribute
-				delattr(
-					builtins,
-					name
-				)
-
-
-
-	# ~~~~~~~~~ Copy ~~~~~~~~~
-	def copy(self):
-		return copy.deepcopy(self)
-
-
-
-	# ~~~~~~~~~ Print ~~~~~~~~
-	def print(self, *, end:str = "\n"):
-		print(str(self), end = end)
-
-		return self
+	def setattr(self, attr:str, obj:object):
+		object.__setattr__(self, attr, obj)
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-	# ~~~~~~~~~~ Attributes ~~~~~~~~~~
-	def tryattr(self, attr:str, default = None):
-		if (self.hasattr(attr)):
-			return self.getattr(attr)
+	# ~~~~~~~~~~~~ Context ~~~~~~~~~~~
+	def context(self, *, ignore:bool = False, clearBefore:bool = False, clearAfter:bool = False):
+		self.setattr("__rft_context_ignore__", ignore)
+		self.setattr("__rft_context_clear_before__", clearBefore)
+		self.setattr("__rft_context_clear_after__", clearAfter)
+		return self
 
-		else:
-			return default
+	def __enter__(self) -> object:
+		if (self.getattr("__rft_context_clear_before__", False)):
+			if (isinstance(self, RFT_Object)):
+				self.__rft_clear__()
 
+		return self
 
-	def hasattr(self, attr:str):
-		return hasattr(self, attr)
+	def __exit__(self, excType, excValue, excTraceback) -> bool:
+		if (self.getattr("__rft_context_clear_after__", False)):
+			if (isinstance(self, RFT_Object)):
+				self.__rft_clear__()
 
-
-	def getattr(self, attr:str):
-		return getattr(self, attr)
-
-
-	def setattr(self, attr:str, value):
-		setattr(self, attr, value)
+		return self.getattr("__rft_context_ignore__", False)
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 	# ~~~~~~~~~ Magic Methods ~~~~~~~~
-	def __str__(self, *, showMagic:bool = False, indent:int = 0, found:list = [], ignore:list = []):
+	def __str__(self, *, showMagic:bool = False, indent:int = 0, found:list = [], ignore:list = []) -> str:
 		# Variables
 		lines = []
 
-		varis = sorted(dir(self))
+		varis = dir(self)
 		items = {}
 
 		longest = 0
@@ -96,7 +65,8 @@ class RFT_Object(object):
 		for k in varis:
 			try:
 				# Get value
-				v = getattr(self, k)
+				v = self.getattr(k)
+
 			except:
 				...
 
@@ -251,14 +221,12 @@ class RFT_Object(object):
 					o = str(v)
 
 
-
 				# If value type is none
 				if (isinstance(v, (inspect._empty, types.NoneType))):
 					n = "void"
+				
 				else:
 					n = type(v).__name__
-
-
 
 
 				# Format type string

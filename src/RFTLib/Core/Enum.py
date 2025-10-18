@@ -1,9 +1,8 @@
 from RFTLib.Require import *
 
-from .Object import *
-from .Exception import *
-
-
+from RFTLib.Core.Object import *
+from RFTLib.Core.Structure import *
+from RFTLib.Core.Exception import *
 
 
 
@@ -11,68 +10,74 @@ __all__ = ("RFT_Enum",)
 
 
 
-
-
 class RFT_Enum(RFT_Object):
-	def __init__(self, items:object, *, start = 0):
-		data = {}
+	def __init__(self, obj:tuple | list | RFT_Object, *, start:int = 0):
+		object.__setattr__(self, "__rft_data__", dict())
 
-		if (isinstance(items, tuple | list)):
-			for i, k in enumerate(items):
-				data[k] = start + i
+		if (isinstance(obj, tuple | list)):
+			for k in obj:
+				self.add(k)
 
-		elif (isinstance(items, RFT_Enum)):
-			for i, k in enumerate(items.keys()):
-				data[k] = start + i
+		elif (isinstance(obj, RFT_Object)):
+			obj.__rft_enum__(self)
 
 		else:
-			raise RFT_Exception.TypeError(type(items))
-
-
-		# Set new object data
-		object.__setattr__(self, "__data__", data)
-
-
-
-
-	# ~~~~~~~~ Attr Assignment ~~~~~~~
-	def __getattr__(self, attr:str):
-		# Get dict data
-		v = self.data()
-
-		# Return value
-		return v[attr]
-
-
-
-	def __setattr__(self, attr:str, value):
-		raise RFT_Exception("Enum is readonly", RFT_Exception.ERROR)
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-
-	# ~~~~~~~~ Item Assignment ~~~~~~~
-	def __getitem__(self, attr:str):
-		return self.__getattr__(attr)
-
-
-
-	def __setitem__(self, path:tuple | list | str, value):
-		raise RFT_Exception("Enum is readonly", RFT_Exception.ERROR)
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+			raise RFT_Exception.TypeError(type(obj))
 
 
 	# ~~~~~~~~~ Magic Methods ~~~~~~~~
-	def __len__(self):
+	# ~~~~~~~ Operators ~~~~~~
+	def __add__(self, key:str) -> RFT_Object:
+		return self.add(key)
+
+	def __eq__(self, obj:object) -> bool:
+		if (isinstance(obj, RFT_Enum)):
+			return obj.data == self.data
+
+		else:
+			return obj == self.data
+
+
+	# ~~~~~~ Containers ~~~~~~
+	def __len__(self) -> int:
 		return len(
 			self.keys()
 		)
 
+	def __getattr__(self, key:str) -> int:
+		if (isinstance(key, str)):
+			# Return value
+			return self.__dict__["__rft_data__"][key]
 
-	def __str__(self, showMagic:bool = False, indent:int = 0, found:list = [], ignore:list = []):
+		else:
+			raise RFT_Exception.TypeError(type(key))
+
+	def __setattr__(self, key:str, value:object):
+		raise RFT_Exception(f"{type(self).__name__} is readonly.")
+
+	def __getitem__(self, key:str) -> int:
+		return self.__getattr__(key)
+
+	def __setitem__(self, key:str, value:object):
+		raise RFT_Exception(f"{type(self).__name__} is readonly.")
+
+	def __iter__(self) -> iter:
+		return iter(self.keys())
+
+	def __reversed__(self) -> iter:
+		return iter(reversed(self.keys()))
+
+	def __contains__(self, key:str) -> bool:
+		return self.contains(key)
+
+
+	# ~~~~~~ Converters ~~~~~~
+	def __bool__(self) -> bool:
+		return len(self) > 0
+
+	def __str__(self, *, showMagic:bool = False, indent:int = 0, found:list = [], ignore:list = []) -> str:
 		o = RFT_Object()
-		o.__dict__ = self.data()
+		o.__dict__ = self.__dict__["__rft_data__"]
 
 		return o.__str__(
 			showMagic = showMagic,
@@ -80,23 +85,45 @@ class RFT_Enum(RFT_Object):
 			found = found,
 			ignore = dir(RFT_Object) + ignore
 		)
+
+	def __repr__(self) -> str:
+		return RFT_Object.__str__(self)
+
+	def __format__(self, fmt:str) -> str:
+		return RFT_Object.__str__(self)
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+	# ~~~~~~~~~~ RFT Methods ~~~~~~~~~
+	def __rft_buffer__(self, obj:RFT_Object):
+		obj += self.data
 
-	# ~~~~~~~~~ Retrieve Data ~~~~~~~~
+	def __rft_structure__(self, obj:RFT_Object):
+		obj += self.data
+
+	def __rft_enum__(self, obj:RFT_Object):
+		for k in self.keys():
+			obj += k
+
+	def __rft_clear__(self):
+		self.__dict__["__rft_data__"].clear()
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 	# ~~~~~ Get Raw Data ~~~~~
-	def data(self):
-		return self.__dict__["__data__"]
+	@property
+	def data(self) -> dict:
+		return self.__dict__["__rft_data__"]
 
 
-	# ~~~~~ Copy Raw Data ~~~~
-	def copy(self):
-		return RFT_Enum(self)
+	# ~~~~~~~~~~ Add ~~~~~~~~~
+	def add(self, key:str) -> RFT_Object:
+		self.__dict__["__rft_data__"][str(key)] = len(self)
+		return self
 
 
 	# ~~~~~~~~ Get Key ~~~~~~~
-	def get(self, key, default = None):
+	def get(self, key:str, default:object = None) -> object:
 		if (self.contains(key)):
 			return self[key]
 
@@ -105,56 +132,31 @@ class RFT_Enum(RFT_Object):
 
 
 	# ~~~~~ Get All Keys ~~~~~
-	def keys(self):
-		d = self.data()
-
-		return d.keys()
+	def keys(self) -> tuple[str]:
+		return tuple(self.__dict__["__rft_data__"].keys())
 
 
 	# ~~~~~ Get All Items ~~~~
-	def items(self):
-		d = self.data()
-
-		return d.items()
+	def items(self) -> tuple[str, object]:
+		return tuple(self.__dict__["__rft_data__"].items())
 
 
 	# ~~~~ Get All Values ~~~~
-	def values(self):
-		d = self.data()
-
-		return d.values()
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	def values(self) -> tuple[object]:
+		return tuple(self.__dict__["__rft_data__"].values())
 
 
-	# ~~~~~~~~~ Contains Data ~~~~~~~~
 	# ~~~~~~~ Contains ~~~~~~~
-	def contains(self, attr:str | tuple | list):
-		d = self.data()
-		k = d.keys()
-
-		if (isinstance(attr, list | tuple)):
-			return all(
-				[a in k for a in attr]
-			)
-
-		else:
-			return attr in k
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	def contains(self, key:str) -> bool:
+		return key in self.keys()
 
 
-	# ~~~~~~ First/Last ~~~~~~
-	def first(self):
+	# ~~~~~~~ Normalize ~~~~~~
+	def normalize(self):
+		out = {}
+
 		for k, v in self.items():
-			return k
+			out[k] = v
 
-
-	def last(self):
-		keys = tuple(self.keys())
-
-		if (keys):
-			return keys[-1]
-	# ~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-
+		return out
 

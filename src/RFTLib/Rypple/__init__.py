@@ -12,46 +12,18 @@ from .Filesystem import *
 
 
 
-
-
-__all__ = (
-	"RFT_Rypple",
-	"RFT_Rypple_Process",
-	"RFT_Rypple_Filesystem",
-
-	"RFT_Rypple_C",
-	"RFT_Rypple_CPP",
-	"RFT_Rypple_Python"
-)
-
-
+__all__ = ("RFT_Rypple",)
 
 
 
 class RFT_Rypple(RFT_Object):
-	default = RFT_Structure({
-	})
+	def __init__(self):
+		self.Process = RFT_Rypple_Process(self)
+		self.Filesystem = RFT_Rypple_Filesystem(self)
 
-
-
-	@classmethod
-	def begin(self, *plugins: tuple | list) -> RFT_Structure:
-		scope = self.default.copy()
-
-		for pl in plugins:
-			pl.scope = scope
-
-			s = RFT_Structure(pl)
-			for k, v in s.items():
-				if (callable(v)):
-					scope[k] = v
-
-		return scope
-
-
-	@classmethod
-	def end(self, scope):
-		scope.clear()
+		self.C = RFT_Rypple_C(self)
+		self.CPP = RFT_Rypple_CPP(self)
+		self.Python = RFT_Rypple_Python(self)
 
 
 
