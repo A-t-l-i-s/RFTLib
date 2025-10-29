@@ -33,7 +33,7 @@ class RFT_Object(object):
 
 		return self
 
-	def __exit__(self, excType, excValue, excTraceback) -> bool:
+	def __exit__(self, excType:object, excValue:object, excTraceback:object) -> bool:
 		if (self.getattr("__rft_context_clear_after__", False)):
 			if (isinstance(self, RFT_Object)):
 				self.__rft_clear__()
@@ -43,7 +43,7 @@ class RFT_Object(object):
 
 
 	# ~~~~~~~~~ Magic Methods ~~~~~~~~
-	def __str__(self, *, showMagic:bool = False, indent:int = 0, found:list = [], ignore:list = []) -> str:
+	def __str__(self, *, showMagic:bool = False, indent:int = 0, found:list = [], ignore:list = [], listOnly:bool = False) -> str:
 		# Variables
 		lines = []
 
@@ -59,7 +59,7 @@ class RFT_Object(object):
 		if (indent == 0):
 			found.clear()
 
-		found.append(self)
+		found.append(id(self))
 
 
 		for k in varis:
@@ -119,28 +119,33 @@ class RFT_Object(object):
 		for k in removed:
 			varis.remove(k)
 
-
 		# Opening structure
-		lines.append("{")
+		if (listOnly):
+			lines.append("[")
+
+		else:
+			lines.append("{")
 
 		last = None
 
 		for t, i in items.items():
 			for k, v in i:
-				if (isinstance(v, RFT_Object)):
-					if (v not in found):
-						if (len(found) > 1):
-							# Add newline
-							lines.append("")
+				id_ = id(v)
 
-						found.append(v)
-						
-						try:
-							# Covert RFT object to string
-							o = v.__str__(showMagic = showMagic, indent = indent + 1, found = found)
-						
-						except:
-							o = "<error>"
+				if (isinstance(v, RFT_Object)):
+					if (id_ not in found):
+						# if (len(found) > 1):
+						# 	# Add newline
+						# 	lines.append("")
+
+						found.append(id_)
+
+						# Covert RFT object to string
+						o = v.__str__(
+							showMagic = showMagic,
+							indent = indent + 1,
+							found = found
+						)
 
 					else:
 						o = "<...>"
@@ -161,7 +166,6 @@ class RFT_Object(object):
 						ret = sig.return_annotation
 
 
-
 						# Return type is void
 						if (ret in (inspect._empty, types.NoneType, typing.NoReturn, None)):
 							retName = "void"
@@ -171,10 +175,8 @@ class RFT_Object(object):
 							retName = ret.__name__
 
 
-
-
 						typeNames = []
-						for k_,v_ in params.items():
+						for k_, v_ in params.items():
 							types_ = []
 							
 							# Get parameter annotations
@@ -183,8 +185,10 @@ class RFT_Object(object):
 							# Convert annoatation to tuple
 							if (isinstance(anno, types.UnionType)):
 								annoL = anno.__args__
+
 							elif (isinstance(anno, tuple | list)):
 								annoL = tuple(anno)
+
 							else:
 								annoL = (anno,)
 
@@ -199,14 +203,10 @@ class RFT_Object(object):
 									t_ = t.__name__
 
 								types_.append(t_)
-						
 
-
-							# Join types to form name
-							name = " | ".join(types_)
 
 							# Append to type names list
-							typeNames.append(f"{k_}: {name}")
+							typeNames.append(f"{k_}: " + " | ".join(types_))
 
 
 						# Join type names into string
@@ -215,6 +215,23 @@ class RFT_Object(object):
 						# Create line output
 						o = f"({typeNamesStr}) -> {retName}"
 
+
+				elif (isinstance(v, tuple | list)):
+					struct = {}
+
+					for i, v in enumerate(v):
+						struct[str(i)] = v
+
+					obj = RFT_Object()
+					obj.__dict__ = struct
+
+					o = obj.__str__(
+						showMagic = showMagic,
+						indent = indent + 1,
+						found = found,
+						ignore = dir(RFT_Object),
+						listOnly = True
+					)
 
 				else:
 					# Get value repr
@@ -229,22 +246,27 @@ class RFT_Object(object):
 					n = type(v).__name__
 
 
-				# Format type string
-				typeStr = f"<{n}>"
-
-
-				if (isinstance(v, RFT_Object)):
-					# Combine all into single line
-					l = f"   {typeStr} {k} {o}"
+				if (listOnly):
+					l = f"\t{o}"
 
 				else:
-					l = f"   {typeStr} {k}: {o}"
+					# Format type string
+					typeStr = f"<{n}>"
+
+
+					if (isinstance(v, RFT_Object)):
+						# Combine all into single line
+						l = f"\t{typeStr} {k} {o}"
+
+					else:
+						l = f"\t{typeStr} {k}: {o}"
+
 
 
 				# Add a newline of previous value is an object and current isn't
 				if (isinstance(last, RFT_Object)):
 					if (not isinstance(v, RFT_Object)):
-						if (last not in found):
+						if (id(last) not in found):
 							lines.append("")
 
 
@@ -255,15 +277,14 @@ class RFT_Object(object):
 				last = v
 
 
-
 		# Close structure
-		lines.append("}")
+		if (listOnly):
+			lines.append("]")
 
-
-		# Join lines into string
-		out = ("\n" + ("   " * indent)).join(lines)
+		else:
+			lines.append("}")
 
 		# Return string
-		return out
+		return ("\n" + ("\t" * indent)).join(lines)
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

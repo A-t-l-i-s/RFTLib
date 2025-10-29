@@ -149,7 +149,7 @@ class RFT_Structure(RFT_Object):
 
 	# ~~~~~~~~~~ RFT Methods ~~~~~~~~~
 	def __rft_buffer__(self, obj:RFT_Object):
-		obj += self.data
+		obj += self.normalize()
 
 	def __rft_structure__(self, obj:RFT_Object):
 		obj.setattr("__rft_get_event__", self.__rft_get_event__)

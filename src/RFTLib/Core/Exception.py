@@ -52,8 +52,8 @@ class RFT_Exception(BaseException, RFT_Object):
 	def __bool__(self) -> bool:
 		return len(self.text) > 0
 
-	def __str__(self) -> str:
-		return self.message(extra = False)
+	def __str__(self, *args, **kwargs) -> str:
+		return self.message()
 
 	def __repr__(self) -> str:
 		return RFT_Object.__str__(self)

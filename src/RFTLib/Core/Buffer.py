@@ -80,14 +80,17 @@ class RFT_Buffer(RFT_Object):
 	def __complex__(self) -> complex:
 		return complex(self.toInt())
 
-	def __index__(self) -> int:
-		raise RFT_Exception.NotImplemented()
-
 	def __bool__(self) -> bool:
 		return len(self) > 0
 
-	def __str__(self) -> str:
-		return RFT_Object.__str__(self)
+	def __str__(self, *, showMagic:bool = False, indent:int = 0, found:list = [], ignore:list = []) -> str:
+		return RFT_Object.__str__(
+			self,
+			showMagic = showMagic,
+			indent = indent,
+			found = found,
+			ignore = dir(RFT_Object) + ignore
+		)
 
 	def __repr__(self) -> str:
 		return RFT_Object.__str__(self)
