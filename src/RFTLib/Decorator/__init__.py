@@ -11,23 +11,23 @@ __all__ = ("RFT_Decorator",)
 
 
 class RFT_Decorator(RFT_Object):
-	def __init__(self, func:object):
+	def __init__(self, func:object, *, nested:bool = False):
 		self.inst = None
-		self.func = None
+		self.func = func
+		self.nested = nested
 		self.events = []
 
 
-		if (isinstance(func, classmethod)):
-			self.inst = func.__func__
 
-		else:
-			self.func = func
-		
+	@classmethod
+	def nested(self, func:object):
+		return self(func, nested = True)
+
 
 
 	def __get__(self, instance, owner = None):
-		if (self.inst is not None):
-			self.func = classmethod(self.inst).__get__(instance, owner)
+		if (self.nested):
+			self.inst = owner
 
 		return self
 
@@ -51,11 +51,20 @@ class RFT_Decorator(RFT_Object):
 		event.start = time.time()
 
 		try:
-			# Call function
-			v = self.func(
-				*args,
-				**kwargs
-			)
+			if (self.nested):
+				# Call function
+				v = self.func(
+					self.inst,
+					*args,
+					**kwargs
+				)
+
+			else:
+				# Call function
+				v = self.func(
+					*args,
+					**kwargs
+				)
 
 
 		except Exception as exc:
@@ -77,8 +86,8 @@ class RFT_Decorator(RFT_Object):
 
 	def __str__(self, *, showMagic:bool = False, indent:int = 0, found:list = [], ignore:list = []) -> str:
 		o = RFT_Object()
-		o.inst = self.inst
 		o.func = self.func
+		o.nested = self.nested
 		o.events = self.events
 
 		return o.__str__(
