@@ -11,17 +11,23 @@ __all__ = ("RFT_Decorator",)
 
 
 class RFT_Decorator(RFT_Object):
-	def __init__(self, func:object, *, nested:bool = False):
+	def __init__(self, func:object, *, nested:bool = False, maxLogs:int = -1):
 		self.inst = None
 		self.func = func
-		self.nested = nested
 		self.events = []
+		self.eventsLen = 0
+
+		self.nested = nested
+		self.maxLogs = maxLogs
 
 
 
 	@classmethod
-	def nested(self, func:object):
-		return self(func, nested = True)
+	def settings(self, **kwargs:dict):
+		def wrapper(func:object):
+			return self(func, **kwargs)
+
+		return wrapper
 
 
 
@@ -46,6 +52,14 @@ class RFT_Decorator(RFT_Object):
 
 		# Add to events list
 		self.events.append(event)
+		self.eventsLen += 1
+
+		# Manage limited logs
+		if (self.maxLogs > -1):
+			if (self.eventsLen > self.maxLogs):
+				self.events.pop(0)
+				self.eventsLen -= 1
+
 
 		# Update start time
 		event.start = time.time()
@@ -87,8 +101,11 @@ class RFT_Decorator(RFT_Object):
 	def __str__(self, *, showMagic:bool = False, indent:int = 0, found:list = [], ignore:list = []) -> str:
 		o = RFT_Object()
 		o.func = self.func
-		o.nested = self.nested
 		o.events = self.events
+		o.eventsLen = self.eventsLen
+
+		o.nested = self.nested
+		o.maxLogs = self.maxLogs
 
 		return o.__str__(
 			showMagic = showMagic,
