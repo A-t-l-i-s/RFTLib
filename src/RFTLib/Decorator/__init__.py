@@ -11,9 +11,25 @@ __all__ = ("RFT_Decorator",)
 
 
 class RFT_Decorator(RFT_Object):
-	def __init__(self, obj:object, *, inst:object = None):
-		self.obj = obj
+	def __init__(self, func:object):
+		self.inst = None
+		self.func = None
 		self.events = []
+
+
+		if (isinstance(func, classmethod)):
+			self.inst = func.__func__
+
+		else:
+			self.func = func
+		
+
+
+	def __get__(self, instance, owner = None):
+		if (self.inst is not None):
+			self.func = classmethod(self.inst).__get__(instance, owner)
+
+		return self
 
 
 
@@ -36,7 +52,7 @@ class RFT_Decorator(RFT_Object):
 
 		try:
 			# Call function
-			v = self.obj(
+			v = self.func(
 				*args,
 				**kwargs
 			)
@@ -61,7 +77,8 @@ class RFT_Decorator(RFT_Object):
 
 	def __str__(self, *, showMagic:bool = False, indent:int = 0, found:list = [], ignore:list = []) -> str:
 		o = RFT_Object()
-		o.obj = self.obj
+		o.inst = self.inst
+		o.func = self.func
 		o.events = self.events
 
 		return o.__str__(
