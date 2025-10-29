@@ -11,7 +11,7 @@ __all__ = ("RFT_Decorator",)
 
 
 class RFT_Decorator(RFT_Object):
-	def __init__(self, obj:object):
+	def __init__(self, obj:object, *, inst:object = None):
 		self.obj = obj
 		self.events = []
 
@@ -40,6 +40,7 @@ class RFT_Decorator(RFT_Object):
 				*args,
 				**kwargs
 			)
+
 
 		except Exception as exc:
 			# Update error and end time
