@@ -129,32 +129,30 @@ class RFT_Buffer(RFT_Object):
 
 
 	# ~~~~~~~~~~ Add ~~~~~~~~~
-	def add(self, obj:bytes | bytearray | str | tuple | list | range | int | dict | map | set | RFT_Object, *, start:int = -1) -> RFT_Object:
-		buf = bytearray()
-
+	def add(self, obj:bytes | bytearray | str | tuple | list | range | int | dict | map | set | RFT_Object) -> RFT_Object:
 		# ~~~~~~~~~ None ~~~~~~~~~
 		if (obj is None):
 			...
 
 		# ~~~~~~~~~ Bytes ~~~~~~~~
 		elif (isinstance(obj, bytes | bytearray)):
-			buf += obj
+			self.data += obj
 
 
 		# ~~~~~~~~ String ~~~~~~~~
 		elif (isinstance(obj, str)):
-			buf += bytearray(obj, "utf-8")
+			self.data += bytearray(obj, "utf-8")
 
 
 		# ~~~~~~~~~ Array ~~~~~~~~
 		elif (isinstance(obj, tuple | list | range)):
-			buf += bytearray(obj)
+			self.data += bytearray(obj)
 
 
 		# ~~~~~~~~ Integer ~~~~~~~
 		elif (isinstance(obj, int)):
 			if (obj == 0):
-				buf += bytearray(1)
+				self.data += bytearray(1)
 
 			else:
 				size = (obj.bit_length() + 7) // 8
@@ -163,6 +161,8 @@ class RFT_Buffer(RFT_Object):
 				
 				for i in range(size):
 					buf[size - i - 1] = (obj >> (8 * i)) & 0xff
+
+				self.data += buf
 
 
 		# ~~~~~~ Structure ~~~~~~~
@@ -178,37 +178,18 @@ class RFT_Buffer(RFT_Object):
 				raise RFT_Exception("Failed to dump dictionary.")
 
 			else:
-				buf += bytearray(objStr, "utf-8")
+				self.data += bytearray(objStr, "utf-8")
 
 
 		# ~~~~~~ RFT Object ~~~~~~
 		elif (isinstance(obj, RFT_Object)):
 			tempBuf = RFT_Buffer(obj)
-			buf += tempBuf.data
+			self.data += tempBuf.data
 
 
 		else:
 			raise RFT_Exception.TypeError(type(obj))
 
-
-		curLen = len(self)
-		bufLen = len(buf)
-		
-		if (start >= 0):
-			maxLen = start + bufLen
-
-			# Check if buffer need to extend
-			if (maxLen > curLen):
-				self.inflate(maxLen - curLen)
-
-		else:
-			start = curLen
-			self.inflate(curLen + bufLen)
-
-
-		# Place new characters in buffer
-		for i, c in enumerate(buf):
-			self[start + i] = c
 
 		return self
 
