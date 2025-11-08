@@ -26,6 +26,7 @@ class RFT_Resource(RFT_Object):
 		self.entries = RFT_Structure(entries)
 
 
+
 	# ~~~~~~~~ Iter Resources ~~~~~~~~
 	def iterDir(self, path:str) -> tuple[str, object]:
 		# Create path object
@@ -298,7 +299,7 @@ class RFT_Resource(RFT_Object):
 		# Read entire file
 		buf.read(file)
 
-		with RFT_Structure().context(ignore = True) as struct:
+		with RFT_Structure().context() as struct:
 			# Create empty module spec
 			spec = importlib.util.spec_from_loader(f"PYTHON_Entry.{uuid.uuid4().hex}", loader = None)
 
