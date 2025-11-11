@@ -148,13 +148,13 @@ class RFT_Structure(RFT_Object):
 
 
 	# ~~~~~~~~~~ RFT Methods ~~~~~~~~~
+	def __rft_exception__(self, obj:RFT_Object):
+		obj.text = str(self)
+
 	def __rft_buffer__(self, obj:RFT_Object):
-		obj += self.normalize()
+		obj += self.toDict()
 
 	def __rft_structure__(self, obj:RFT_Object):
-		obj.setattr("__rft_get_event__", self.__rft_get_event__)
-		obj.setattr("__rft_set_event__", self.__rft_set_event__)
-
 		for k, v in self.items():
 			if (isinstance(v, RFT_Object)):
 				obj[k] = RFT_Structure(v)
@@ -184,7 +184,7 @@ class RFT_Structure(RFT_Object):
 
 
 	# ~~~~~~~~ Parent ~~~~~~~~
-	def parent(self, attr:str | tuple | list | int, *, allocate:bool = False) -> RFT_Object:
+	def parent(self, attr:str | tuple | list | int, *, allocate:bool = False, child:bool = False) -> RFT_Object:
 		"""
 		Gets parent structure of given attr path.
 		"""
@@ -225,6 +225,10 @@ class RFT_Structure(RFT_Object):
 		# Get attribute end key
 		if (isinstance(attrEnd, int)):
 			attrEnd = parent.index(attrEnd)
+
+		# Add structure for attrEnd
+		if (child):
+			parent += {attrEnd: RFT_Structure()}
 
 		return parent, attrEnd
 

@@ -66,7 +66,6 @@ class RFT_Exception(BaseException, RFT_Object):
 	# ~~~~~~~~~~ RFT Methods ~~~~~~~~~
 	def __rft_exception__(self, obj:RFT_Object):
 		obj.text = self.text
-		obj.level = self.level
 
 	def __rft_buffer__(self, obj:RFT_Object):
 		obj += self.message(extra = False)
