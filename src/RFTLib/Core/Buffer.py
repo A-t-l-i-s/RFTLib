@@ -15,11 +15,8 @@ class RFT_Buffer(RFT_Object):
 		# Define main data structure
 		self.setattr("__rft_data__", bytearray())
 
-		if (isinstance(obj, RFT_Object)):
-			obj.__rft_buffer__(self)
-
-		else:
-			self.add(obj)
+		# Add data to buffer
+		self.add(obj)
 
 
 	# ~~~~~~~~~ Magic Methods ~~~~~~~~
@@ -103,25 +100,6 @@ class RFT_Buffer(RFT_Object):
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-	# ~~~~~~~~~~ RFT Methods ~~~~~~~~~
-	def __rft_exception__(self, obj:RFT_Object):
-		obj.text = self.toStr()
-
-	def __rft_buffer__(self, obj:RFT_Object):
-		obj += self.data
-
-	def __rft_structure__(self, obj:RFT_Object):
-		try:
-			obj += json.loads(self.data)
-
-		except:
-			raise RFT_Exception("Failed to parse content.")
-
-	def __rft_clear__(self):
-		self.clear()
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
 	# ~~~~~~~ Raw Data ~~~~~~~
 	@property
 	def data(self) -> bytearray:
@@ -166,7 +144,7 @@ class RFT_Buffer(RFT_Object):
 
 
 		# ~~~~~~ Structure ~~~~~~~
-		elif (isinstance(obj, dict | map | set)):
+		elif (isinstance(obj, dict | map | set | RFT_Structure)):
 			try:
 				objStr = json.dumps(
 					dict(obj),
@@ -182,9 +160,8 @@ class RFT_Buffer(RFT_Object):
 
 
 		# ~~~~~~ RFT Object ~~~~~~
-		elif (isinstance(obj, RFT_Object)):
-			tempBuf = RFT_Buffer(obj)
-			buf += tempBuf.data
+		elif (isinstance(obj, RFT_Buffer)):
+			buf += obj.data
 
 
 		else:
@@ -198,35 +175,23 @@ class RFT_Buffer(RFT_Object):
 
 	# ~~~~~~~~~~ Pop ~~~~~~~~~
 	def pop(self, index:int) -> int:
-		return self.data.pop(index)
+		return self.__dict__["__rft_data__"].pop(index)
 
 
 	# ~~~~~~~~ Resize ~~~~~~~~
 	def resize(self, length:int) -> RFT_Object:
 		l = len(self)
 
-		if (l == length):
+		if (l == length or length == 0):
 			...
 
-		elif (length > l):
-			self.inflate(length - l)
+		if (length > l):
+			self.__dict__["__rft_data__"] += bytearray(length - l)
 
 		else:
-			self.deflate(l - length)
+			for i in range(min(l - length, l)):
+				self.__dict__["__rft_data__"].pop(-1)
 
-		return self
-
-
-	# ~~~~~~~~ Inflate ~~~~~~~
-	def inflate(self, length:int) -> RFT_Object:
-		self.__dict__["__rft_data__"] += bytearray(max(length, 0))
-		return self
-
-
-	# ~~~~~~~~ Deflate ~~~~~~~
-	def deflate(self, length:int) -> RFT_Object:
-		for i in range(max(length, 0)):
-			self.pop(-1)
 		return self
 
 
@@ -239,7 +204,7 @@ class RFT_Buffer(RFT_Object):
 	# ~~~~~~~~~ Find ~~~~~~~~~
 	def find(self, obj:bytes | bytearray | str | tuple | list | range | int | dict | map | set | RFT_Object) -> int:
 		with RFT_Buffer(obj) as buf:
-			return self.data.find(buf.data)
+			return self.__dict__["__rft_data__"].find(buf.data)
 
 
 	# ~~~~ To Hexidecimal ~~~~
@@ -260,29 +225,5 @@ class RFT_Buffer(RFT_Object):
 	# ~~~~~~~ To String ~~~~~~
 	def toStr(self) -> str:
 		return str(self.data, "utf-8")
-
-
-	# ~~~~~~~ File Read ~~~~~~
-	def read(self, file:object, size:int = -1) -> RFT_Object:
-		self += file.read(
-			size
-		)
-		return self
-
-
-	# ~~~~~~ File Write ~~~~~~
-	def write(self, file:object) -> RFT_Object:
-		file.write(
-			self.data
-		)
-		return self
-
-
-	# ~~~~~~~ Normalize ~~~~~~
-	def normalize(self):
-		return self.data
-
-
-
 
 

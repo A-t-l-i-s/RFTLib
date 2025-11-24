@@ -11,15 +11,12 @@ __all__ = ("RFT_Enum",)
 
 
 class RFT_Enum(RFT_Object):
-	def __init__(self, obj:tuple | list | RFT_Object, *, start:int = 0):
-		object.__setattr__(self, "__rft_data__", dict())
+	def __init__(self, obj:tuple | list, *, start:int = 0):
+		self.setattr("__rft_data__", dict())
 
-		if (isinstance(obj, tuple | list)):
+		if (isinstance(obj, tuple | list | RFT_Enum)):
 			for k in obj:
 				self.add(k)
-
-		elif (isinstance(obj, RFT_Object)):
-			obj.__rft_enum__(self)
 
 		else:
 			raise RFT_Exception.TypeError(type(obj))
@@ -91,22 +88,6 @@ class RFT_Enum(RFT_Object):
 
 	def __format__(self, fmt:str) -> str:
 		return RFT_Object.__str__(self)
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-	# ~~~~~~~~~~ RFT Methods ~~~~~~~~~
-	def __rft_buffer__(self, obj:RFT_Object):
-		obj += self.data
-
-	def __rft_structure__(self, obj:RFT_Object):
-		obj += self.data
-
-	def __rft_enum__(self, obj:RFT_Object):
-		for k in self.keys():
-			obj += k
-
-	def __rft_clear__(self):
-		self.__dict__["__rft_data__"].clear()
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 

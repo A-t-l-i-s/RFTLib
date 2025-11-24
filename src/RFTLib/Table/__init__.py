@@ -43,12 +43,6 @@ class RFT_Table(RFT_Object):
 			)
 
 
-	# ~~~~~~~~~~ RFT Methods ~~~~~~~~~
-	def __rft_clear__(self):
-		self.data.clear()
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
 	# ~~~~~~~~~~~~ Events ~~~~~~~~~~~~
 	def getEvent(self, attr:str):
 		self.wait()
@@ -84,7 +78,7 @@ class RFT_Table(RFT_Object):
 		path = self.path / (attr + ".table")
 
 		# Allocate new structure if needed
-		if (not self.data.containsInst(attr, RFT_Structure)):
+		if (not self.data.containsInst(RFT_Structure, attr)):
 			struct = RFT_Structure(
 				getEvent = self.tableGetEvent,
 				setEvent = self.tableSetEvent
@@ -96,7 +90,7 @@ class RFT_Table(RFT_Object):
 		# Allocate new file if needed
 		if (not path.exists()):
 			with path.open("wb") as file:
-				self.default.write(file)
+				file.write(self.default.data)
 
 		return path
 
@@ -111,11 +105,9 @@ class RFT_Table(RFT_Object):
 		with RFT_Buffer() as buf:
 			# Read file data
 			with path.open("r") as file:
-				buf.read(file)
-
 				try:
 					data = RFT_Structure(
-						buf,
+						json.load(file),
 						getEvent = self.tableGetEvent,
 						setEvent = self.tableSetEvent
 					)
@@ -125,7 +117,7 @@ class RFT_Table(RFT_Object):
 
 					# Backup file
 					with path.with_suffix(".error").open("wb") as errFile:
-						buf.write(errFile)
+						errFile.write(buf.data)
 
 				finally:
 					self.data[attr] = data
@@ -148,7 +140,7 @@ class RFT_Table(RFT_Object):
 		with path.open("w") as file:
 			try:
 				# Convert to python dict
-				dataOut = data.normalize()
+				dataOut = data.toDict()
 
 				# Dump json data to file
 				json.dump(
@@ -162,7 +154,7 @@ class RFT_Table(RFT_Object):
 				)
 			
 			except:
-				file.write(self.default)
+				file.write(self.default.data)
 
 		# End Updating
 		self.updating = False

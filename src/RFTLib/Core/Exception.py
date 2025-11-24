@@ -20,15 +20,8 @@ class RFT_Exception(BaseException, RFT_Object):
 
 	def __init__(self, obj:str | RFT_Object, level:str = INFO):
 		# Set text and level
-		self.text = None
+		self.text = str(obj)
 		self.level = level
-
-		if (isinstance(obj, RFT_Object)):
-			obj.__rft_exception__(self)
-
-		else:
-			# Convert to string
-			self.text = obj
 
 
 	# ~~~~~~~~~ Magic Methods ~~~~~~~~
@@ -63,19 +56,6 @@ class RFT_Exception(BaseException, RFT_Object):
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-	# ~~~~~~~~~~ RFT Methods ~~~~~~~~~
-	def __rft_exception__(self, obj:RFT_Object):
-		obj.text = self.text
-
-	def __rft_buffer__(self, obj:RFT_Object):
-		obj += self.message(extra = False)
-
-	def __rft_clear__(self):
-		self.text = None
-		self.level = None
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
 	# ~~~~~~~~~~~~ Message ~~~~~~~~~~~
 	def message(self, *, extra:bool = True) -> str:
 		# Get current datetime
@@ -102,11 +82,6 @@ class RFT_Exception(BaseException, RFT_Object):
 		print(self.message(), end = end, file = sys.stderr)
 		return self
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-	# ~~~~~~~ Normalize ~~~~~~
-	def normalize(self):
-		return BaseException(self.message(extra = False))
 
 
 	# ~~~~~~~~~ Class Methods ~~~~~~~~

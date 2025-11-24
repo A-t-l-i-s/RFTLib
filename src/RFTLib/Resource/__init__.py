@@ -41,12 +41,7 @@ class RFT_Resource(RFT_Object):
 						rel = file.relative_to(path)
 
 						# Create attribute for structure
-						attr = self.formatAttr(
-							".".join((
-								rel.parent.as_posix().replace("/", "."),
-								rel.stem.replace(".", "_")
-							)).strip(".")
-						)
+						attr = self.formatAttr(rel.parent.as_posix().replace("/", "."), rel.stem.replace(".", "_"))
 
 						# Get entry
 						entry = self.getEntry(rel)
@@ -61,6 +56,7 @@ class RFT_Resource(RFT_Object):
 									v = RFT_Exception.Traceback()
 
 								finally:
+									print(attr)
 									yield (
 										attr,
 										v	
@@ -89,12 +85,7 @@ class RFT_Resource(RFT_Object):
 							rel = pathlib.Path(name)
 							
 							# Create attribute for structure
-							attr = self.formatAttr(
-								".".join((
-									rel.parent.as_posix().replace("/", "."),
-									rel.stem.replace(".", "_")
-								)).strip(".")
-							)
+							attr = self.formatAttr(rel.parent.as_posix().replace("/", "."), rel.stem.replace(".", "_"))
 
 							# Get entry
 							entry = self.getEntry(rel)
@@ -163,8 +154,9 @@ class RFT_Resource(RFT_Object):
 
 				else:
 					# Get parent of attribute and assign the key to the value
-					parent, key = structOut.parent(attr, allocate = True)
-					parent[key] = value
+					attrEnd = attr.pop(-1)
+					parent = structOut.allocate(attr)
+					parent[attrEnd] = value
 
 
 			# Return structure at end
@@ -187,7 +179,7 @@ class RFT_Resource(RFT_Object):
 
 
 	# ~~~~~~ Format Attr ~~~~~
-	def formatAttr(self, text:str) -> str:
+	def formatAttr(self, *text:tuple | list) -> str:
 		"""
 		Forcefully replaces any whitelisted characters to '_'
 
@@ -196,14 +188,22 @@ class RFT_Resource(RFT_Object):
 
 		--> tuple[list]: Forced converted text
 		"""
-		out = ""
+		out = []
 
-		for c in text:
-			if (c not in string.ascii_letters + string.digits + "_."):
-				out += '_'
+		for t in text:
+			if (t):
+				out.append("")
 
-			else:
-				out += c
+				for c in t:
+					if (c == '.'):
+						if (out[-1]):
+							out.append("")
+
+					elif (c not in string.ascii_letters + string.digits + "_"):
+						out[-1] += '_'
+
+					else:
+						out[-1] += c
 
 		return out
 
@@ -273,7 +273,7 @@ class RFT_Resource(RFT_Object):
 		# Allocate buffer
 		with RFT_Buffer() as buf:
 			# Read entire file
-			buf.read(file)
+			buf += file.read()
 
 			# Return data
 			return buf.toStr()
@@ -285,7 +285,7 @@ class RFT_Resource(RFT_Object):
 		buf = RFT_Buffer()
 
 		# Read entire file
-		buf.read(file)
+		buf += file
 
 		# Return data
 		return buf
@@ -295,11 +295,9 @@ class RFT_Resource(RFT_Object):
 	def PYTHON_Entry(self, file) -> RFT_Object:
 		# Allocate buffer
 		buf = RFT_Buffer()
+		buf += file.read()
 
-		# Read entire file
-		buf.read(file)
-
-		with RFT_Structure().context() as struct:
+		with RFT_Structure() as struct:
 			# Create empty module spec
 			spec = importlib.util.spec_from_loader(f"PYTHON_Entry.{uuid.uuid4().hex}", loader = None)
 

@@ -20,25 +20,11 @@ class RFT_Object(object):
 
 
 	# ~~~~~~~~~~~~ Context ~~~~~~~~~~~
-	def context(self, *, ignore:bool = False, clearBefore:bool = False, clearAfter:bool = False):
-		self.setattr("__rft_context_ignore__", ignore)
-		self.setattr("__rft_context_clear_before__", clearBefore)
-		self.setattr("__rft_context_clear_after__", clearAfter)
-		return self
-
 	def __enter__(self) -> object:
-		if (self.getattr("__rft_context_clear_before__", False)):
-			if (isinstance(self, RFT_Object)):
-				self.__rft_clear__()
-
 		return self
 
 	def __exit__(self, excType:object, excValue:object, excTraceback:object) -> bool:
-		if (self.getattr("__rft_context_clear_after__", False)):
-			if (isinstance(self, RFT_Object)):
-				self.__rft_clear__()
-
-		return self.getattr("__rft_context_ignore__", False)
+		return False
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
