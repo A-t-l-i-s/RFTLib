@@ -56,7 +56,6 @@ class RFT_Resource(RFT_Object):
 									v = RFT_Exception.Traceback()
 
 								finally:
-									print(attr)
 									yield (
 										attr,
 										v	
@@ -192,7 +191,8 @@ class RFT_Resource(RFT_Object):
 
 		for t in text:
 			if (t):
-				out.append("")
+				if (out[-1]):
+					out.append("")
 
 				for c in t:
 					if (c == '.'):
