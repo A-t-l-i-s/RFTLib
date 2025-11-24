@@ -187,7 +187,7 @@ class RFT_Resource(RFT_Object):
 
 		--> tuple[list]: Forced converted text
 		"""
-		out = []
+		out = [""]
 
 		for t in text:
 			if (t):
