@@ -84,9 +84,15 @@ class RFT_Object(object):
 
 
 					# Determine longest type name
-					l = len(type(v).__name__)
-					if (l > longestType):
-						longestType = l
+					try:
+						l = len(type(v).__name__)
+
+					except:
+						...
+
+					else:
+						if (l > longestType):
+							longestType = l
 
 
 					# Get value type
@@ -157,8 +163,11 @@ class RFT_Object(object):
 							retName = "void"
 
 						else:
-							# Get return type name
-							retName = ret.__name__
+							try:
+								# Get return type name
+								retName = ret.__name__
+							except:
+								retName = "void"
 
 
 						typeNames = []
@@ -232,7 +241,10 @@ class RFT_Object(object):
 					n = "void"
 				
 				else:
-					n = type(v).__name__
+					try:
+						n = type(v).__name__
+					except:
+						n = "void"
 
 
 				if (listOnly):
