@@ -185,8 +185,11 @@ class RFT_Object(object):
 									t_ = "void"
 
 								else:
-									# Get argument type name
-									t_ = t.__name__
+									try:
+										# Get argument type name
+										t_ = t.__name__
+									except:
+										t_ = "void"
 
 								types_.append(t_)
 
