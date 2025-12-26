@@ -3,6 +3,7 @@ from RFTLib.Dev.Require import *
 
 from RFTLib.Core.Object import *
 from RFTLib.Core.Enum import *
+from RFTLib.Core.Buffer import *
 from RFTLib.Core.Exception import *
 from RFTLib.Core.Structure import *
 
@@ -46,19 +47,19 @@ class RFT_Logging(RFT_Object):
 						with RFT_Buffer(obj) as buf:
 							buf += end
 
-							# ~~~~~~~~~ Write ~~~~~~~~
-							if (stream.binary):
-								# Write as binary
-								stream.obj.write(
-									buf.data
-								)
+						# ~~~~~~~~~ Write ~~~~~~~~
+						if (stream.binary):
+							# Write as binary
+							stream.obj.write(
+								buf.data
+							)
 
-							else:
-								# Write as text
-								stream.obj.write(
-									buf.toStr()
-								)
-							# ~~~~~~~~~~~~~~~~~~~~~~~~
+						else:
+							# Write as text
+							stream.obj.write(
+								buf.toStr()
+							)
+						# ~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 					elif (stream.type == RFT_Logging.TYPES.FUNCTION):
