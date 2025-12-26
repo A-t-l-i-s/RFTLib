@@ -86,10 +86,7 @@ class RFT_Table(RFT_Object):
 
 		# Allocate new structure if needed
 		if (not self.data.containsInst(RFT_Structure, attr)):
-			struct = RFT_Structure(
-				getEvent = self.tableGetEvent,
-				setEvent = self.tableSetEvent
-			)
+			struct = RFT_Structure()
 			
 			self.data[attr] = struct
 
@@ -119,7 +116,7 @@ class RFT_Table(RFT_Object):
 		# Start Updating
 		self.updating = True
 
-		with RFT_Structure({}, getEvent = self.tableGetEvent, setEvent = self.tableSetEvent) as struct:
+		with RFT_Structure() as struct:
 			with RFT_Buffer() as buf:
 				# Read file data
 				with path.open("r") as file:
