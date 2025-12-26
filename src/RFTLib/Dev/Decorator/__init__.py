@@ -154,9 +154,9 @@ class RFT_Decorator(RFT_Object):
 				**kwargs
 			)
 
-		except Exception as exc:
+		except:
 			# Update error and end time
-			event.error = exc
+			event.error = RFT_Exception.Traceback()
 
 		else:
 			# Update returned value and end time
@@ -187,14 +187,14 @@ class RFT_Decorator(RFT_Object):
 				)
 
 
-			if (event.error is not None):
-				if (not self.ignore):
-					# Raise error like usual
-					raise event.error
+		if (event.error is not None):
+			if (not self.ignore):
+				# Raise error like usual
+				raise event.error
 
-			else:
-				# Return value
-				return event.returned
+		else:
+			# Return value
+			return event.returned
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 

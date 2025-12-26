@@ -47,6 +47,7 @@ class RFT_Table(RFT_Object):
 
 
 	# ~~~~~~~~~~~~ Events ~~~~~~~~~~~~
+	@RFT_Decorator
 	def getEvent(self, attr:str):
 		self.wait()
 
@@ -55,14 +56,17 @@ class RFT_Table(RFT_Object):
 	
 		return True
 
+	@RFT_Decorator
 	def setEvent(self, attr:str):
 		return True
 
 
+	@RFT_Decorator
 	def tableGetEvent(self, attr:str):
 		self.wait()
 		return True
 
+	@RFT_Decorator
 	def tableSetEvent(self, attr:str):
 		self.wait()
 		return True
@@ -77,7 +81,7 @@ class RFT_Table(RFT_Object):
 
 	# ~~~~~~~ File Input/Output ~~~~~~
 	# ~~~~~~ Touch File ~~~~~~
-	@RFT_Decorator.configure(eventsMax = 120)
+	@RFT_Decorator
 	def touchFile(self, attr:str):
 		path = self.path / (attr + ".table")
 
@@ -108,7 +112,7 @@ class RFT_Table(RFT_Object):
 
 
 	# ~~~~~~~ Read File ~~~~~~
-	@RFT_Decorator.configure(eventsMax = 120)
+	@RFT_Decorator
 	def readFile(self, attr:str):
 		# Touch file
 		path = self.touchFile(attr)
@@ -162,7 +166,7 @@ class RFT_Table(RFT_Object):
 
 
 	# ~~~~~~ Write File ~~~~~~
-	@RFT_Decorator.configure(eventsMax = 120)
+	@RFT_Decorator
 	def writeFile(self, attr:str):
 		# Touch file
 		path = self.touchFile(attr)
@@ -215,14 +219,13 @@ class RFT_Table(RFT_Object):
 
 	# ~~~~~~~~~~ File Saving ~~~~~~~~~
 	# ~~~~~~~ Save All ~~~~~~~
-	@RFT_Decorator.configure(eventsMax = 10)
+	@RFT_Decorator
 	def saveAll(self):
 		for k in self.data.keys():
 			self.writeFile(k)
 
 
 	# ~~~~~~ Save Every ~~~~~~
-	@RFT_Decorator.configure(eventsMax = 10)
 	def saveEvery(self, secs:int | float):
 		# If thread is already running then wait for it to exit
 		if (self.thread is not None):
@@ -241,7 +244,6 @@ class RFT_Table(RFT_Object):
 		self.thread.start()
 
 	# ~~~~~~~~ Thread ~~~~~~~~
-	@RFT_Decorator.configure(eventsMax = 10)
 	def saveEvery_(self, secs:int | float):
 		# Reset running flag
 		self.running = True

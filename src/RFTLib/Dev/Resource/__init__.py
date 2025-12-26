@@ -35,7 +35,7 @@ class RFT_Resource(RFT_Object):
 
 
 	# ~~~~~~~~ Iter Resources ~~~~~~~~
-	@RFT_Decorator.configure(eventsMax = 10)
+	@RFT_Decorator
 	def iterDir(self, path:str) -> tuple[str, object]:
 		# Create path object
 		path = pathlib.Path(path)
@@ -55,8 +55,6 @@ class RFT_Resource(RFT_Object):
 						entry = self.getEntry(rel)
 
 						if (entry is not None):
-
-
 							# Open file
 							with file.open("rb") as fileIO:
 								try:
@@ -91,7 +89,7 @@ class RFT_Resource(RFT_Object):
 			raise RFT_Exception("Directory doesn't exist")
 
 
-	@RFT_Decorator.configure(eventsMax = 10)
+	@RFT_Decorator
 	def iterZip(self, path:str) -> tuple[str, object]:
 		# Create path object
 		path = pathlib.Path(path)
@@ -151,7 +149,7 @@ class RFT_Resource(RFT_Object):
 
 
 	# ~~~~~~~~ Load Resources ~~~~~~~~
-	@RFT_Decorator.configure(eventsMax = 10)
+	@RFT_Decorator
 	def load(self, path:str, struct:RFT_Object = None, *, errEvent:object = None) -> RFT_Object:
 		# Create path object
 		path = pathlib.Path(path)
@@ -186,7 +184,17 @@ class RFT_Resource(RFT_Object):
 							errEvent(attr, value)
 
 						except:
-							raise RFT_Exception.Traceback()
+							v = RFT_Exception.Traceback()
+
+							# Log error
+							self.logger.log(
+								RFT_Exception(
+									v,
+									(".".join(attr), "errEvent")
+								)
+							)
+
+							raise v
 
 					else:
 						raise value
@@ -207,7 +215,7 @@ class RFT_Resource(RFT_Object):
 
 
 	# ~~~~~~~ Get Entry ~~~~~~
-	@RFT_Decorator.configure(eventsMax = 120)
+	@RFT_Decorator
 	def getEntry(self, path:str) -> RFT_Object:
 		path = pathlib.Path(path)
 		ext = path.name.split(".")[-1]
@@ -219,7 +227,7 @@ class RFT_Resource(RFT_Object):
 
 
 	# ~~~~~~ Format Attr ~~~~~
-	@RFT_Decorator.configure(eventsMax = 120)
+	@RFT_Decorator
 	def formatAttr(self, *text:tuple | list) -> str:
 		"""
 		Forcefully replaces any whitelisted characters to '_'
@@ -251,7 +259,7 @@ class RFT_Resource(RFT_Object):
 
 
 	# ~~~~~~~~~~~~ Entries ~~~~~~~~~~~
-	@RFT_Decorator.configure(static = True, eventsMax = 60)
+	@RFT_Decorator.configure(static = True)
 	def JSON_Entry(self, file:object) -> RFT_Object:
 		# Read file
 		dataRaw = json.load(file)
@@ -267,7 +275,7 @@ class RFT_Resource(RFT_Object):
 		return data
 
 
-	@RFT_Decorator.configure(static = True, eventsMax = 60)
+	@RFT_Decorator.configure(static = True)
 	def YAML_Entry(self, file:object) -> RFT_Object:
 		import yaml
 
@@ -289,7 +297,7 @@ class RFT_Resource(RFT_Object):
 		return data
 
 
-	@RFT_Decorator.configure(static = True, eventsMax = 60)
+	@RFT_Decorator.configure(static = True)
 	def TOML_Entry(self, file:object) -> RFT_Object:
 		import tomllib
 
@@ -308,7 +316,7 @@ class RFT_Resource(RFT_Object):
 		return data
 
 
-	@RFT_Decorator.configure(static = True, eventsMax = 60)
+	@RFT_Decorator.configure(static = True)
 	def STRING_Entry(self, file:object) -> str:
 		# Allocate buffer
 		with RFT_Buffer() as buf:
@@ -319,7 +327,7 @@ class RFT_Resource(RFT_Object):
 			return buf.toStr()
 
 
-	@RFT_Decorator.configure(static = True, eventsMax = 60)
+	@RFT_Decorator.configure(static = True)
 	def BUFFER_Entry(self, file:object) -> RFT_Object:
 		# Allocate buffer
 		buf = RFT_Buffer()
@@ -331,7 +339,7 @@ class RFT_Resource(RFT_Object):
 		return buf
 
 
-	@RFT_Decorator.configure(static = True, eventsMax = 60)
+	@RFT_Decorator.configure(static = True)
 	def PYTHON_Entry(self, file:object) -> RFT_Object:
 		# Allocate buffer
 		buf = RFT_Buffer()
@@ -354,7 +362,7 @@ class RFT_Resource(RFT_Object):
 		return struct
 
 
-	@RFT_Decorator.configure(static = True, eventsMax = 60)
+	@RFT_Decorator.configure(static = True)
 	def QT_QIMAGE_Entry(self, file:object) -> object:
 		from PyQt6.QtGui import QImage
 
@@ -368,7 +376,7 @@ class RFT_Resource(RFT_Object):
 		return img
 
 
-	@RFT_Decorator.configure(static = True, eventsMax = 60)
+	@RFT_Decorator.configure(static = True)
 	def QT_QPIXMAP_Entry(self, file:object) -> object:
 		from PyQt6.QtGui import QImage, QPixmap
 
@@ -383,7 +391,7 @@ class RFT_Resource(RFT_Object):
 		return pix
 
 
-	@RFT_Decorator.configure(static = True, eventsMax = 60)
+	@RFT_Decorator.configure(static = True)
 	def QT_QICON_Entry(self, file:object) -> object:
 		from PyQt6.QtGui import QImage, QPixmap, QIcon
 
