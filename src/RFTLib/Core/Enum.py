@@ -1,8 +1,8 @@
 from RFTLib.Require import *
 
-from RFTLib.Core.Object import *
-from RFTLib.Core.Structure import *
-from RFTLib.Core.Exception import *
+from .Object import *
+from .Structure import *
+from .Exception import *
 
 
 

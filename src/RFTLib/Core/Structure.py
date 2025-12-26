@@ -1,6 +1,7 @@
 from RFTLib.Require import *
 
 from .Object import *
+from .Enum import *
 from .Exception import *
 
 
