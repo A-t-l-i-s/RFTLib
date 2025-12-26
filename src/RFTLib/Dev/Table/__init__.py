@@ -160,8 +160,11 @@ class RFT_Table(RFT_Object):
 	# ~~~~~~ Write File ~~~~~~
 	@RFT_Decorator.configure(eventsMax = 120)
 	def writeFile(self, attr:str):
+		# Touch file
+		path = self.touchFile(attr)
+
 		# Get structure
-		struct = self.data[attr]
+		struct = self.data[attr].toDict()
 
 		# Start Updating
 		self.updating = True
@@ -171,7 +174,7 @@ class RFT_Table(RFT_Object):
 				# Dump json data to file
 				file.write(
 					json.dumps(
-						struct.toDict(), # Convert to python dict
+						struct,
 						skipkeys = False,
 						default = lambda o: None,
 						indent = (
