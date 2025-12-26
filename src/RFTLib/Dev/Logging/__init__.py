@@ -143,10 +143,10 @@ class RFT_Logging(RFT_Object):
 
 
 	def addStream(self, stream:object, uid:str):
-		if (hasattr(stream, "encoding") and hasattr(stream, "write") and stream.writable()):
+		if (hasattr(stream, "write") and stream.writable()):
 			self.streams[uid] = {
 				"obj": stream,
-				"encoding": stream.encoding,
+				"encoding": getattr(stream, "encoding", "utf-8"),
 				"binary": not isinstance(stream, io.TextIOBase),
 				"type": RFT_Logging.TYPES.STREAM
 			}
@@ -166,6 +166,23 @@ class RFT_Logging(RFT_Object):
 		self.addStream(
 			stream,
 			uid
+		)
+
+
+	def addLogFile(self, path:str):
+		# Create path object
+		path = pathlib.Path(path)
+
+		# Get current datetime
+		timestamp = datetime.datetime.now()
+
+		uid = f"{timestamp.month:>02}-{timestamp.day:>02}-{timestamp.year:>04}"
+		path /= (uid + ".log")
+
+		self.addFile(
+			path,
+			uid,
+			clear = False
 		)
 
 
