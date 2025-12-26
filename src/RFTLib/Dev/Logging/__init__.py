@@ -43,19 +43,22 @@ class RFT_Logging(RFT_Object):
 
 				if (stream is not None):
 					if (stream.type == RFT_Logging.TYPES.STREAM):
-						# ~~~~~~~~~ Write ~~~~~~~~
-						if (stream.binary):
-							# Write as binary
-							stream.obj.write(
-								bytearray(obj, stream.encoding) + bytearray(end, stream.encoding)
-							)
+						with RFT_Buffer(obj) as buf:
+							buf += end
 
-						else:
-							# Write as text
-							stream.obj.write(
-								str(obj) + str(end)
-							)
-						# ~~~~~~~~~~~~~~~~~~~~~~~~
+							# ~~~~~~~~~ Write ~~~~~~~~
+							if (stream.binary):
+								# Write as binary
+								stream.obj.write(
+									buf.data
+								)
+
+							else:
+								# Write as text
+								stream.obj.write(
+									buf.toStr()
+								)
+							# ~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 					elif (stream.type == RFT_Logging.TYPES.FUNCTION):
@@ -146,7 +149,6 @@ class RFT_Logging(RFT_Object):
 		if (hasattr(stream, "write") and stream.writable()):
 			self.streams[uid] = {
 				"obj": stream,
-				"encoding": getattr(stream, "encoding", "utf-8"),
 				"binary": not isinstance(stream, io.TextIOBase),
 				"type": RFT_Logging.TYPES.STREAM
 			}
@@ -189,7 +191,6 @@ class RFT_Logging(RFT_Object):
 	def addFunction(self, func:object, uid:str):
 		self.streams[uid] = {
 			"obj": func,
-			"encoding": None,
 			"binary": None,
 			"type": RFT_Logging.TYPES.FUNCTION
 		}
@@ -200,7 +201,6 @@ class RFT_Logging(RFT_Object):
 			if (obj is not self):
 				self.streams[uid] = {
 					"obj": obj,
-					"encoding": None,
 					"binary": None,
 					"type": RFT_Logging.TYPES.LOGGER
 				}
