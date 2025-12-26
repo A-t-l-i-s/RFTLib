@@ -44,20 +44,19 @@ class RFT_Logging(RFT_Object):
 
 				if (stream is not None):
 					if (stream.type == RFT_Logging.TYPES.STREAM):
-						with RFT_Buffer(obj) as buf:
-							buf += end
+						buf = str(obj) + str(end)
 
 						# ~~~~~~~~~ Write ~~~~~~~~
 						if (stream.binary):
 							# Write as binary
 							stream.obj.write(
-								buf.data
+								buf.encode("utf-8")
 							)
 
 						else:
 							# Write as text
 							stream.obj.write(
-								buf.toStr()
+								buf
 							)
 						# ~~~~~~~~~~~~~~~~~~~~~~~~
 
