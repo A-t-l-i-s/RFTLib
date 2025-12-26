@@ -169,17 +169,18 @@ class RFT_Table(RFT_Object):
 		# Start Updating
 		self.updating = True
 
-		with path.open("w") as file:
+		with path.open("wb") as file:
 			try:
 				# Dump json data to file
-				json.dump(
-					struct.toDict(), # Convert to python dict
-					file,
-					skipkeys = False,
-					default = lambda o: None,
-					indent = (
-						"\t" if (self.indent) else None
-					)
+				file.write(
+					json.dumps(
+						struct.toDict(), # Convert to python dict
+						skipkeys = False,
+						default = lambda o: None,
+						indent = (
+							"\t" if (self.indent) else None
+						)
+					).encode("utf-8")
 				)
 			
 			except:
