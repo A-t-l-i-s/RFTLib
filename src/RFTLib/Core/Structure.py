@@ -53,7 +53,7 @@ class RFT_Structure(RFT_Object):
 		return self
 
 	def __mul__(self, obj:dict | RFT_Object) -> RFT_Object:
-		self.default(obj, force = True)
+		self.default(obj, forced = True)
 		return self
 
 	def __eq__(self, obj:object) -> bool:
@@ -120,15 +120,12 @@ class RFT_Structure(RFT_Object):
 	def __bool__(self) -> bool:
 		return len(self) > 0
 
-	def __str__(self, *, showMagic:bool = False, indent:int = 0, found:list = [], ignore:list = []) -> str:
+	def __str__(self, **kwargs:dict) -> str:
 		o = RFT_Object()
 		o.__dict__ = self.__dict__["__rft_data__"]
 
 		return o.__str__(
-			showMagic = showMagic,
-			indent = indent,
-			found = found,
-			ignore = dir(RFT_Object) + ignore
+			**kwargs
 		)
 
 	def __repr__(self) -> str:
@@ -175,8 +172,14 @@ class RFT_Structure(RFT_Object):
 
 
 	# ~~~~~~~~ Get Key ~~~~~~~
-	def get(self, key:str, default:object = None) -> object:
-		return self.__dict__["__rft_data__"].get(key, default)
+	def get(self, key:str, default:object = None, type_:type = None) -> object:
+		v = self.__dict__["__rft_data__"].get(key, default)
+
+		if (type_ is not None):
+			if (not isinstance(v, value)):
+				return default
+
+		return v
 
 
 	# ~~~~~ Get All Keys ~~~~~
@@ -284,7 +287,7 @@ class RFT_Structure(RFT_Object):
 		out = {}
 
 		for k, v in self.items():
-			if (isinstance(v, RFT_Structure)):
+			if (isinstance(v, RFT_Structure | RFT_Enum)):
 				out[k] = v.toDict()
 
 			else:

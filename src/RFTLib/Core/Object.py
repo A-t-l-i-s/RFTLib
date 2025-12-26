@@ -16,6 +16,8 @@ class RFT_Object(object):
 
 	def setattr(self, attr:str, obj:object):
 		object.__setattr__(self, attr, obj)
+
+		return self
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -29,74 +31,155 @@ class RFT_Object(object):
 
 
 	# ~~~~~~~~~ Magic Methods ~~~~~~~~
-	def __str__(self, *, showMagic:bool = False, indent:int = 0, found:list = [], ignore:list = [], listOnly:bool = False) -> str:
-		# Variables
-		lines = []
+	def __str_function__(self, obj:object, *, key:str = "None") -> str:
+		funcName = getattr(obj, "__name__", key)
+		out = ""
 
-		varis = dir(self)
-		items = {}
 
-		longest = 0
+		try:
+			# Get function signature
+			details = inspect.signature(obj)
+		
+		except:
+			out = f"{funcName}()"
+
+		else:
+			# Get returned out
+			returnedOut = self.__str_type__(
+				details.return_annotation
+			)
+
+			# Get function parameters
+			params = dict(details.parameters)
+			args = []
+
+			for k, param in params.items():
+				# Append to type names list
+				args.append(
+					f"{k}: " + self.__str_type__(
+						param.annotation
+					)
+				)
+
+			# Join type names into string
+			paramsOut = ", ".join(args)
+
+
+			# Create line output
+			out = f"{funcName}({paramsOut}) -> {returnedOut}"
+
+		finally:
+			return out
+
+	def __str_type__(self, obj:object) -> str:
+		if (not isinstance(obj, tuple | list)):
+			obj = [obj]
+
+		# Define items
+		items = []
+
+		for v in obj:
+			if (v in (inspect._empty, types.NoneType, typing.NoReturn)):
+				# Argument type is void
+				name = "None"
+
+			elif (isinstance(v, types.GenericAlias)):
+				name = str(v)
+
+			elif (isinstance(v, list | tuple | types.UnionType)):
+				if (isinstance(v, types.UnionType)):
+					l = v.__args__
+				else:
+					l = v
+
+				# Repeat call on list
+				name = self.__str_type__(
+					l
+				)
+
+			else:
+				# Get argument type name
+				name = getattr(v, "__name__", "None")
+
+			# Append name
+			items.append(f"{name}")
+
+
+		# Append to type names list
+		return " | ".join(items)
+
+	def __str__(self, *, indent:int = 0, found:list | tuple = [], showMagic:bool = False, tab:str = "\t", newline:str = "\n", blockStart:str = "{", blockEnd:str = "}") -> str:
+		found = list(found)
+
+		lines = [blockStart]
+
+		# Define longest key and value
+		longestKey = 0
 		longestType = 0
-
-		removed = []
 
 		# Clear found
 		if (indent == 0):
 			found.clear()
 
-		found.append(id(self))
+
+		# Add self to found list
+		found.append(
+			id(self)
+		)
+
+		# Define items
+		items = {}
 
 
-		for k in varis:
+		for k in dir(self):
 			try:
 				# Get value
 				v = self.getattr(k)
 
 			except:
-				...
+				# Failed to retrieve value for some reason
+				v = None
+				t = type(v)
 
 			else:
+				# Get type
+				t = type(v)
+
+			finally:
 				# If key is blacklisted
-				if (k in ("__class__", "__module__", "__dict__")):
-					removed.append(k)
+				if (k in ("__class__", "__module__", "__dict__", "getattr", "setattr", "hasattr")):
+					...
 
 				# If value is blacklisted
-				elif (isinstance(v, (types.BuiltinFunctionType, types.BuiltinMethodType, types.MethodWrapperType))):
-					removed.append(k)
-
-
-				# If key in ignore list
-				elif (k in ignore):
-					removed.append(k)
-
+				elif (isinstance(v, types.BuiltinFunctionType | types.BuiltinMethodType | types.MethodWrapperType)):
+					...
 
 				# Ignore magic functions
-				elif (not showMagic and k.startswith("__") and k.endswith("__")):
-					removed.append(k)
-
+				elif (not showMagic and (k.startswith("__") and k.endswith("__"))):
+					...
 
 				else:
 					# Determine longest var name
-					l = len(k)
-					if (l > longest):
-						longest = l
-
+					if ((lk := len(k)) > longestKey):
+						longestKey = lk
 
 					# Determine longest type name
-					try:
-						l = len(type(v).__name__)
-
-					except:
-						...
-
-					else:
-						if (l > longestType):
-							longestType = l
+					if ((lt := len(t.__name__)) > longestType):
+						longestType = lt
 
 
-					# Get value type
-					t = type(v)
+					if (isinstance(v, dict | tuple | list | RFT_Object)):
+						# Get uid
+						uid = id(v)
+
+						# If uid already displayed
+						if (uid in found):
+							v = hex(uid)
+
+						else:
+							# Add uid to found
+							found.append(uid)
+
 
 					# Add list to items
 					if (t not in items):
@@ -106,186 +189,71 @@ class RFT_Object(object):
 					items[t].append((k, v))
 
 
+		# Iter through filtered items
+		for type_, values in items.items():
+			for k, v in values:
+				n = f"<{type_.__name__}> {k}: "
 
-		# Remove all blacklisted vars
-		for k in removed:
-			varis.remove(k)
-
-		# Opening structure
-		if (listOnly):
-			lines.append("[")
-
-		else:
-			lines.append("{")
-
-		last = None
-
-		for t, i in items.items():
-			for k, v in i:
-				id_ = id(v)
 
 				if (isinstance(v, RFT_Object)):
-					if (id_ not in found):
-						# if (len(found) > 1):
-						# 	# Add newline
-						# 	lines.append("")
-
-						found.append(id_)
-
-						# Covert RFT object to string
-						o = v.__str__(
-							showMagic = showMagic,
-							indent = indent + 1,
-							found = found
-						)
-
-					else:
-						o = "<...>"
-
-
-				elif (isinstance(v, typing.Callable)):
-					try:
-						# Get function signature
-						sig = inspect.signature(v)
-					except:
-						o = "void"
-
-					else:
-						# Get function parameters
-						params = dict(sig.parameters)
-
-						# Get function return type
-						ret = sig.return_annotation
-
-
-						# Return type is void
-						if (ret in (inspect._empty, types.NoneType, typing.NoReturn, None)):
-							retName = "void"
-
-						else:
-							try:
-								# Get return type name
-								retName = ret.__name__
-							except:
-								retName = "void"
-
-
-						typeNames = []
-						for k_, v_ in params.items():
-							types_ = []
-							
-							# Get parameter annotations
-							anno = v_.annotation
-
-							# Convert annoatation to tuple
-							if (isinstance(anno, types.UnionType)):
-								annoL = anno.__args__
-
-							elif (isinstance(anno, tuple | list)):
-								annoL = tuple(anno)
-
-							else:
-								annoL = (anno,)
-
-
-							for t in annoL:
-								# If argument type is void
-								if (t in (inspect._empty, types.NoneType, typing.NoReturn)):
-									t_ = "void"
-
-								else:
-									try:
-										# Get argument type name
-										t_ = t.__name__
-									except:
-										t_ = "void"
-
-								types_.append(t_)
-
-
-							# Append to type names list
-							typeNames.append(f"{k_}: " + " | ".join(types_))
-
-
-						# Join type names into string
-						typeNamesStr = ", ".join(typeNames)
-						
-						# Create line output
-						o = f"({typeNamesStr}) -> {retName}"
-
-
-				elif (isinstance(v, tuple | list)):
-					struct = {}
-
-					for i, v in enumerate(v):
-						struct[str(i)] = v
-
-					obj = RFT_Object()
-					obj.__dict__ = struct
-
-					o = obj.__str__(
-						showMagic = showMagic,
+					# Repeat operation on same class type
+					l = n + v.__str__(
 						indent = indent + 1,
 						found = found,
-						ignore = dir(RFT_Object),
-						listOnly = True
+						showMagic = showMagic
 					)
 
+				elif (isinstance(v, dict)):
+					# Display dictionary
+					o = RFT_Object()
+					o.__dict__ = v
+
+					l = n + o.__str__(
+						indent = indent + 1,
+						found = found,
+						showMagic = showMagic
+					)
+
+				elif (isinstance(v, list | tuple)):
+					# Display list
+					o = RFT_Object()
+
+					for i, x in enumerate(v):
+						o.__dict__[f"{i}"] = x
+
+					l = n + o.__str__(
+						indent = indent + 1,
+						found = found,
+						showMagic = showMagic,
+						blockStart = "[",
+						blockEnd = "]"
+					)
+
+				elif (issubclass(type_, type)):
+					# Display type
+					l = n + v.__name__
+
+				elif (issubclass(type_, typing.Callable)):
+					# Display function
+					l = f"<{type_.__name__}> {self.__str_function__(v, key = k)}"
+
+				elif (issubclass(type_, str)):
+					l = f"{n}\"{v}\""
+
+				elif (issubclass(type_, bytes | bytearray | memoryview)):
+					l = f"{n}b\"{str(v, 'utf-8', 'ignore')}\""
+
 				else:
-					# Get value repr
-					o = str(v)
+					l = f"{n}{v}"
 
-
-				# If value type is none
-				if (isinstance(v, (inspect._empty, types.NoneType))):
-					n = "void"
-				
-				else:
-					try:
-						n = type(v).__name__
-					except:
-						n = "void"
-
-
-				if (listOnly):
-					l = f"\t{o}"
-
-				else:
-					# Format type string
-					typeStr = f"<{n}>"
-
-
-					if (isinstance(v, RFT_Object)):
-						# Combine all into single line
-						l = f"\t{typeStr} {k} {o}"
-
-					else:
-						l = f"\t{typeStr} {k}: {o}"
-
-
-
-				# Add a newline of previous value is an object and current isn't
-				if (isinstance(last, RFT_Object)):
-					if (not isinstance(v, RFT_Object)):
-						if (id(last) not in found):
-							lines.append("")
-
-
-				# Append new line
+				# Add line to list
 				lines.append(l)
 
-				# Add last
-				last = v
 
+		return (newline + (tab * (indent + 1))).join(lines) + newline + (tab * indent) + blockEnd
 
-		# Close structure
-		if (listOnly):
-			lines.append("]")
-
-		else:
-			lines.append("}")
-
-		# Return string
-		return ("\n" + ("\t" * indent)).join(lines)
+	def __repr__(self) -> str:
+		return self.__str__()
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 

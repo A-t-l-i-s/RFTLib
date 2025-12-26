@@ -22,12 +22,10 @@ class RFT_Buffer(RFT_Object):
 	# ~~~~~~~~~ Magic Methods ~~~~~~~~
 	# ~~~~~~ Arithmetic ~~~~~~
 	def __add__(self, obj:bytes | bytearray | str | tuple | list | range | int | dict | map | set | RFT_Object) -> RFT_Object:
-		self.add(obj)
-		return self
+		return self.add(obj)
 
 	def __sub__(self, length:int) -> RFT_Object:
-		self.deflate(length)
-		return self
+		return self.resize(len(self) - length)
 
 	def __mul__(self, length:int) -> RFT_Object:
 		length -= 1
@@ -79,18 +77,6 @@ class RFT_Buffer(RFT_Object):
 
 	def __bool__(self) -> bool:
 		return len(self) > 0
-
-	def __str__(self, *, showMagic:bool = False, indent:int = 0, found:list = [], ignore:list = []) -> str:
-		return RFT_Object.__str__(
-			self,
-			showMagic = showMagic,
-			indent = indent,
-			found = found,
-			ignore = dir(RFT_Object) + ignore
-		)
-
-	def __repr__(self) -> str:
-		return RFT_Object.__str__(self)
 
 	def __bytes__(self) -> bytes:
 		return bytes(self.data)
@@ -159,7 +145,7 @@ class RFT_Buffer(RFT_Object):
 				buf += bytearray(objStr, "utf-8")
 
 
-		# ~~~~~~ RFT Object ~~~~~~
+		# ~~~~~~ RFT Buffer ~~~~~~
 		elif (isinstance(obj, RFT_Buffer)):
 			buf += obj.data
 
@@ -226,4 +212,15 @@ class RFT_Buffer(RFT_Object):
 	def toStr(self) -> str:
 		return str(self.data, "utf-8")
 
+
+	# ~~~~~~~ Read File ~~~~~~
+	def readFile(self, file:object, length:int = -1) -> RFT_Object:
+		self += file.read(length)
+		return self
+
+
+	# ~~~~~~ Write File ~~~~~~
+	def writeFile(self, file:object) -> RFT_Object:
+		file.write(self.data)
+		return self
 

@@ -1,9 +1,13 @@
 from RFTLib.Require import *
+from RFTLib.Dev.Require import *
 
 from RFTLib.Core.Object import *
 from RFTLib.Core.Buffer import *
 from RFTLib.Core.Exception import *
 from RFTLib.Core.Structure import *
+
+from RFTLib.Dev.Logging import *
+from RFTLib.Dev.Decorator import *
 
 
 
@@ -25,9 +29,13 @@ class RFT_Resource(RFT_Object):
 		# Assign entries
 		self.entries = RFT_Structure(entries)
 
+		# Create logger
+		self.logger = RFT_Logging()
+
 
 
 	# ~~~~~~~~ Iter Resources ~~~~~~~~
+	@RFT_Decorator.configure(eventsMax = 10)
 	def iterDir(self, path:str) -> tuple[str, object]:
 		# Create path object
 		path = pathlib.Path(path)
@@ -47,13 +55,29 @@ class RFT_Resource(RFT_Object):
 						entry = self.getEntry(rel)
 
 						if (entry is not None):
+
+
 							# Open file
 							with file.open("rb") as fileIO:
 								try:
 									v = entry.__call__(fileIO)
 
 								except:
-									v = RFT_Exception.Traceback()
+									v = RFT_Exception.Traceback(
+										(RFT_Exception.ERROR, entry.__name__, ".".join(attr))
+									)
+
+									# Log exception
+									self.logger.log(v)
+
+								else:
+									# Log file found
+									self.logger.log(
+										RFT_Exception(
+											f"Loaded \"{rel.as_posix()}\"",
+											(entry.__name__, ".".join(attr))
+										)
+									)
 
 								finally:
 									yield (
@@ -67,6 +91,7 @@ class RFT_Resource(RFT_Object):
 			raise RFT_Exception("Directory doesn't exist")
 
 
+	@RFT_Decorator.configure(eventsMax = 10)
 	def iterZip(self, path:str) -> tuple[str, object]:
 		# Create path object
 		path = pathlib.Path(path)
@@ -96,7 +121,21 @@ class RFT_Resource(RFT_Object):
 										v = entry.__call__(fileIO)
 
 									except:
-										v = RFT_Exception.Traceback()
+										v = RFT_Exception.Traceback(
+											(RFT_Exception.ERROR, entry.__name__, ".".join(attr))
+										)
+
+										# Log exception
+										self.logger.log(v)
+
+									else:
+										# Log file found
+										self.logger.log(
+											RFT_Exception(
+												f"Loaded \"{rel.as_posix()}\"",
+												(entry.__name__, ".".join(attr))
+											)
+										)
 
 									finally:
 										yield (
@@ -112,6 +151,7 @@ class RFT_Resource(RFT_Object):
 
 
 	# ~~~~~~~~ Load Resources ~~~~~~~~
+	@RFT_Decorator.configure(eventsMax = 10)
 	def load(self, path:str, struct:RFT_Object = None, *, errEvent:object = None) -> RFT_Object:
 		# Create path object
 		path = pathlib.Path(path)
@@ -167,6 +207,7 @@ class RFT_Resource(RFT_Object):
 
 
 	# ~~~~~~~ Get Entry ~~~~~~
+	@RFT_Decorator.configure(eventsMax = 120)
 	def getEntry(self, path:str) -> RFT_Object:
 		path = pathlib.Path(path)
 		ext = path.name.split(".")[-1]
@@ -178,6 +219,7 @@ class RFT_Resource(RFT_Object):
 
 
 	# ~~~~~~ Format Attr ~~~~~
+	@RFT_Decorator.configure(eventsMax = 120)
 	def formatAttr(self, *text:tuple | list) -> str:
 		"""
 		Forcefully replaces any whitelisted characters to '_'
@@ -209,10 +251,8 @@ class RFT_Resource(RFT_Object):
 
 
 	# ~~~~~~~~~~~~ Entries ~~~~~~~~~~~
-	@classmethod
-	def JSON_Entry(self, file) -> RFT_Object:
-		import json
-
+	@RFT_Decorator.configure(static = True, eventsMax = 60)
+	def JSON_Entry(self, file:object) -> RFT_Object:
 		# Read file
 		dataRaw = json.load(file)
 
@@ -227,8 +267,8 @@ class RFT_Resource(RFT_Object):
 		return data
 
 
-	@classmethod
-	def YAML_Entry(self, file) -> RFT_Object:
+	@RFT_Decorator.configure(static = True, eventsMax = 60)
+	def YAML_Entry(self, file:object) -> RFT_Object:
 		import yaml
 
 		# Read file
@@ -249,8 +289,8 @@ class RFT_Resource(RFT_Object):
 		return data
 
 
-	@classmethod
-	def TOML_Entry(self, file) -> RFT_Object:
+	@RFT_Decorator.configure(static = True, eventsMax = 60)
+	def TOML_Entry(self, file:object) -> RFT_Object:
 		import tomllib
 
 		# Read file
@@ -268,8 +308,8 @@ class RFT_Resource(RFT_Object):
 		return data
 
 
-	@classmethod
-	def STRING_Entry(self, file) -> str:
+	@RFT_Decorator.configure(static = True, eventsMax = 60)
+	def STRING_Entry(self, file:object) -> str:
 		# Allocate buffer
 		with RFT_Buffer() as buf:
 			# Read entire file
@@ -279,20 +319,20 @@ class RFT_Resource(RFT_Object):
 			return buf.toStr()
 
 
-	@classmethod
-	def BUFFER_Entry(self, file) -> RFT_Object:
+	@RFT_Decorator.configure(static = True, eventsMax = 60)
+	def BUFFER_Entry(self, file:object) -> RFT_Object:
 		# Allocate buffer
 		buf = RFT_Buffer()
 
 		# Read entire file
-		buf += file
+		buf += file.read()
 
 		# Return data
 		return buf
 
 
-	@classmethod
-	def PYTHON_Entry(self, file) -> RFT_Object:
+	@RFT_Decorator.configure(static = True, eventsMax = 60)
+	def PYTHON_Entry(self, file:object) -> RFT_Object:
 		# Allocate buffer
 		buf = RFT_Buffer()
 		buf += file.read()
@@ -314,8 +354,8 @@ class RFT_Resource(RFT_Object):
 		return struct
 
 
-	@classmethod
-	def QT_QIMAGE_Entry(self, file) -> object:
+	@RFT_Decorator.configure(static = True, eventsMax = 60)
+	def QT_QIMAGE_Entry(self, file:object) -> object:
 		from PyQt6.QtGui import QImage
 
 		# Read entire file
@@ -328,8 +368,8 @@ class RFT_Resource(RFT_Object):
 		return img
 
 
-	@classmethod
-	def QT_QPIXMAP_Entry(self, file) -> object:
+	@RFT_Decorator.configure(static = True, eventsMax = 60)
+	def QT_QPIXMAP_Entry(self, file:object) -> object:
 		from PyQt6.QtGui import QImage, QPixmap
 
 		# Read entire file
@@ -343,8 +383,8 @@ class RFT_Resource(RFT_Object):
 		return pix
 
 
-	@classmethod
-	def QT_QICON_Entry(self, file) -> object:
+	@RFT_Decorator.configure(static = True, eventsMax = 60)
+	def QT_QICON_Entry(self, file:object) -> object:
 		from PyQt6.QtGui import QImage, QPixmap, QIcon
 
 		# Read entire file

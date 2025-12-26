@@ -15,20 +15,33 @@ class RFT_Exception(BaseException, RFT_Object):
 	WARNING = "Warning"
 	ERROR = "Error"
 	CRITICAL = "Critical"
+	WILDCARD = "*"
+
+	FORMAT = "[{timestamp}]({status}): {text}"
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-	def __init__(self, obj:str | RFT_Object, level:str = INFO):
-		# Set text and level
+	def __init__(self, obj:str | RFT_Object, status:str | tuple[str] | list[str] = WILDCARD):
+		# Set text and status
 		self.text = str(obj)
-		self.level = level
+
+		if (isinstance(status, list | tuple)):
+			self.status = " | ".join(status)
+
+		else:
+			self.status = str(status)
+
+		# If RFT_Exception passed
+		if (isinstance(obj, RFT_Exception)):
+			self.status += f" | {obj.status}"
+
 
 
 	# ~~~~~~~~~ Magic Methods ~~~~~~~~
 	# ~~~~~~~ Operators ~~~~~~
 	def __eq__(self, obj:object) -> bool:
 		if (isinstance(obj, RFT_Exception)):
-			return obj.text == self.text and obj.level == self.level
+			return obj.text == self.text and obj.status == self.status
 
 		else:
 			return obj == self.text
@@ -36,38 +49,32 @@ class RFT_Exception(BaseException, RFT_Object):
 
 	# ~~~~~~ Containers ~~~~~~
 	def __iter__(self) -> iter:
-		msg = self.message(extra = False)
-		msg = msg.strip()
-		return iter(msg.split("\n"))
+		return iter(self.text.split("\n"))
 
 
 	# ~~~~~~ Converters ~~~~~~
 	def __bool__(self) -> bool:
 		return len(self.text) > 0
 
-	def __str__(self, *args, **kwargs) -> str:
-		return self.message()
-
-	def __repr__(self) -> str:
-		return RFT_Object.__str__(self)
+	def __str__(self, **kwargs:dict) -> str:
+		return str(self.text)
 
 	def __format__(self, fmt:str) -> str:
-		return self.text
+		return self.__str__()
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 	# ~~~~~~~~~~~~ Message ~~~~~~~~~~~
-	def message(self, *, extra:bool = True) -> str:
+	def message(self) -> str:
 		# Get current datetime
 		timestamp = datetime.datetime.now()
 
-		# Add extra info to msg
-		if (extra):
-			msg = f"[{timestamp.hour:>2}:{timestamp.minute:>2}:{str(timestamp.second) + '.' + str(timestamp.microsecond)[:4]:<7}]({self.level}): {self.text}"
-
-		else:
-			# Set msg to text
-			msg = str(self.text)
+		# Format message
+		msg = RFT_Exception.FORMAT.format(
+			timestamp = f"{timestamp.hour:>2}:{timestamp.minute:>2}:{str(timestamp.second) + '.' + str(timestamp.microsecond)[:4]:<7}",
+			status = self.status,
+			text = self.text
+		)
 
 		return msg
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -86,58 +93,58 @@ class RFT_Exception(BaseException, RFT_Object):
 
 	# ~~~~~~~~~ Class Methods ~~~~~~~~
 	@classmethod
-	def TypeError(cls, type_:type, level:str = ERROR) -> RFT_Object:
+	def TypeError(cls, type_:type, status:str = ERROR) -> RFT_Object:
 		return RFT_Exception(
 			f"Invalid type '{type_.__name__}'",
-			level
+			status
 		)
 
 
 	@classmethod
-	def NoValue(cls, level:str = ERROR) -> RFT_Object:
+	def NoValue(cls, status:str = ERROR) -> RFT_Object:
 		return RFT_Exception(
 			"No value provided",
-			level
+			status
 		)
 
 
 	@classmethod
-	def HasValue(cls, level:str = ERROR) -> RFT_Object:
+	def HasValue(cls, status:str = ERROR) -> RFT_Object:
 		return RFT_Exception(
 			"Values are not needed",
-			level
+			status
 		)
 
 
 	@classmethod
-	def AttributeError(cls, type_:type, attr:str, level:str = ERROR) -> RFT_Object:
+	def AttributeError(cls, type_:type, attr:str, status:str = ERROR) -> RFT_Object:
 		return RFT_Exception(
 			f"'{type_.__name__}' doesn't contain attribute '{attr}'",
-			level
+			status
 		)
 
 
 	@classmethod
-	def IndexError(cls, index:int, level:str = ERROR) -> RFT_Object:
+	def IndexError(cls, index:int, status:str = ERROR) -> RFT_Object:
 		return RFT_Exception(
 			f"Index out of range: {index}",
-			level
+			status
 		)
 
 
 	@classmethod
-	def Traceback(cls, level:str = WARNING) -> RFT_Object:
+	def Traceback(cls, status:str = WARNING) -> RFT_Object:
 		return RFT_Exception(
 			"\n" + traceback.format_exc().strip(),
-			level
+			status
 		)
 
 
 	@classmethod
-	def NotImplemented(cls, level:str = WARNING) -> RFT_Object:
+	def NotImplemented(cls, status:str = WARNING) -> RFT_Object:
 		return RFT_Exception(
 			"Not Implemented",
-			level
+			status
 		)
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

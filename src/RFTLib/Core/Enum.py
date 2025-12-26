@@ -72,19 +72,13 @@ class RFT_Enum(RFT_Object):
 	def __bool__(self) -> bool:
 		return len(self) > 0
 
-	def __str__(self, *, showMagic:bool = False, indent:int = 0, found:list = [], ignore:list = []) -> str:
+	def __str__(self, **kwargs:dict) -> str:
 		o = RFT_Object()
 		o.__dict__ = self.__dict__["__rft_data__"]
 
 		return o.__str__(
-			showMagic = showMagic,
-			indent = indent,
-			found = found,
-			ignore = dir(RFT_Object) + ignore
+			**kwargs
 		)
-
-	def __repr__(self) -> str:
-		return RFT_Object.__str__(self)
 
 	def __format__(self, fmt:str) -> str:
 		return RFT_Object.__str__(self)
@@ -132,12 +126,16 @@ class RFT_Enum(RFT_Object):
 		return key in self.keys()
 
 
-	# ~~~~~~~ Normalize ~~~~~~
-	def normalize(self):
+	# ~~~~~ To Dictionary ~~~~
+	def toDict(self) -> dict:
 		out = {}
 
 		for k, v in self.items():
-			out[k] = v
+			if (isinstance(v, RFT_Structure | RFT_Enum)):
+				out[k] = v.toDict()
+
+			else:
+				out[k] = v
 
 		return out
 

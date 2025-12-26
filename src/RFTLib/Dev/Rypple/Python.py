@@ -1,16 +1,15 @@
 from RFTLib.Require import *
+from RFTLib.Dev.Require import *
 
 from RFTLib.Core.Object import *
 from RFTLib.Core.Buffer import *
 from RFTLib.Core.Structure import *
 
-
+from RFTLib.Dev.Decorator import *
 
 
 
 __all__ = ("RFT_Rypple_Python",)
-
-
 
 
 
@@ -30,30 +29,36 @@ class RFT_Rypple_Python(RFT_Object):
 
 
 
+	@RFT_Decorator.configure(static = True, eventsMax = 30)
 	def executable(self, path:str):
 		self.scope.executable = path
 		return self
 
 
+	@RFT_Decorator.configure(static = True, eventsMax = 30)
 	def file(self, file:str):
 		self.scope.file = file
 		return self
 
 
+	@RFT_Decorator.configure(static = True, eventsMax = 30)
 	def bytecode(self, value:bool = True):
 		self.scope.bytecode = value
 		return self
 
+	@RFT_Decorator.configure(static = True, eventsMax = 30)
 	def buffered(self, value:bool = True):
 		self.scope.buffered = value
 		return self
 
 
+	@RFT_Decorator.configure(static = True, eventsMax = 30)
 	def args(self, *args:str | tuple | list):
 		self.scope.args += args
 		return self
 
 
+	@RFT_Decorator.configure(static = True, eventsMax = 30)
 	def done(self):
 		args = [self.scope.executable]
 

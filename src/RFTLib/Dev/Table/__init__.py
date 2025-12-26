@@ -1,9 +1,13 @@
 from RFTLib.Require import *
+from RFTLib.Dev.Require import *
 
 from RFTLib.Core.Object import *
 from RFTLib.Core.Buffer import *
 from RFTLib.Core.Exception import *
 from RFTLib.Core.Structure import *
+
+from RFTLib.Dev.Logging import *
+from RFTLib.Dev.Decorator import *
 
 
 
@@ -19,6 +23,8 @@ class RFT_Table(RFT_Object):
 		self.running = False
 		self.indent = indent
 		self.thread = None
+
+		self.logger = RFT_Logging()
 
 		# Allocate data
 		self.data = RFT_Structure(
@@ -74,6 +80,7 @@ class RFT_Table(RFT_Object):
 
 	# ~~~~~~~ File Input/Output ~~~~~~
 	# ~~~~~~ Touch File ~~~~~~
+	@RFT_Decorator.configure(eventsMax = 120)
 	def touchFile(self, attr:str):
 		path = self.path / (attr + ".table")
 
@@ -92,9 +99,19 @@ class RFT_Table(RFT_Object):
 			with path.open("wb") as file:
 				file.write(self.default.data)
 
+			# Log file creation
+			self.logger.log(
+				RFT_Exception(
+					f"Created \"{path.as_posix()}\"",
+					attr
+				)
+			)
+
 		return path
 
+
 	# ~~~~~~~ Read File ~~~~~~
+	@RFT_Decorator.configure(eventsMax = 120)
 	def readFile(self, attr:str):
 		# Touch file
 		path = self.touchFile(attr)
@@ -102,49 +119,61 @@ class RFT_Table(RFT_Object):
 		# Start Updating
 		self.updating = True
 
-		with RFT_Buffer() as buf:
-			# Read file data
-			with path.open("r") as file:
-				try:
-					data = RFT_Structure(
-						json.load(file),
-						getEvent = self.tableGetEvent,
-						setEvent = self.tableSetEvent
-					)
+		with RFT_Structure({}, getEvent = self.tableGetEvent, setEvent = self.tableSetEvent) as struct:
+			with RFT_Buffer() as buf:
+				# Read file data
+				with path.open("r") as file:
+					buf.readFile(file)
+					
+					try:
+						struct *= json.loads(buf.data)
 
-				except:
-					data = {}
+					except:
+						# Backup file
+						with path.with_suffix(".error").open("wb") as errFile:
+							errFile.write(buf.data)
 
-					# Backup file
-					with path.with_suffix(".error").open("wb") as errFile:
-						errFile.write(buf.data)
 
-				finally:
-					self.data[attr] = data
+						# Log reading error
+						self.logger.log(
+							RFT_Exception.Traceback(
+								attr
+							)
+						)
+
+					else:
+						# Log file reading
+						self.logger.log(
+							RFT_Exception(
+								f"Loaded \"{path.as_posix()}\"",
+								attr
+							)
+						)
+
+					finally:
+						self.data[attr] = struct
 
 		# End Updating
 		self.updating = False
 
+
 	# ~~~~~~ Write File ~~~~~~
+	@RFT_Decorator.configure(eventsMax = 120)
 	def writeFile(self, attr:str):
 		# Touch file
 		path = self.touchFile(attr)
 
-		# Get data
-		data = self.data[attr]
-
+		# Get structure
+		struct = self.data[attr]
 
 		# Start Updating
 		self.updating = True
 
 		with path.open("w") as file:
 			try:
-				# Convert to python dict
-				dataOut = data.toDict()
-
 				# Dump json data to file
 				json.dump(
-					dataOut,
+					struct.toDict(), # Convert to python dict
 					file,
 					skipkeys = False,
 					default = lambda o: None,
@@ -156,6 +185,22 @@ class RFT_Table(RFT_Object):
 			except:
 				file.write(self.default.data)
 
+				# Log writing error
+				self.logger.log(
+					RFT_Exception.Traceback(
+						attr
+					)
+				)
+
+			else:
+				# Log successful write
+				self.logger.log(
+					RFT_Exception(
+						f"Saved \"{path.as_posix()}\"",
+						attr
+					)
+				)
+
 		# End Updating
 		self.updating = False
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -163,12 +208,14 @@ class RFT_Table(RFT_Object):
 
 	# ~~~~~~~~~~ File Saving ~~~~~~~~~
 	# ~~~~~~~ Save All ~~~~~~~
+	@RFT_Decorator.configure(eventsMax = 10)
 	def saveAll(self):
 		for k in self.data.keys():
 			self.writeFile(k)
 
 
 	# ~~~~~~ Save Every ~~~~~~
+	@RFT_Decorator.configure(eventsMax = 10)
 	def saveEvery(self, secs:int | float):
 		# If thread is already running then wait for it to exit
 		if (self.thread is not None):
@@ -187,6 +234,7 @@ class RFT_Table(RFT_Object):
 		self.thread.start()
 
 	# ~~~~~~~~ Thread ~~~~~~~~
+	@RFT_Decorator.configure(eventsMax = 10)
 	def saveEvery_(self, secs:int | float):
 		# Reset running flag
 		self.running = True

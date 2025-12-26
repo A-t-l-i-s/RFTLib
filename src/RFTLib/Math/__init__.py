@@ -11,8 +11,8 @@ __all__ = ("RFT_Math",)
 
 class RFT_Math(RFT_Object):
 	def pairing(a:int | float, b:int | float) -> int | float:
-		if (isinstance(a, (int | float))):
-			if (isinstance(b, (int | float))):
+		if (isinstance(a, int | float)):
+			if (isinstance(b, int | float)):
 				if (a >= 0):
 					a *= 2
 				else:

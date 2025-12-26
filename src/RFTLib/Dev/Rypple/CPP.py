@@ -1,18 +1,17 @@
 from RFTLib.Require import *
+from RFTLib.Dev.Require import *
 
 from RFTLib.Core.Object import *
 from RFTLib.Core.Buffer import *
 from RFTLib.Core.Structure import *
 
+from RFTLib.Dev.Decorator import *
+
 from .C import *
 
 
 
-
-
 __all__ = ("RFT_Rypple_CPP",)
-
-
 
 
 
@@ -41,6 +40,7 @@ class RFT_Rypple_CPP(RFT_Object):
 
 
 
+	@RFT_Decorator.configure(static = True, eventsMax = 60)
 	def done(self):
 		return self.parent.C.done()
 

@@ -1,16 +1,15 @@
 from RFTLib.Require import *
+from RFTLib.Dev.Require import *
 
 from RFTLib.Core.Object import *
 from RFTLib.Core.Buffer import *
 from RFTLib.Core.Structure import *
 
-
+from RFTLib.Dev.Decorator import *
 
 
 
 __all__ = ("RFT_Rypple_C",)
-
-
 
 
 
@@ -42,73 +41,88 @@ class RFT_Rypple_C(RFT_Object):
 
 
 
+	@RFT_Decorator.configure(static = True, eventsMax = 30)
 	def executable(self, path:str):
 		self.scope.executable = path
 		return self
 
 
+	@RFT_Decorator.configure(static = True, eventsMax = 30)
 	def inFile(self, path:str):
 		self.scope.inFile = path
 		return self
 
+	@RFT_Decorator.configure(static = True, eventsMax = 30)
 	def outFile(self, path:str):
 		self.scope.outFile = path
 		return self
 
 
+	@RFT_Decorator.configure(static = True, eventsMax = 30)
 	def isStatic(self, value:bool = True):
 		self.scope.isStatic = value
 		return self
 
+	@RFT_Decorator.configure(static = True, eventsMax = 30)
 	def isShared(self, value:bool = True):
 		self.scope.shared = value
 		return self
 
+	@RFT_Decorator.configure(static = True, eventsMax = 30)
 	def isWindow(self, value:bool = True):
 		self.scope.isWindow = value
 		return self
 
-
+	@RFT_Decorator.configure(static = True, eventsMax = 30)
 	def includePath(self, path:str):
 		self.scope.includePath.append(path)
 		return self
 
+	@RFT_Decorator.configure(static = True, eventsMax = 30)
 	def libraryPath(self, path:str):
 		self.scope.libraryPath.append(path)
 		return self
 
+	@RFT_Decorator.configure(static = True, eventsMax = 30)
 	def library(self, name:str):
 		self.scope.library.append(name)
 		return self
 
 
+	@RFT_Decorator.configure(static = True, eventsMax = 30)
 	def version(self, value:str):
 		self.scope.version = value
 		return self
 
+	@RFT_Decorator.configure(static = True, eventsMax = 30)
 	def bit(self, value:int):
 		self.scope.bit = value
 		return self
 
+	@RFT_Decorator.configure(static = True, eventsMax = 30)
 	def compression(self, value:int):
 		self.scope.compression = value
 		return self
 
 
+	@RFT_Decorator.configure(static = True, eventsMax = 30)
 	def define(self, key:str, value:object = None):
 		self.scope.define[key] = value
 		return self
 
+	@RFT_Decorator.configure(static = True, eventsMax = 30)
 	def defineRemove(self, key:str):
 		self.scope.define.pop(key)
 		return self
 
 
+	@RFT_Decorator.configure(static = True, eventsMax = 30)
 	def args(self, *args:str | tuple | list):
 		self.scope.args += args
 		return self
 
 
+	@RFT_Decorator.configure(static = True, eventsMax = 30)
 	def done(self):
 		args = [self.scope.executable]
 
