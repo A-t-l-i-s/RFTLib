@@ -16,7 +16,7 @@ __all__ = ("RFT_Table",)
 
 
 class RFT_Table(RFT_Object):
-	def __init__(self, path:str, struct:dict | RFT_Object = None, *, default:str | bytes | dict | RFT_Object = {}, indent:bool = False):
+	def __init__(self, path:str, struct:dict | RFT_Object = None, *, indent:bool = False):
 		self.path = pathlib.Path(path)
 
 		self.updating = False
@@ -32,9 +32,6 @@ class RFT_Table(RFT_Object):
 			getEvent = self.getEvent,
 			setEvent = self.setEvent
 		)
-
-		# Set default buffer
-		self.default = RFT_Buffer(default)
 
 
 		# Check if path is a file
@@ -53,7 +50,7 @@ class RFT_Table(RFT_Object):
 	def getEvent(self, attr:str):
 		self.wait()
 
-		if (attr not in self.data):
+		if (not self.data.contains(attr)):
 	 		self.readFile(attr)
 	
 		return True
@@ -96,8 +93,8 @@ class RFT_Table(RFT_Object):
 
 		# Allocate new file if needed
 		if (not path.exists()):
-			with path.open("wb") as file:
-				file.write(self.default.data)
+			with path.open("w") as file:
+				file.write("{}")
 
 			# Log file creation
 			self.logger.log(
@@ -119,39 +116,46 @@ class RFT_Table(RFT_Object):
 		# Start Updating
 		self.updating = True
 
-		with RFT_Structure({}, getEvent = self.tableGetEvent, setEvent = self.tableSetEvent) as struct:
-			with RFT_Buffer() as buf:
-				# Read file data
-				with path.open("r") as file:
-					buf.readFile(file)
-					
-					try:
-						struct *= json.loads(buf.data)
 
-					except:
-						# Backup file
-						with path.with_suffix(".error").open("wb") as errFile:
-							errFile.write(buf.data)
+		with RFT_Buffer() as buf:
+			with path.open("rb") as file:
+				buf.readFile(file)
 
+				try:
+					data = json.loads(buf.data)
 
-						# Log reading error
-						self.logger.log(
-							RFT_Exception.Traceback(
-								attr
-							)
+				except:
+					data = {}
+
+					# Backup file
+					with path.with_suffix(".error").open("wb") as errFile:
+						errFile.write(buf.data)
+
+					# Log reading error
+					self.logger.log(
+						RFT_Exception.Traceback(
+							attr
 						)
+					)
 
-					else:
-						# Log file reading
-						self.logger.log(
-							RFT_Exception(
-								f"Loaded \"{path.as_posix()}\"",
-								attr
-							)
+				else:
+					# Log file reading
+					self.logger.log(
+						RFT_Exception(
+							f"Loaded \"{path.as_posix()}\"",
+							attr
 						)
+					)
 
-					finally:
-						self.data[attr] = struct
+		# Convert to structure
+		struct = RFT_Structure(
+			data,
+			getEvent = self.tableGetEvent,
+			setEvent = self.tableSetEvent
+		)
+
+		# Set value
+		self.data[attr] = struct
 
 		# End Updating
 		self.updating = False
@@ -164,27 +168,29 @@ class RFT_Table(RFT_Object):
 		path = self.touchFile(attr)
 
 		# Get structure
-		struct = self.data[attr].toDict()
+		struct = self.data[attr]
 
 		# Start Updating
 		self.updating = True
 
-		with path.open("wb") as file:
+		with path.open("w") as file:
 			try:
+				# Convert to dict
+				structD = struct.toDict()
+
 				# Dump json data to file
-				file.write(
-					json.dumps(
-						struct,
-						skipkeys = False,
-						default = lambda o: None,
-						indent = (
-							"\t" if (self.indent) else None
-						)
-					).encode("utf-8")
+				json.dump(
+					structD,
+					file,
+					skipkeys = False,
+					default = lambda o: None,
+					indent = (
+						"\t" if (self.indent) else None
+					)
 				)
 			
 			except:
-				file.write(self.default.data)
+				file.write("{}")
 
 				# Log writing error
 				self.logger.log(
