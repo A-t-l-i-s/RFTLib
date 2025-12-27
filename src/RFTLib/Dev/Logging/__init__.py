@@ -60,6 +60,10 @@ class RFT_Logging(RFT_Object):
 							)
 						# ~~~~~~~~~~~~~~~~~~~~~~~~
 
+						# Flush stream if available
+						if (stream.flush):
+							stream.obj.flush()
+
 
 					elif (stream.type == RFT_Logging.TYPES.FUNCTION):
 						# ~~~ Callback Function ~~
@@ -150,6 +154,7 @@ class RFT_Logging(RFT_Object):
 			self.streams[uid] = {
 				"obj": stream,
 				"binary": not isinstance(stream, io.TextIOBase),
+				"flush": hasattr(stream, "flush"),
 				"type": RFT_Logging.TYPES.STREAM
 			}
 
@@ -192,6 +197,7 @@ class RFT_Logging(RFT_Object):
 		self.streams[uid] = {
 			"obj": func,
 			"binary": None,
+			"flush": False,
 			"type": RFT_Logging.TYPES.FUNCTION
 		}
 
@@ -202,6 +208,7 @@ class RFT_Logging(RFT_Object):
 				self.streams[uid] = {
 					"obj": obj,
 					"binary": None,
+					"flush": False,
 					"type": RFT_Logging.TYPES.LOGGER
 				}
 

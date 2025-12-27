@@ -220,7 +220,7 @@ class RFT_Table(RFT_Object):
 	# ~~~~~~~~~~ File Saving ~~~~~~~~~
 	# ~~~~~~~ Save All ~~~~~~~
 	@RFT_Decorator
-	def saveAll(self, clear:bool = False):
+	def saveAll(self, *, clear:bool = False):
 		for k in self.data.keys():
 			self.writeFile(k)
 
@@ -229,7 +229,19 @@ class RFT_Table(RFT_Object):
 
 
 	# ~~~~~~ Save Every ~~~~~~
-	def saveEvery(self, secs:int | float):
+	def saveEvery(self, secs:int | float, *, clear:bool = False):
+		def callback():
+			# Reset running flag
+			self.running = True
+
+			while self.running:
+				# Delay in seconds
+				time.sleep(secs)
+
+				# Save all tables
+				self.saveAll(clear = clear)
+
+
 		# If thread is already running then wait for it to exit
 		if (self.thread is not None):
 			self.running = False
@@ -237,26 +249,14 @@ class RFT_Table(RFT_Object):
 
 		# Create new thread
 		self.thread = threading.Thread(
-			target = self.saveEvery_,
-			args = (secs,),
+			target = callback,
+			args = (),
 			kwargs = {},
 			daemon = True
 		)
 
 		# Start thread
 		self.thread.start()
-
-	# ~~~~~~~~ Thread ~~~~~~~~
-	def saveEvery_(self, secs:int | float):
-		# Reset running flag
-		self.running = True
-
-		while self.running:
-			# Delay in seconds
-			time.sleep(secs)
-
-			# Save all tables
-			self.saveAll()
 	# # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
