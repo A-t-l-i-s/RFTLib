@@ -220,9 +220,12 @@ class RFT_Table(RFT_Object):
 	# ~~~~~~~~~~ File Saving ~~~~~~~~~
 	# ~~~~~~~ Save All ~~~~~~~
 	@RFT_Decorator
-	def saveAll(self):
+	def saveAll(self, clear:bool = False):
 		for k in self.data.keys():
 			self.writeFile(k)
+
+			if (clear):
+				self.data.pop(k)
 
 
 	# ~~~~~~ Save Every ~~~~~~
