@@ -102,10 +102,12 @@ class RFT_WebApi(RFT_Object):
 	def load(self, path:str):
 		if (self.app is not None):
 			for attr, value in self.rulesInst.iterDir(path):
-				# Create log instance
+				uid = ".".join(attr)
+
+				# Log error
 				log = RFT_Exception(
 					"Failed",
-					".".join(attr)
+					uid
 				)
 
 				if (not isinstance(value, RFT_Exception)):
@@ -124,10 +126,15 @@ class RFT_WebApi(RFT_Object):
 								main.init()
 
 								# Wrap function
-								func = self.wrapEvent(main.event)
+								func = self.wrapEvent(main.event, uid)
 
-							except Exception as exc:
-								log.text = exc
+							except:
+								# Log error
+								self.logger.log(
+									RFT_Exception.Traceback(
+										(RFT_Exception.ERROR, uid)
+									)
+								)
 
 							else:
 								try:
@@ -139,8 +146,13 @@ class RFT_WebApi(RFT_Object):
 										methods = main.methods
 									)
 
-								except Exception as exc:
-									log.text = exc
+								except:
+									# Log error
+									self.logger.log(
+										RFT_Exception.Traceback(
+											(RFT_Exception.ERROR, uid)
+										)
+									)
 
 								else:
 									# Everything works
@@ -148,14 +160,19 @@ class RFT_WebApi(RFT_Object):
 
 				else:
 					# Assign log text to exception
-					log.text = value
+					self.logger.log(
+						RFT_Exception(
+							value,
+							uid
+						)
+					)
 
 				# Print log to console
 				self.logger.log(log)
 
 
 	@RFT_Decorator.configure(static = True)
-	def wrapEvent(self, func:object):
+	def wrapEvent(self, func:object, uid:str):
 		def wrapper(*args, **kwargs):
 			start = time.time()
 
@@ -166,7 +183,7 @@ class RFT_WebApi(RFT_Object):
 				response.headers["Server"] = f"{self.config.name}/{self.config.version}"
 
 				# Assign log status
-				logStatus = (FlaskRequest.remote_addr, FlaskRequest.endpoint)
+				logStatus = (FlaskRequest.remote_addr, uid)
 
 				try:
 					# Call function
@@ -182,7 +199,7 @@ class RFT_WebApi(RFT_Object):
 					# Log error
 					self.logger.log(
 						RFT_Exception.Traceback(
-							(*logStatus, RFT_Exception.ERROR)
+							(RFT_Exception.ERROR, *logStatus)
 						)
 					)
 
@@ -203,7 +220,7 @@ class RFT_WebApi(RFT_Object):
 							# Log error
 							self.logger.log(
 								RFT_Exception.Traceback(
-									(*logStatus, RFT_Exception.ERROR)
+									(RFT_Exception.ERROR, *logStatus)
 								)
 							)
 
@@ -213,10 +230,11 @@ class RFT_WebApi(RFT_Object):
 								buf.toStr()
 							)
 
+
 					# Update log
 					self.logger.log(
 						RFT_Exception(
-							f"{model.status} [{response.content_length}][{time.time() - start:.2f}ms]",
+							f"{FlaskRequest.endpoint} -> {model.status} [{response.content_length}][{time.time() - start:.2f}ms]",
 							logStatus
 						)
 					)

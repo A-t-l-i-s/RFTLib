@@ -166,6 +166,13 @@ class RFT_Logging(RFT_Object):
 		# Create path object
 		path = pathlib.Path(path)
 
+		# Make directory for file
+		if (not path.parent.is_dir()):
+			path.parent.mkdir(
+				parents = True,
+				exist_ok = True
+			)
+
 		# Open stream
 		stream = path.open("wb" if clear else "ab")
 
