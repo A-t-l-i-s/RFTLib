@@ -6,6 +6,8 @@ from RFTLib.Core.Buffer import *
 from RFTLib.Core.Exception import *
 from RFTLib.Core.Structure import *
 
+from RFTLib.Timer import *
+
 from RFTLib.Dev.Logging import *
 from RFTLib.Dev.Resource import *
 from RFTLib.Dev.Decorator import *
@@ -24,6 +26,7 @@ from flask import (
 	abort as FlaskAbort
 )
 
+from werkzeug.exceptions import HTTPException
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 
@@ -56,6 +59,8 @@ class RFT_WebApi(RFT_Object):
 			# Create App
 			self.app = Flask(config.name)
 			self.app.config.update(config.config)
+
+			self.app.errorhandler(HTTPException)(self.errorHandler)
 
 			# Log that server is good
 			self.logger.log("Initialized Server")
@@ -179,6 +184,7 @@ class RFT_WebApi(RFT_Object):
 
 			with RFT_Structure({"status": HTTPStatus.OK}) as model:
 				response = FlaskResponse()
+				response.code = HTTPStatus.OK
 				response.headers["Content-Type"] = "application/json; charset=utf-8"
 				response.headers["Server"] = f"{self.config.name}/{self.config.version}"
 
@@ -243,5 +249,33 @@ class RFT_WebApi(RFT_Object):
 					return response
 
 		return wrapper
+
+
+	@RFT_Decorator.configure(static = True)
+	def errorHandler(self, event:object):
+		with RFT_Structure({"status": event.code}) as model:
+			response = FlaskResponse()
+			response.code = HTTPStatus.OK
+			response.headers["Content-Type"] = "application/json; charset=utf-8"
+			response.headers["Server"] = f"{self.config.name}/{self.config.version}"
+
+			with RFT_Buffer() as buf:
+				buf += model
+
+				response.set_data(
+					buf.toStr()
+				)
+
+
+				# Update log
+				self.logger.log(
+					RFT_Exception(
+						f"{model.status}",
+						FlaskRequest.remote_addr
+					)
+				)
+
+				# Return response
+				return response
 
 
