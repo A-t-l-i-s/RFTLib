@@ -116,12 +116,12 @@ class RFT_WebApi(RFT_Object):
 				)
 
 				if (not isinstance(value, RFT_Exception)):
-					attrEnd = attr.pop(-1)
-					parent = self.rules.allocate(attr)
-					parent[attrEnd] = value
-
 					if (value.contains("Main")):
 						main = value.Main
+
+						attrEnd = attr.pop(-1)
+						parent = self.rules.allocate(attr)
+						parent[attrEnd] = main
 
 						if (issubclass(main, RFT_Object)):
 							main.uid = (*attr, attrEnd)
