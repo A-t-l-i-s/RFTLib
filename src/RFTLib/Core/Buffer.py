@@ -129,8 +129,8 @@ class RFT_Buffer(RFT_Object):
 					buf[size - i - 1] = (obj >> (8 * i)) & 0xff
 
 
-		# ~~~~~~ Structure ~~~~~~~
-		elif (isinstance(obj, dict | map | set | RFT_Structure)):
+		# ~~~~~~ Dictionary ~~~~~~
+		elif (isinstance(obj, dict | map | set)):
 			try:
 				objStr = json.dumps(
 					dict(obj),
@@ -140,6 +140,22 @@ class RFT_Buffer(RFT_Object):
 
 			except:
 				raise RFT_Exception("Failed to dump dictionary.")
+
+			else:
+				buf += bytearray(objStr, "utf-8")
+
+
+		# ~~~~~~ Structure ~~~~~~~
+		elif (isinstance(obj, RFT_Structure)):
+			try:
+				objStr = json.dumps(
+					obj.toDict(),
+					skipkeys = False,
+					default = lambda o: None
+				)
+
+			except:
+				raise RFT_Exception("Failed to dump RFT_Structure.")
 
 			else:
 				buf += bytearray(objStr, "utf-8")
