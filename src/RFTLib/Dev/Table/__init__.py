@@ -179,12 +179,9 @@ class RFT_Table(RFT_Object):
 
 		with path.open("w") as file:
 			try:
-				# Convert to dict
-				structD = struct.toDict()
-
 				# Dump json data to file
 				json.dump(
-					structD,
+					struct.normalize(),
 					file,
 					skipkeys = False,
 					default = lambda o: None,

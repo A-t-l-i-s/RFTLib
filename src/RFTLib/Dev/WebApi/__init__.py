@@ -278,4 +278,3 @@ class RFT_WebApi(RFT_Object):
 				# Return response
 				return response
 
-

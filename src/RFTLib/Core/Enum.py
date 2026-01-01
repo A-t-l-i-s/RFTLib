@@ -85,6 +85,17 @@ class RFT_Enum(RFT_Object):
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+	# ~~~~~~~ Normalize ~~~~~~
+	def normalize(self) -> dict:
+		out = {}
+
+		for k, v in self.items():
+			out[k] = v
+
+		return out
+	# ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 	# ~~~~~ Get Raw Data ~~~~~
 	@property
 	def data(self) -> dict:
@@ -125,17 +136,4 @@ class RFT_Enum(RFT_Object):
 	def contains(self, key:str) -> bool:
 		return key in self.keys()
 
-
-	# ~~~~~ To Dictionary ~~~~
-	def toDict(self) -> dict:
-		out = {}
-
-		for k, v in self.items():
-			if (isinstance(v, RFT_Structure | RFT_Enum)):
-				out[k] = v.toDict()
-
-			else:
-				out[k] = v
-
-		return out
 

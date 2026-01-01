@@ -1,6 +1,7 @@
 from RFTLib.Require import *
 
 from .Object import *
+from .Enum import *
 from .Structure import *
 from .Exception import *
 
@@ -86,6 +87,12 @@ class RFT_Buffer(RFT_Object):
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+	# ~~~~~~~ Normalize ~~~~~~
+	def normalize(self) -> bytearray:
+		return self.data
+	# ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 	# ~~~~~~~ Raw Data ~~~~~~~
 	@property
 	def data(self) -> bytearray:
@@ -146,10 +153,10 @@ class RFT_Buffer(RFT_Object):
 
 
 		# ~~~~~~ Structure ~~~~~~~
-		elif (isinstance(obj, RFT_Structure)):
+		elif (isinstance(obj, RFT_Structure | RFT_Enum)):
 			try:
 				objStr = json.dumps(
-					obj.toDict(),
+					obj.normalize(),
 					skipkeys = False,
 					default = lambda o: None
 				)

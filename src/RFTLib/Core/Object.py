@@ -21,6 +21,12 @@ class RFT_Object(object):
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+	# ~~~~~~~ Normalize ~~~~~~
+	def normalize(self) -> object:
+		return None
+	# ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 	# ~~~~~~~~~~~~ Context ~~~~~~~~~~~
 	def __enter__(self) -> object:
 		return self
@@ -31,7 +37,7 @@ class RFT_Object(object):
 
 
 	# ~~~~~~~~~ Magic Methods ~~~~~~~~
-	def __str_function__(self, obj:object, *, key:str = "None") -> str:
+	def __str_function__(self, obj:object, *, key:str = None) -> str:
 		funcName = getattr(obj, "__name__", key)
 		out = ""
 

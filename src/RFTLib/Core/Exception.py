@@ -64,6 +64,12 @@ class RFT_Exception(BaseException, RFT_Object):
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+	# ~~~~~~~~~~~ Normalize ~~~~~~~~~~
+	def normalize(self) -> str:
+		return self.message()
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 	# ~~~~~~~~~~~~ Message ~~~~~~~~~~~
 	def message(self) -> str:
 		# Get current datetime

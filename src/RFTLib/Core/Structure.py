@@ -1,7 +1,6 @@
 from RFTLib.Require import *
 
 from .Object import *
-from .Enum import *
 from .Exception import *
 
 
@@ -49,8 +48,10 @@ class RFT_Structure(RFT_Object):
 		self.default(obj)
 		return self
 
-	def __sub__(self, attr:str) -> RFT_Object:
-		self.pop(attr)
+	def __sub__(self, obj:dict | RFT_Object) -> RFT_Object:
+		for k in obj.keys():
+			if (self.contains(k)):
+				self.pop(k)
 		return self
 
 	def __mul__(self, obj:dict | RFT_Object) -> RFT_Object:
@@ -144,6 +145,21 @@ class RFT_Structure(RFT_Object):
 	def __rft_set_event__(self, key:str) -> bool:
 		return True
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+	# ~~~~~~~ Normalize ~~~~~~
+	def normalize(self) -> dict:
+		out = {}
+
+		for k, v in self.items():
+			if (isinstance(v, RFT_Object)):
+				out[k] = v.normalize()
+
+			else:
+				out[k] = v
+
+		return out
+	# ~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 	# ~~~~~~~ Raw Data ~~~~~~~
@@ -281,19 +297,5 @@ class RFT_Structure(RFT_Object):
 				self[k] = v
 
 		return self
-
-
-	# ~~~~~ To Dictionary ~~~~
-	def toDict(self) -> dict:
-		out = {}
-
-		for k, v in self.items():
-			if (isinstance(v, RFT_Structure | RFT_Enum)):
-				out[k] = v.toDict()
-
-			else:
-				out[k] = v
-
-		return out
 
 
