@@ -150,7 +150,7 @@ class RFT_Resource(RFT_Object):
 
 	# ~~~~~~~~ Load Resources ~~~~~~~~
 	@RFT_Decorator
-	def load(self, path:str, struct:RFT_Object = None, *, errEvent:object = None) -> RFT_Object:
+	def load(self, path:str, struct:RFT_Object = None, *, single:bool = False, errEvent:object = None) -> RFT_Object:
 		# Create path object
 		path = pathlib.Path(path)
 
@@ -200,10 +200,17 @@ class RFT_Resource(RFT_Object):
 						raise value
 
 				else:
-					# Get parent of attribute and assign the key to the value
-					attrEnd = attr.pop(-1)
-					parent = structOut.allocate(attr)
-					parent[attrEnd] = value
+					if (single):
+						# Only a single namespace
+						structOut[
+							"_".join(attr).replace(".", "_")
+						] = value
+
+					else:
+						# Get parent of attribute and assign the key to the value
+						attrEnd = attr.pop(-1)
+						parent = structOut.allocate(attr)
+						parent[attrEnd] = value
 
 
 			# Return structure at end
