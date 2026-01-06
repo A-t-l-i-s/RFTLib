@@ -28,6 +28,7 @@ class RFT_Resource(RFT_Object):
 	def __init__(self, entries:dict[str, object] | RFT_Object):
 		# Assign entries
 		self.entries = RFT_Structure(entries)
+		self.timestamps = RFT_Structure()
 
 		# Create logger
 		self.logger = RFT_Logging()

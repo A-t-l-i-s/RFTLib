@@ -12,7 +12,7 @@ __all__ = ("RFT_Buffer",)
 
 
 class RFT_Buffer(RFT_Object):
-	def __init__(self, obj:bytes | bytearray | str | tuple | list | range | int | dict | map | set | RFT_Object = None):
+	def __init__(self, obj:bytes | bytearray | str | tuple | list | range | int | RFT_Object = None):
 		# Define main data structure
 		self.setattr("__rft_data__", bytearray())
 
@@ -22,7 +22,7 @@ class RFT_Buffer(RFT_Object):
 
 	# ~~~~~~~~~ Magic Methods ~~~~~~~~
 	# ~~~~~~ Arithmetic ~~~~~~
-	def __add__(self, obj:bytes | bytearray | str | tuple | list | range | int | dict | map | set | RFT_Object) -> RFT_Object:
+	def __add__(self, obj:bytes | bytearray | str | tuple | list | range | int | RFT_Object) -> RFT_Object:
 		return self.add(obj)
 
 	def __sub__(self, length:int) -> RFT_Object:
@@ -100,7 +100,7 @@ class RFT_Buffer(RFT_Object):
 
 
 	# ~~~~~~~~~~ Add ~~~~~~~~~
-	def add(self, obj:bytes | bytearray | str | tuple | list | range | int | dict | map | set | RFT_Object) -> RFT_Object:
+	def add(self, obj:bytes | bytearray | str | tuple | list | range | int | RFT_Object) -> RFT_Object:
 		buf = bytearray()
 
 		# ~~~~~~~~~ None ~~~~~~~~~
@@ -134,38 +134,6 @@ class RFT_Buffer(RFT_Object):
 				
 				for i in range(size):
 					buf[size - i - 1] = (obj >> (8 * i)) & 0xff
-
-
-		# ~~~~~~ Dictionary ~~~~~~
-		elif (isinstance(obj, dict | map | set)):
-			try:
-				objStr = json.dumps(
-					dict(obj),
-					skipkeys = False,
-					default = lambda o: None
-				)
-
-			except:
-				raise RFT_Exception("Failed to dump dictionary.")
-
-			else:
-				buf += bytearray(objStr, "utf-8")
-
-
-		# ~~~~~~ Structure ~~~~~~~
-		elif (isinstance(obj, RFT_Structure | RFT_Enum)):
-			try:
-				objStr = json.dumps(
-					obj.normalize(),
-					skipkeys = False,
-					default = lambda o: None
-				)
-
-			except:
-				raise RFT_Exception("Failed to dump RFT_Structure.")
-
-			else:
-				buf += bytearray(objStr, "utf-8")
 
 
 		# ~~~~~~ RFT Buffer ~~~~~~
@@ -211,7 +179,7 @@ class RFT_Buffer(RFT_Object):
 
 
 	# ~~~~~~~~~ Find ~~~~~~~~~
-	def find(self, obj:bytes | bytearray | str | tuple | list | range | int | dict | map | set | RFT_Object) -> int:
+	def find(self, obj:bytes | bytearray | str | tuple | list | range | int | RFT_Object) -> int:
 		with RFT_Buffer(obj) as buf:
 			return self.__dict__["__rft_data__"].find(buf.data)
 
