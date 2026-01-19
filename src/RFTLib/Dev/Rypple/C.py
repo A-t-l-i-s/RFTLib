@@ -16,113 +16,114 @@ __all__ = ("RFT_Rypple_C",)
 class RFT_Rypple_C(RFT_Object):
 	def __init__(self, parent):
 		self.parent = parent
-		self.scope = RFT_Structure()
+		self.scope = RFT_Structure({
+			"inFile": None,
+			"outFile": None,
+			
+			"isStatic": False,
+			"isShared": False,
+			"isWindow": False,
+			
+			"includePath": [],
+			"libraryPath": [],
+			
+			"library": [],
+			
+			"version": None,
+			"bit": None,
+			"compression": None,
+			
+			"define": {},
 
-		self.scope.inFile:str = None
-		self.scope.outFile:str = None
-
-		self.scope.isStatic:bool = False
-		self.scope.isShared:bool = False
-		self.scope.isWindow:bool = False
-
-		self.scope.includePath:list = []
-		self.scope.libraryPath:list = []
-
-		self.scope.library:list = []
-		self.scope.version:str = None
-
-		self.scope.bit:int = None
-		self.scope.compression:int = None
-
-		self.scope.define:RFT_Structure = RFT_Structure()
-
-		self.scope.args:list = []
-		self.scope.executable:str = "gcc"
+			"args": [],
+			"executable": "gcc",
+		})
 
 
 
-	@RFT_Decorator.configure(static = True, eventsMax = 30)
+	@RFT_Decorator.configure()
 	def executable(self, path:str):
 		self.scope.executable = path
 		return self
 
 
-	@RFT_Decorator.configure(static = True, eventsMax = 30)
+	@RFT_Decorator.configure()
 	def inFile(self, path:str):
 		self.scope.inFile = path
 		return self
 
-	@RFT_Decorator.configure(static = True, eventsMax = 30)
+	@RFT_Decorator.configure()
 	def outFile(self, path:str):
 		self.scope.outFile = path
 		return self
 
 
-	@RFT_Decorator.configure(static = True, eventsMax = 30)
+	@RFT_Decorator.configure()
 	def isStatic(self, value:bool = True):
 		self.scope.isStatic = value
 		return self
 
-	@RFT_Decorator.configure(static = True, eventsMax = 30)
+	@RFT_Decorator.configure()
 	def isShared(self, value:bool = True):
 		self.scope.shared = value
 		return self
 
-	@RFT_Decorator.configure(static = True, eventsMax = 30)
+	@RFT_Decorator.configure()
 	def isWindow(self, value:bool = True):
 		self.scope.isWindow = value
 		return self
 
-	@RFT_Decorator.configure(static = True, eventsMax = 30)
+	@RFT_Decorator.configure()
 	def includePath(self, path:str):
 		self.scope.includePath.append(path)
 		return self
 
-	@RFT_Decorator.configure(static = True, eventsMax = 30)
+	@RFT_Decorator.configure()
 	def libraryPath(self, path:str):
 		self.scope.libraryPath.append(path)
 		return self
 
-	@RFT_Decorator.configure(static = True, eventsMax = 30)
+	@RFT_Decorator.configure()
 	def library(self, name:str):
 		self.scope.library.append(name)
 		return self
 
 
-	@RFT_Decorator.configure(static = True, eventsMax = 30)
+	@RFT_Decorator.configure()
 	def version(self, value:str):
 		self.scope.version = value
 		return self
 
-	@RFT_Decorator.configure(static = True, eventsMax = 30)
+	@RFT_Decorator.configure()
 	def bit(self, value:int):
 		self.scope.bit = value
 		return self
 
-	@RFT_Decorator.configure(static = True, eventsMax = 30)
+	@RFT_Decorator.configure()
 	def compression(self, value:int):
 		self.scope.compression = value
 		return self
 
 
-	@RFT_Decorator.configure(static = True, eventsMax = 30)
+	@RFT_Decorator.configure()
 	def define(self, key:str, value:object = None):
 		self.scope.define[key] = value
 		return self
 
-	@RFT_Decorator.configure(static = True, eventsMax = 30)
+	@RFT_Decorator.configure()
 	def defineRemove(self, key:str):
-		self.scope.define.pop(key)
+		if (self.scope.define.contains(key)):
+			self.scope.define.pop(key)
 		return self
 
 
-	@RFT_Decorator.configure(static = True, eventsMax = 30)
+	@RFT_Decorator.configure()
 	def args(self, *args:str | tuple | list):
 		self.scope.args += args
 		return self
 
 
-	@RFT_Decorator.configure(static = True, eventsMax = 30)
+	@RFT_Decorator.configure()
 	def done(self):
 		args = [self.scope.executable]
 
@@ -173,7 +174,6 @@ class RFT_Rypple_C(RFT_Object):
 
 
 		args += self.scope.args
-
 
 		return self.parent.Process.run(*args)
 

@@ -40,7 +40,7 @@ class RFT_Rypple_CPP(RFT_Object):
 
 
 
-	@RFT_Decorator.configure(static = True, eventsMax = 60)
+	@RFT_Decorator.configure()
 	def done(self):
 		return self.parent.C.done()
 

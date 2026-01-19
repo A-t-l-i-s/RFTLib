@@ -136,7 +136,6 @@ class RFT_Object(object):
 		# Define items
 		items = {}
 
-
 		for k in dir(self):
 			try:
 				# Get value
@@ -153,7 +152,7 @@ class RFT_Object(object):
 
 			finally:
 				# If key is blacklisted
-				if (k in ("__class__", "__module__", "__dict__", "getattr", "setattr", "hasattr")):
+				if (k in ("__class__", "__module__", "__dict__", "getattr", "setattr", "hasattr", "normalize")):
 					...
 
 				# If value is blacklisted

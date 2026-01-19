@@ -105,16 +105,20 @@ class RFT_Decorator(RFT_Object):
 			"end": 0.0,
 			"error": None,
 			"returned": None,
-			"args": args,
-			"kwargs": kwargs
+			"args": [],
+			"kwargs": {}
 		})
 
-		# Add to events list
-		self.events.append(event)
-		self.eventsLen += 1
+		if (self.eventsMax > 0):
+			# Assign args/kwargs
+			event.args = args
+			event.kwargs = kwargs
 
-		# Manage limited logs
-		if (self.eventsMax > -1):
+			# Add to events list
+			self.events.append(event)
+			self.eventsLen += 1
+
+			# Manage limited logs
 			if (self.eventsLen > self.eventsMax):
 				self.events.pop(0)
 				self.eventsLen -= 1
@@ -136,8 +140,8 @@ class RFT_Decorator(RFT_Object):
 		if (self.logBefore):
 			o = RFT_Object()
 			o.__dict__["start"] = event.start
-			o.__dict__["args"] = event.args
-			o.__dict__["kwargs"] = event.kwargs
+			o.__dict__["args"] = args
+			o.__dict__["kwargs"] = kwargs
 
 			self.logger.log(
 				RFT_Exception(
@@ -169,8 +173,8 @@ class RFT_Decorator(RFT_Object):
 				o = RFT_Object()
 
 				if (not self.logBefore):
-					o.__dict__["args"] = event.args
-					o.__dict__["kwargs"] = event.kwargs
+					o.__dict__["args"] = args
+					o.__dict__["kwargs"] = kwargs
 
 				o.__dict__["start"] = event.start
 				o.__dict__["end"] = event.end

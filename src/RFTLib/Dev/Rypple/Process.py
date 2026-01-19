@@ -17,17 +17,17 @@ __all__ = ("RFT_Rypple_Process",)
 class RFT_Rypple_Process(RFT_Object):
 	def __init__(self, parent):
 		self.parent = parent
-		self.scope = RFT_Structure()
-		
-		self.scope.latest:list[object, list] = [None, []]
-		self.scope.popout:bool = False
-		self.scope.processes:list = []
+		self.scope = RFT_Structure({
+			"latest": [None, []],
+			"popout": False,
+			"processes": []
+		})
 
 
 
-	@RFT_Decorator.configure(static = True, eventsMax = 30)
+	@RFT_Decorator.configure()
 	def run(self, *args:tuple | list):
-		args = shlex.split(shlex.join(args))
+		args = shlex.split(" ".join(args))
 
 		self.scope.latest[0] = self.run
 		self.scope.latest[1] = args
@@ -42,9 +42,9 @@ class RFT_Rypple_Process(RFT_Object):
 		return self
 
 
-	@RFT_Decorator.configure(static = True, eventsMax = 30)
+	@RFT_Decorator.configure()
 	def capture(self, *args:tuple | list):
-		args = shlex.split(shlex.join(args))
+		args = shlex.split(" ".join(args))
 
 		self.scope.latest[0] = self.capture
 		self.scope.latest[1] = args
@@ -64,13 +64,13 @@ class RFT_Rypple_Process(RFT_Object):
 		return text
 
 
-	@RFT_Decorator.configure(static = True, eventsMax = 30)
+	@RFT_Decorator.configure()
 	def again(self):
 		self.scope.latest[0](*self.scope.latest[1])
 		return self
 
 
-	@RFT_Decorator.configure(static = True, eventsMax = 30)
+	@RFT_Decorator.configure()
 	def wait(self):
 		for p in self.scope.processes:
 			p.wait()
@@ -79,7 +79,7 @@ class RFT_Rypple_Process(RFT_Object):
 		return self
 
 
-	@RFT_Decorator.configure(static = True, eventsMax = 30)
+	@RFT_Decorator.configure()
 	def kill(self):
 		for p in self.scope.processes:
 			p.kill()
@@ -89,7 +89,7 @@ class RFT_Rypple_Process(RFT_Object):
 		return self
 
 
-	@RFT_Decorator.configure(static = True, eventsMax = 30)
+	@RFT_Decorator.configure()
 	def popout(self, value:bool = True):
 		self.scope.popout = value
 		return self

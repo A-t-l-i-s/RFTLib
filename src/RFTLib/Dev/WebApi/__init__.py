@@ -43,9 +43,7 @@ class RFT_WebApi(RFT_Object):
 	logger = RFT_Logging()
 
 	rules = RFT_Structure()
-	rulesInst = RFT_Resource({
-		r"py": RFT_Resource.PYTHON_Entry
-	})
+	rulesInst = None
 	# ~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -54,7 +52,7 @@ class RFT_WebApi(RFT_Object):
 
 
 	@RFT_Decorator.configure(static = True)
-	def init(self, config:RFT_Structure):
+	def init(self, config:RFT_Structure, path:str):
 		if (self.app is None):
 			# Create App
 			self.app = Flask(config.name)
@@ -73,6 +71,14 @@ class RFT_WebApi(RFT_Object):
 
 			# Override config
 			self.config *= config
+
+			# Create resource manager
+			self.rulesInst = rulesInst = RFT_Resource(
+				path,
+				{
+					r"py": RFT_Resource_Entries.PYTHON
+				}
+			)
 
 
 	@RFT_Decorator.configure(static = True)
@@ -104,9 +110,9 @@ class RFT_WebApi(RFT_Object):
 
 
 	@RFT_Decorator.configure(static = True)
-	def load(self, path:str):
+	def load(self):
 		if (self.app is not None):
-			for attr, value in self.rulesInst.iterDir(path):
+			for attr, value in self.rulesInst.iter():
 				uid = ".".join(attr)
 
 				# Log error
@@ -214,27 +220,37 @@ class RFT_WebApi(RFT_Object):
 						model.status = c
 
 				finally:
-					with RFT_Buffer() as buf:
-						try:
-							buf += model
+					try:
+						buf = json.dumps(
+							model.normalize(),
+							skipkeys = False,
+							default = lambda o: None,
+							indent = None
+						)
 
-						except:
-							buf += {
+					except:
+						buf = json.dumps(
+							{
 								"status": HTTPStatus.INTERNAL_SERVER_ERROR
-							}
+							},
+							skipkeys = False,
+							default = lambda o: None,
+							indent = None
+						)
 
-							# Log error
-							self.logger.log(
-								RFT_Exception.Traceback(
-									(RFT_Exception.ERROR, *logStatus)
-								)
+						# Log error
+						self.logger.log(
+							RFT_Exception.Traceback(
+								(RFT_Exception.ERROR, *logStatus)
 							)
+						)
 
 
-						finally:
-							response.set_data(
-								buf.toStr()
-							)
+					finally:
+						# Assign data
+						response.set_data(
+							buf
+						)
 
 
 					# Update log
@@ -259,22 +275,27 @@ class RFT_WebApi(RFT_Object):
 			response.headers["Content-Type"] = "application/json; charset=utf-8"
 			response.headers["Server"] = f"{self.config.name}/{self.config.version}"
 
-			with RFT_Buffer() as buf:
-				buf += model
+			buf = json.dumps(
+				model.normalize(),
+				skipkeys = False,
+				default = lambda o: None,
+				indent = None
+			)
 
-				response.set_data(
-					buf.toStr()
+			# Assign data
+			response.set_data(
+				buf
+			)
+
+
+			# Update log
+			self.logger.log(
+				RFT_Exception(
+					f"{model.status}",
+					FlaskRequest.remote_addr
 				)
+			)
 
-
-				# Update log
-				self.logger.log(
-					RFT_Exception(
-						f"{model.status}",
-						FlaskRequest.remote_addr
-					)
-				)
-
-				# Return response
-				return response
+			# Return response
+			return response
 

@@ -34,18 +34,6 @@ class RFT_Table(RFT_Object):
 		)
 
 
-		# Check if path is a file
-		if (self.path.is_file()):
-			raise RFT_Exception("Directory is file")
-
-		else:
-			# Verify integrity of path
-			self.path.mkdir(
-				parents = True,
-				exist_ok = True
-			)
-
-
 	# ~~~~~~~~~~~~ Events ~~~~~~~~~~~~
 	@RFT_Decorator
 	def getEvent(self, attr:str):
@@ -71,6 +59,30 @@ class RFT_Table(RFT_Object):
 		self.wait()
 		return True
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+	# ~~~~~~ Verify Dir ~~~~~~
+	def verify(self):
+		# Check if path is a file
+		if (not self.path.exists()):
+			try:
+				# Verify integrity of path
+				self.path.mkdir(
+					parents = True,
+					exist_ok = True
+				)
+
+				# Log success
+				self.logger.log(
+					f"Created directory: \"{self.path.as_posix()}\"",
+				)
+
+			except:
+				# Log failure
+				self.logger.log(
+					f"Failed to create directory: \"{self.path.as_posix()}\"",
+				)
+	# ~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 	# ~~~~~~~~~ Wait ~~~~~~~~~

@@ -16,25 +16,25 @@ __all__ = ("RFT_Rypple_Filesystem",)
 class RFT_Rypple_Filesystem(RFT_Object):
 	def __init__(self, parent):
 		self.parent = parent
-		self.scope = RFT_Structure()
+		self.scope = RFT_Structure({
+			"path": pathlib.Path(".")
+		})
 
-		self.scope.path = pathlib.Path("file")
 
 
-
-	@RFT_Decorator.configure(static = True, eventsMax = 30)
+	@RFT_Decorator.configure()
 	def path(self, path:str):
 		self.scope.path = pathlib.Path(path)
 		return self
 
 
-	@RFT_Decorator.configure(static = True, eventsMax = 30)
+	@RFT_Decorator.configure()
 	def touch(self):
 		self.scope.path.touch()
 		return self
 
 
-	@RFT_Decorator.configure(static = True, eventsMax = 30)
+	@RFT_Decorator.configure()
 	def write(self, buf:RFT_Buffer):
 		buf = RFT_Buffer(buf)
 
@@ -44,7 +44,7 @@ class RFT_Rypple_Filesystem(RFT_Object):
 		return self
 
 
-	@RFT_Decorator.configure(static = True, eventsMax = 30)
+	@RFT_Decorator.configure()
 	def remove(self):
 		if (self.scope.path.is_file()):
 			os.remove(self.scope.path)
@@ -52,7 +52,7 @@ class RFT_Rypple_Filesystem(RFT_Object):
 		return self
 
 
-	@RFT_Decorator.configure(static = True, eventsMax = 30)
+	@RFT_Decorator.configure()
 	def chdir(self, path:str = None):
 		if (path == None):
 			path = self.scope.path
