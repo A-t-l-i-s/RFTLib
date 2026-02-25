@@ -138,17 +138,17 @@ class RFT_Decorator(RFT_Object):
 
 		# If function should log that it's about to be called
 		if (self.logBefore):
-			o = RFT_Object()
-			o.__dict__["start"] = event.start
-			o.__dict__["args"] = args
-			o.__dict__["kwargs"] = kwargs
+			with RFT_Object() as o:
+				o.__dict__["start"] = event.start
+				o.__dict__["args"] = args
+				o.__dict__["kwargs"] = kwargs
 
-			self.logger.log(
-				RFT_Exception(
-					str(o),
-					o.__str_function__(self.func)
+				self.logger.log(
+					RFT_Exception(
+						str(o),
+						o.__str_function__(self.func)
+					)
 				)
-			)
 
 
 		try:
@@ -170,25 +170,24 @@ class RFT_Decorator(RFT_Object):
 			event.end = time.time()
 
 			if (self.log):
-				o = RFT_Object()
+				with RFT_Object() as o:
+					if (not self.logBefore):
+						o.__dict__["args"] = args
+						o.__dict__["kwargs"] = kwargs
 
-				if (not self.logBefore):
-					o.__dict__["args"] = args
-					o.__dict__["kwargs"] = kwargs
+					o.__dict__["start"] = event.start
+					o.__dict__["end"] = event.end
+					o.__dict__["error"] = event.error
+					o.__dict__["returned"] = event.returned
+					o.__dict__["took"] = f"{(event.end - event.start) * 1000:.2f}ms"
 
-				o.__dict__["start"] = event.start
-				o.__dict__["end"] = event.end
-				o.__dict__["error"] = event.error
-				o.__dict__["returned"] = event.returned
-				o.__dict__["took"] = f"{(event.end - event.start) * 1000:.2f}ms"
-
-				# Log after function is called and everything is settled
-				self.logger.log(
-					RFT_Exception(
-						str(o),
-						o.__str_function__(self.func)
+					# Log after function is called and everything is settled
+					self.logger.log(
+						RFT_Exception(
+							str(o),
+							o.__str_function__(self.func)
+						)
 					)
-				)
 
 
 		if (event.error is not None):

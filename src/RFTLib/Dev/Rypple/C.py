@@ -16,6 +16,7 @@ __all__ = ("RFT_Rypple_C",)
 class RFT_Rypple_C(RFT_Object):
 	def __init__(self, parent):
 		self.parent = parent
+
 		self.scope = RFT_Structure({
 			"inFile": None,
 			"outFile": None,
@@ -65,7 +66,7 @@ class RFT_Rypple_C(RFT_Object):
 
 	@RFT_Decorator.configure()
 	def isShared(self, value:bool = True):
-		self.scope.shared = value
+		self.scope.isShared = value
 		return self
 
 	@RFT_Decorator.configure()

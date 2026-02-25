@@ -76,10 +76,10 @@ class RFT_Logging(RFT_Object):
 									uid
 								)
 
-							except Exception as exc:
+							except:
 								# Log function exception but dont call function again
 								self.logRaw(
-									RFT_Exception(exc, uid).message(),
+									RFT_Exception.Traceback(uid).message(),
 									uid,
 									end = end,
 									forced = True
@@ -91,7 +91,7 @@ class RFT_Logging(RFT_Object):
 						# ~~~~~~~~ Logger ~~~~~~~~
 						stream.obj.logRaw(
 							RFT_Exception(obj, uid),
-							end = True,
+							end = end,
 							forced = forced
 						)
 						# ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -183,15 +183,14 @@ class RFT_Logging(RFT_Object):
 		)
 
 
-	def addLogFile(self, path:str):
+	def addLogFile(self, path:str, uid:str):
 		# Create path object
 		path = pathlib.Path(path)
 
 		# Get current datetime
 		timestamp = datetime.datetime.now()
 
-		uid = f"{timestamp.month:>02}-{timestamp.day:>02}-{timestamp.year:>04}"
-		path /= (uid + ".log")
+		path /= f"{timestamp.month:>02}-{timestamp.day:>02}-{timestamp.year:>04}.log"
 
 		self.addFile(
 			path,

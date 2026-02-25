@@ -44,7 +44,7 @@ class RFT_Resource(RFT_Object):
 	# ~~~~~~ Verify Dir ~~~~~~
 	def verify(self):
 		# Check if path is a file
-		if (not self.path.exists()):
+		if (not self.path.is_dir()):
 			try:
 				# Verify integrity of path
 				self.path.mkdir(
@@ -66,23 +66,23 @@ class RFT_Resource(RFT_Object):
 
 
 	# ~~~~~~~~ Iter Resources ~~~~~~~~
-	def iter(self, *, onlyUpdated:bool = False) -> tuple[str, object]:
+	def iter(self, **kwargs:dict) -> tuple[str, object]:
 		if (self.path.exists()):
 			if (self.path.is_dir()):
 				# Iter directory
-				for attr, value in self.iterDir(onlyUpdated = onlyUpdated):
+				for attr, value in self.iterDir(**kwargs):
 					yield (attr, value)
 
 			else:
 				# Iter zip file
-				for attr, value in self.iterZip(onlyUpdated = onlyUpdated):
+				for attr, value in self.iterZip(**kwargs):
 					yield (attr, value)
 
 		else:
 			raise RFT_Exception("Directory doesn't exist")
 
 
-	def iterDir(self, *, onlyUpdated:bool = False) -> tuple[str, object]:
+	def iterDir(self, *, onlyUpdated:bool = False, recursionLimit:int = -1) -> tuple[str, object]:
 		if (self.path.exists()):
 			if (self.path.is_dir()):
 				for file in self.path.rglob("*.*"):
@@ -90,69 +90,76 @@ class RFT_Resource(RFT_Object):
 						# Get path relative to current path
 						rel = file.relative_to(self.path)
 
-						# Get entry
-						entry = self.getEntry(rel)
-
-						if (entry is not None):
-							# Create attribute for structure
-							attr = self.formatAttr(
-								rel.parent.as_posix().replace("/", "."),
-								rel.stem.replace(".", "_")
+						# Check recursion limit
+						if (recursionLimit > -1 and len(rel.parts) > recursionLimit + 1):
+							self.logger.log(
+								f"Skipped \"{rel.as_posix()}\""
 							)
 
-							# Get uid
-							uid = "-".join(attr).replace(".", "-")
+						else:
+							# Get entry
+							entry = self.getEntry(rel)
 
-							# Get stat
-							stat = file.stat()
-							timestamp = stat.st_mtime
-							update = True
-
-							# Check if already loaded and if file was edited after that
-							if (self.timestamps.contains(uid)):
-								if (self.timestamps[uid] >= timestamp):
-									update = False
-
-
-							if (onlyUpdated):
-								# Yield only attribute to signify update
-								yield (
-									attr,
-									update
+							if (entry is not None):
+								# Create attribute for structure
+								attr = self.formatAttr(
+									rel.parent.as_posix().replace("/", "."),
+									rel.stem.replace(".", "_")
 								)
 
-							else:
-								if (update):
-									# Open file
-									with file.open("rb") as fileIO:
-										try:
-											v = entry.__call__(fileIO)
+								# Get uid
+								uid = rel.as_posix()
 
-										except:
-											v = RFT_Exception.Traceback(
-												(RFT_Exception.ERROR, entry.__name__, ".".join(attr))
-											)
+								# Get stat
+								stat = file.stat()
+								timestamp = stat.st_mtime
+								update = True
 
-											# Log exception
-											self.logger.log(v)
+								# Check if already loaded and if file was edited after that
+								if (self.timestamps.contains(uid)):
+									if (self.timestamps[uid] >= timestamp):
+										update = False
 
-										else:
-											# Log file found
-											self.logger.log(
-												RFT_Exception(
-													f"Loaded \"{rel.as_posix()}\"",
-													(entry.__name__, ".".join(attr))
+
+								if (onlyUpdated):
+									# Yield only attribute to signify update
+									yield (
+										attr,
+										update
+									)
+
+								else:
+									if (update):
+										# Open file
+										with file.open("rb") as fileIO:
+											try:
+												v = entry.__call__(fileIO)
+
+											except:
+												v = RFT_Exception.Traceback(
+													(RFT_Exception.ERROR, entry.__name__, ".".join(attr))
 												)
-											)
 
-											# Update timestamp
-											self.timestamps[uid] = timestamp
+												# Log exception
+												self.logger.log(v)
 
-										finally:
-											yield (
-												attr,
-												v
-											)
+											else:
+												# Log file found
+												self.logger.log(
+													RFT_Exception(
+														f"Loaded \"{rel.as_posix()}\"",
+														(entry.__name__, ".".join(attr))
+													)
+												)
+
+											finally:
+												# Update timestamp
+												self.timestamps[uid] = timestamp
+
+												yield (
+													attr,
+													v
+												)
 
 			else:
 				raise RFT_Exception("Directory is file")
@@ -160,7 +167,7 @@ class RFT_Resource(RFT_Object):
 			raise RFT_Exception("Directory doesn't exist")
 
 
-	def iterZip(self, *, onlyUpdated:bool = False) -> tuple[str, object]:
+	def iterZip(self, *, onlyUpdated:bool = False, recursionLimit:int = -1) -> tuple[str, object]:
 		if (self.path.exists()):
 			if (self.path.is_file()):
 					with zipfile.ZipFile(self.path, "r") as zfile:
@@ -172,69 +179,76 @@ class RFT_Resource(RFT_Object):
 								# Create path
 								rel = pathlib.Path(name)
 
-								# Get entry
-								entry = self.getEntry(rel)
-
-								if (entry is not None):
-									# Create attribute for structure
-									attr = self.formatAttr(
-										rel.parent.as_posix().replace("/", "."),
-										rel.stem.replace(".", "_")
+								# Check recursion limit
+								if (recursionLimit > -1 and len(rel.parts) > recursionLimit + 1):
+									self.logger.log(
+										f"Skipped \"{rel.as_posix()}\""
 									)
 
-									# Get uid
-									uid = "-".join(attr).replace(".", "-")
+								else:
+									# Get entry
+									entry = self.getEntry(rel)
 
-									# Get stat
-									stat = datetime.datetime(*file.date_time)
-									timestamp = stat.timestamp()
-									update = True
-
-									# Check if already loaded and if file was edited after that
-									if (self.timestamps.contains(uid)):
-										if (self.timestamps[uid] >= timestamp):
-											update = False
-
-
-									if (onlyUpdated):
-										# Yield only attribute to signify update
-										yield (
-											attr,
-											update
+									if (entry is not None):
+										# Create attribute for structure
+										attr = self.formatAttr(
+											rel.parent.as_posix().replace("/", "."),
+											rel.stem.replace(".", "_")
 										)
 
-									else:
-										if (update):
-											# Open file in zipfile
-											with zfile.open(file, "r") as fileIO:
-												try:
-													v = entry.__call__(fileIO)
+										# Get uid
+										uid = rel.as_posix()
 
-												except:
-													v = RFT_Exception.Traceback(
-														(RFT_Exception.ERROR, entry.__name__, ".".join(attr))
-													)
+										# Get stat
+										stat = datetime.datetime(*file.date_time)
+										timestamp = stat.timestamp()
+										update = True
 
-													# Log exception
-													self.logger.log(v)
+										# Check if already loaded and if file was edited after that
+										if (self.timestamps.contains(uid)):
+											if (self.timestamps[uid] >= timestamp):
+												update = False
 
-												else:
-													# Log file found
-													self.logger.log(
-														RFT_Exception(
-															f"Loaded \"{rel.as_posix()}\"",
-															(entry.__name__, ".".join(attr))
+
+										if (onlyUpdated):
+											# Yield only attribute to signify update
+											yield (
+												attr,
+												update
+											)
+
+										else:
+											if (update):
+												# Open file in zipfile
+												with zfile.open(file, "r") as fileIO:
+													try:
+														v = entry.__call__(fileIO)
+
+													except:
+														v = RFT_Exception.Traceback(
+															(RFT_Exception.ERROR, entry.__name__, ".".join(attr))
 														)
-													)
 
-													# Update timestamp
-													self.timestamps[uid] = timestamp
+														# Log exception
+														self.logger.log(v)
 
-												finally:
-													yield (
-														attr,
-														v
-													)
+													else:
+														# Log file found
+														self.logger.log(
+															RFT_Exception(
+																f"Loaded \"{rel.as_posix()}\"",
+																(entry.__name__, ".".join(attr))
+															)
+														)
+
+														# Update timestamp
+														self.timestamps[uid] = timestamp
+
+													finally:
+														yield (
+															attr,
+															v
+														)
 					
 			else:
 				raise RFT_Exception("File is directory")
@@ -244,7 +258,7 @@ class RFT_Resource(RFT_Object):
 
 
 	# ~~~~~~~~ Load Resources ~~~~~~~~
-	def load(self, struct:RFT_Object = None, *, single:bool = False, errEvent:object = None) -> RFT_Object:
+	def load(self, struct:RFT_Object = None, *, single:bool = False, errEvent:object = None, **kwargs) -> RFT_Object:
 		if (struct is None):
 			# Create new structure
 			structOut = RFT_Structure(struct)
@@ -254,43 +268,41 @@ class RFT_Resource(RFT_Object):
 			structOut = struct
 
 
-		# Iterate through all content
-		for attr, value in self.iter():
-			# Check if any files raised an error
-			if (isinstance(value, RFT_Exception)):
-				if (errEvent is not None):
-					try:
-						# Call errEvent with attr and exception
-						errEvent(attr, value)
+		with structOut as out:
+			# Iterate through all content
+			for attr, value in self.iter(**kwargs):
+				# Check if any files raised an error
+				if (isinstance(value, RFT_Exception)):
+					if (errEvent is not None):
+						try:
+							# Call errEvent with attr and exception
+							errEvent(attr, value)
 
-					except:
-						v = RFT_Exception.Traceback()
-
-						# Log error
-						self.logger.log(
-							RFT_Exception(
-								v,
+						except:
+							v = RFT_Exception.Traceback(
 								(".".join(attr), "errEvent")
 							)
-						)
 
-						raise v
+							# Log error
+							self.logger.log(v)
 
-				else:
-					raise value
+							raise v
 
-			else:
-				if (single):
-					# Only a single namespace
-					structOut[
-						"_".join(attr).replace(".", "_")
-					] = value
+					else:
+						raise value
 
 				else:
-					# Get parent of attribute and assign the key to the value
-					attrEnd = attr.pop(-1)
-					parent = structOut.allocate(attr)
-					parent[attrEnd] = value
+					if (single):
+						# Only a single namespace
+						out[
+							"_".join(attr).replace(".", "_")
+						] = value
+
+					else:
+						# Get parent of attribute and assign the key to the value
+						attrEnd = attr.pop(-1)
+						parent = structOut.allocate(attr)
+						parent[attrEnd] = value
 
 
 		# Return structure at end

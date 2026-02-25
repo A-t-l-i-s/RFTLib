@@ -6,6 +6,8 @@ from RFTLib.Core.Buffer import *
 from RFTLib.Core.Exception import *
 from RFTLib.Core.Structure import *
 
+from RFTLib.Timer import *
+
 from RFTLib.Dev.Logging import *
 from RFTLib.Dev.Decorator import *
 
@@ -64,7 +66,7 @@ class RFT_Table(RFT_Object):
 	# ~~~~~~ Verify Dir ~~~~~~
 	def verify(self):
 		# Check if path is a file
-		if (not self.path.exists()):
+		if (not self.path.is_dir()):
 			try:
 				# Verify integrity of path
 				self.path.mkdir(
@@ -82,7 +84,6 @@ class RFT_Table(RFT_Object):
 				self.logger.log(
 					f"Failed to create directory: \"{self.path.as_posix()}\"",
 				)
-	# ~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 	# ~~~~~~~~~ Wait ~~~~~~~~~
@@ -91,20 +92,30 @@ class RFT_Table(RFT_Object):
 			time.sleep(0.01)
 
 
+	# ~~~~~~~~~ Close ~~~~~~~~
+	def close(self):
+		# If thread is already running then wait for it to exit
+		if (self.thread is not None):
+			self.running = False
+			
+			# Join and delete thread object
+			self.thread.join()
+			self.thread = None
+
+
 	# ~~~~~~~ File Input/Output ~~~~~~
 	# ~~~~~~ Touch File ~~~~~~
 	@RFT_Decorator
 	def touchFile(self, attr:str):
 		path = self.path / (attr + ".table")
 
-		# Allocate new structure if needed
-		if (not self.data.containsInst(RFT_Structure, attr)):
-			struct = RFT_Structure(
-				getEvent = self.tableGetEvent,
-				setEvent = self.tableSetEvent
-			)
-			
-			self.data[attr] = struct
+		with self.data as struct:
+			# Allocate new structure if needed
+			if (not struct.containsInst(RFT_Structure, attr)):
+				struct[attr] = RFT_Structure(
+					getEvent = self.tableGetEvent,
+					setEvent = self.tableSetEvent
+				)
 
 
 		# Allocate new file if needed
@@ -163,15 +174,13 @@ class RFT_Table(RFT_Object):
 						)
 					)
 
-		# Convert to structure
-		struct = RFT_Structure(
-			data,
-			getEvent = self.tableGetEvent,
-			setEvent = self.tableSetEvent
-		)
-
 		# Set value
-		self.data[attr] = struct
+		with self.data as struct:
+			struct[attr] = RFT_Structure(
+				data,
+				getEvent = self.tableGetEvent,
+				setEvent = self.tableSetEvent
+			)
 
 		# End Updating
 		self.updating = False
@@ -183,43 +192,44 @@ class RFT_Table(RFT_Object):
 		# Touch file
 		path = self.touchFile(attr)
 
-		# Get structure
-		struct = self.data[attr]
+		
+		with self.data as parent:
+			struct = parent[attr]
 
-		# Start Updating
-		self.updating = True
+			# Start Updating
+			self.updating = True
 
-		with path.open("w") as file:
-			try:
-				# Dump json data to file
-				json.dump(
-					struct.normalize(),
-					file,
-					skipkeys = False,
-					default = lambda o: None,
-					indent = (
-						"\t" if (self.indent) else None
+			with path.open("w") as file:
+				try:
+					# Dump json data to file
+					json.dump(
+						struct.normalize(),
+						file,
+						skipkeys = False,
+						default = lambda o: None,
+						indent = (
+							"\t" if (self.indent) else None
+						)
 					)
-				)
-			
-			except:
-				file.write("{}")
+				
+				except:
+					file.write("{}")
 
-				# Log writing error
-				self.logger.log(
-					RFT_Exception.Traceback(
-						attr
+					# Log writing error
+					self.logger.log(
+						RFT_Exception.Traceback(
+							attr
+						)
 					)
-				)
 
-			else:
-				# Log successful write
-				self.logger.log(
-					RFT_Exception(
-						f"Saved \"{path.as_posix()}\"",
-						attr
+				else:
+					# Log successful write
+					self.logger.log(
+						RFT_Exception(
+							f"Saved \"{path.as_posix()}\"",
+							attr
+						)
 					)
-				)
 
 		# End Updating
 		self.updating = False
@@ -238,17 +248,24 @@ class RFT_Table(RFT_Object):
 
 
 	# ~~~~~~ Save Every ~~~~~~
-	def saveEvery(self, secs:int | float, *, clear:bool = False):
+	def saveEvery(self, secs:int | float, *, clear:bool = False, interval:float | int = 0.1):
 		def callback():
 			# Reset running flag
 			self.running = True
 
-			while self.running:
-				# Delay in seconds
-				time.sleep(secs)
+			# Create timer
+			timer = RFT_Timer()
 
-				# Save all tables
-				self.saveAll(clear = clear)
+			while self.running:
+				if (timer.secs() > secs):
+					# Save all tables
+					self.saveAll(clear = clear)
+
+					# Update timer
+					timer.update()
+
+				else:
+					time.sleep(interval)
 
 
 		# If thread is already running then wait for it to exit
@@ -266,6 +283,6 @@ class RFT_Table(RFT_Object):
 
 		# Start thread
 		self.thread.start()
-	# # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 

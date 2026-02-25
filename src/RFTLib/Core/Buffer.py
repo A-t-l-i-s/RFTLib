@@ -26,17 +26,20 @@ class RFT_Buffer(RFT_Object):
 		return self.add(obj)
 
 	def __sub__(self, length:int) -> RFT_Object:
-		return self.resize(len(self) - length)
+		return self.resize(
+			len(self) - length
+		)
 
 	def __mul__(self, length:int) -> RFT_Object:
 		length -= 1
 
 		if (length >= 0):
-			self.add(self.data * length, start = len(self))
+			# Add multiplied data to buffer
+			return self.add(
+				self.data * length
+			)
 		else:
-			self.clear()
-		
-		return self
+			return self.clear()
 
 	def __eq__(self, obj:object) -> bool:
 		if (isinstance(obj, RFT_Buffer)):
@@ -140,7 +143,6 @@ class RFT_Buffer(RFT_Object):
 		elif (isinstance(obj, RFT_Buffer)):
 			buf += obj.data
 
-
 		else:
 			raise RFT_Exception.TypeError(type(obj))
 
@@ -163,11 +165,13 @@ class RFT_Buffer(RFT_Object):
 			...
 
 		if (length > l):
-			self.__dict__["__rft_data__"] += bytearray(length - l)
+			self.add(
+				bytearray(length - l)
+			)
 
 		else:
 			for i in range(min(l - length, l)):
-				self.__dict__["__rft_data__"].pop(-1)
+				self.pop(-1)
 
 		return self
 
@@ -181,7 +185,8 @@ class RFT_Buffer(RFT_Object):
 	# ~~~~~~~~~ Find ~~~~~~~~~
 	def find(self, obj:bytes | bytearray | str | tuple | list | range | int | RFT_Object) -> int:
 		with RFT_Buffer(obj) as buf:
-			return self.__dict__["__rft_data__"].find(buf.data)
+			out = self.data.find(buf.data)
+		return out
 
 
 	# ~~~~ To Hexidecimal ~~~~
@@ -206,12 +211,15 @@ class RFT_Buffer(RFT_Object):
 
 	# ~~~~~~~ Read File ~~~~~~
 	def readFile(self, file:object, length:int = -1) -> RFT_Object:
-		self += file.read(length)
-		return self
+		return self.add(
+			file.read(length)
+		)
 
 
 	# ~~~~~~ Write File ~~~~~~
 	def writeFile(self, file:object) -> RFT_Object:
-		file.write(self.data)
+		file.write(
+			self.data
+		)
 		return self
 

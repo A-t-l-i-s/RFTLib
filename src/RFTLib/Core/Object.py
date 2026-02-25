@@ -7,6 +7,9 @@ __all__ = ("RFT_Object",)
 
 
 class RFT_Object(object):
+	__rft_paused__:bool = False
+
+
 	# ~~~~~~~~~~ Attributes ~~~~~~~~~~
 	def hasattr(self, attr:str) -> bool:
 		return hasattr(self, attr)
@@ -29,9 +32,14 @@ class RFT_Object(object):
 
 	# ~~~~~~~~~~~~ Context ~~~~~~~~~~~
 	def __enter__(self) -> object:
+		while self.__rft_paused__:
+			time.sleep(0.01)
+
+		self.__rft_paused__ = True
 		return self
 
 	def __exit__(self, excType:object, excValue:object, excTraceback:object) -> bool:
+		self.__rft_paused__ = False
 		return False
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

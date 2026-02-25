@@ -58,6 +58,10 @@ class RFT_Structure(RFT_Object):
 		self.default(obj, forced = True)
 		return self
 
+	def __truediv__(self, obj:dict | RFT_Object) -> RFT_Object:
+		self.default(obj, existing = True)
+		return self
+
 	def __eq__(self, obj:object) -> bool:
 		if (isinstance(obj, RFT_Structure)):
 			return obj.data == self.data
@@ -73,24 +77,38 @@ class RFT_Structure(RFT_Object):
 		)
 
 	def __getattr__(self, key:str) -> object:
-		if (self.__rft_get_event__(key)):
-			try:
-				# Return value
-				return self.__dict__["__rft_data__"][key]
+		if (key == "__rft_paused__"):
+			return self.__rft_paused__
 
-			except:
-				raise RFT_Exception.AttributeError(type(self), key)
+		else:
+			# Force convert to string
+			key = str(key)
+
+			if (self.__rft_get_event__(key)):
+				try:
+					# Return value
+					return self.__dict__["__rft_data__"][key]
+
+				except:
+					raise RFT_Exception.AttributeError(type(self), key)
 
 	def __setattr__(self, key:str, value:object):
-		if (self.__rft_set_event__(key)):
-			# Convert value to structure
-			if (isinstance(value, dict)):
-				# Convert to structure
-				self.__dict__["__rft_data__"][key] = RFT_Structure(value)
+		if (key == "__rft_paused__"):
+			self.setattr("__rft_paused__", bool(value))
 
-			else:
-				# Set value
-				self.__dict__["__rft_data__"][key] = value
+		else:
+			# Force convert to string
+			key = str(key)
+
+			if (self.__rft_set_event__(key)):
+				# Convert value to structure
+				if (isinstance(value, dict)):
+					# Convert to structure
+					self.__dict__["__rft_data__"][key] = RFT_Structure(value)
+
+				else:
+					# Set value
+					self.__dict__["__rft_data__"][key] = value
 
 	def __getitem__(self, key:str) -> object:
 		# Get value
@@ -193,7 +211,7 @@ class RFT_Structure(RFT_Object):
 		v = self.__dict__["__rft_data__"].get(key, default)
 
 		if (type_ is not None):
-			if (not isinstance(v, value)):
+			if (not isinstance(v, type_)):
 				return default
 
 		return v
@@ -280,20 +298,28 @@ class RFT_Structure(RFT_Object):
 
 
 	# ~~~~~~~~ Default ~~~~~~~
-	def default(self, obj:dict | RFT_Object, *, forced:bool = False) -> RFT_Object:
+	def default(self, obj:dict | RFT_Object, *, forced:bool = False, existing:bool = False) -> RFT_Object:
 		for k, v in obj.items():
-			if (not self.contains(k) or forced):
+			if (existing):
+				if (self.contains(k) or forced):
+					self[k] = v
+
+			elif (not self.contains(k) or forced):
 				self[k] = v
 
 		return self
 
 
 	# ~~~~~ Default Inst ~~~~~
-	def defaultInst(self, type_:type, obj:dict | RFT_Object, *, forced:bool = False) -> RFT_Object:
+	def defaultInst(self, type_:type, obj:dict | RFT_Object, *, forced:bool = False, existing:bool = False) -> RFT_Object:
 		for k, v in obj.items():
 			k = str(k)
 
-			if (not self.containsInst(type_, k) or forced):
+			if (existing):
+				if (self.containsInst(type_, k) or forced):
+					self[k] = v
+
+			elif (not self.containsInst(type_, k) or forced):
 				self[k] = v
 
 		return self
